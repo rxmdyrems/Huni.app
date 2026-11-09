@@ -8,4 +8,4 @@
 - Used the supplied Huni graphic in the About profile/avatar slot.
 - Preserved existing playback, library, navigation, account, settings, and service behavior.
 
-This release retains upstream source notices and GPL-3.0 licensing. The Settings changelog and updater remain connected to the original public release source until Huni has a public release feed; the pre-existing private `Huni` repository is a separate project. The `Huni.app` public repository has not yet been created. A Huni release feed should be enabled only after a public release exists; embedding a credential in the APK would be unsafe.
+This release retains upstream source notices and GPL-3.0 licensing. The Settings changelog and updater remain connected to the original public release source until Huni has a compatible public release feed; the pre-existing private `Huni` repository is a separate project. The public `Huni.app` repository exists, but no Huni release has been published yet. Embedding a credential in the APK would be unsafe.
