@@ -11,4 +11,4 @@
 - Repointed the update feed to Huni.app and redesigned the home toolbar around the Huni logo.
 - Preserved existing playback, library, navigation, account, settings, and service behavior.
 
-This release retains upstream source notices and GPL-3.0 licensing. The Settings changelog and updater remain connected to the original public release source until a Huni release is published; the pre-existing private `Huni` repository is a separate project. The public `Huni.app` repository exists, but no Huni release has been published yet. Embedding a credential in the APK would be unsafe.
+This release retains upstream source notices and GPL-3.0 licensing. The in-app changelog is Huni-authored, and update checks now target the public Huni.app repository. No Huni release has been published yet, so update downloads will become available only after a compatible Huni release and APK assets are published. The pre-existing private `Huni` repository is a separate project. Credentials are kept out of the public source.
