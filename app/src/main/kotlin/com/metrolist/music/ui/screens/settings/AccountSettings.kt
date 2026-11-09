@@ -130,6 +130,14 @@ fun AccountSettings(
         }
 
         Spacer(Modifier.height(12.dp))
+        OutlinedButton(
+            onClick = { onClose(); navController.navigate("stats") },
+            modifier = Modifier.fillMaxWidth().height(48.dp),
+        ) {
+            Icon(painterResource(R.drawable.stats), contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.stats))
+        }
 
         // Logout confirmation dialog
         if (showLogoutDialog) {

@@ -220,15 +220,13 @@ fun AppNavigationBar(
                         contentDescription = stringResource(screen.titleId)
                     )
                 },
-                label = if (!slimNav) {
-                    {
-                        Text(
-                            text = stringResource(screen.titleId),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                } else null
+                label = {
+                    Text(
+                        text = stringResource(screen.titleId),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
             )
         }
     }

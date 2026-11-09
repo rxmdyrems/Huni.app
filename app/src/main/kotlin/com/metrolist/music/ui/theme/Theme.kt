@@ -6,16 +6,13 @@
 package com.metrolist.music.ui.theme
 
 import android.graphics.Bitmap
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.Shapes
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.Typography
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,12 +20,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.palette.graphics.Palette
-import com.materialkolor.PaletteStyle
-import com.materialkolor.dynamiccolor.ColorSpec
-import com.materialkolor.rememberDynamicColorScheme
 import com.materialkolor.score.Score
 
 val DefaultThemeColor = Color(0xFFFFB84D)
+
+private val HuniTypography = Typography().let { base ->
+    base.copy(
+        displayLarge = base.displayLarge.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
+        displayMedium = base.displayMedium.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
+        displaySmall = base.displaySmall.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
+        headlineLarge = base.headlineLarge.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
+        headlineMedium = base.headlineMedium.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
+        headlineSmall = base.headlineSmall.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
+        titleLarge = base.titleLarge.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
+        titleMedium = base.titleMedium.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
+        titleSmall = base.titleSmall.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
+    )
+}
 
 private val HuniShapes = Shapes(
     extraSmall = RoundedCornerShape(12.dp),
@@ -65,6 +73,7 @@ fun MetrolistTheme(
     // Use standard MaterialTheme instead of MaterialExpressiveTheme
     MaterialTheme(
         colorScheme = colorScheme,
+        typography = HuniTypography,
         shapes = HuniShapes,
         content = content,
     )

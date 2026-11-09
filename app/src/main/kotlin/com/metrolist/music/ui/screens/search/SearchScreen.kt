@@ -63,7 +63,6 @@ import com.metrolist.music.constants.SearchSource
 import com.metrolist.music.constants.SearchSourceKey
 import com.metrolist.music.db.entities.SearchHistory
 import com.metrolist.music.playback.queues.YouTubeQueue
-import com.metrolist.music.ui.component.HideOnScrollFAB
 import com.metrolist.music.utils.SearchRoutes
 import com.metrolist.music.utils.rememberEnumPreference
 import com.metrolist.music.utils.rememberPreference
@@ -229,6 +228,9 @@ fun SearchScreen(
                         )
 
                         Row {
+                            IconButton(onClick = { navController.navigate("recognition") }) {
+                                Icon(painter = painterResource(R.drawable.mic), contentDescription = stringResource(R.string.widget_recognizer_mic_desc), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
                             if (query.text.isNotEmpty()) {
                                 IconButton(onClick = { query = TextFieldValue("") }) {
                                     Icon(
@@ -306,11 +308,7 @@ fun SearchScreen(
                 }
             }
 
-            HideOnScrollFAB(
-                lazyListState = lazyListState,
-                icon = R.drawable.mic,
-                onClick = { navController.navigate("recognition") },
-            )
+
         }
     }
 

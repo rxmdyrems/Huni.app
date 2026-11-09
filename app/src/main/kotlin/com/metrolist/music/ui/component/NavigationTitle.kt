@@ -43,6 +43,7 @@ fun NavigationTitle(
     thumbnail: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     onPlayAllClick: (() -> Unit)? = null,
+    trailingContent: (@Composable () -> Unit)? = null,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -79,6 +80,7 @@ fun NavigationTitle(
             )
         }
 
+        trailingContent?.invoke()
         onPlayAllClick?.let { playAllClick ->
             OutlinedButton(
                 onClick = playAllClick,

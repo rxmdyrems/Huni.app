@@ -292,16 +292,8 @@ private fun NewMiniPlayer(
     }
 
     // Memoize colors
-    val backgroundColor = when (miniPlayerBackground) {
-        MiniPlayerBackgroundStyle.DEFAULT    -> MaterialTheme.colorScheme.surfaceContainer
-        MiniPlayerBackgroundStyle.TRANSPARENT -> Color.Black.copy(alpha = 0.25f)
-        MiniPlayerBackgroundStyle.BLUR       -> MaterialTheme.colorScheme.surfaceContainer
-        MiniPlayerBackgroundStyle.GRADIENT   -> MaterialTheme.colorScheme.surfaceContainer
-        MiniPlayerBackgroundStyle.PURE_BLACK -> Color.Black
-    }
-    val forceLightColors = !useDarkTheme && (miniPlayerBackground == MiniPlayerBackgroundStyle.PURE_BLACK ||
-            miniPlayerBackground == MiniPlayerBackgroundStyle.BLUR ||
-            miniPlayerBackground == MiniPlayerBackgroundStyle.GRADIENT)
+    val backgroundColor = MaterialTheme.colorScheme.surfaceContainerHigh
+    val forceLightColors = false
 
     val primaryColor = if (forceLightColors) Color.White else MaterialTheme.colorScheme.primary
     val outlineColor = if (forceLightColors) Color.White else MaterialTheme.colorScheme.outline
@@ -385,16 +377,15 @@ private fun NewMiniPlayer(
                     .then(if (isTabletLandscape) Modifier.width(500.dp).align(Alignment.Center) else Modifier.fillMaxWidth())
                     .height(64.dp)
                     .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) }
-                    .clip(RoundedCornerShape(32.dp))
+                    .clip(RoundedCornerShape(20.dp))
                     .background(color = backgroundColor)
-                    .border(1.dp, outlineColor.copy(alpha = 0.3f), RoundedCornerShape(32.dp))
                     .clickable(
                         interactionSource = interactionSource,
                         indication = LocalIndication.current,
                         onClick = onClick
                     ),
         ) {
-            when (miniPlayerBackground) {
+            when (MiniPlayerBackgroundStyle.DEFAULT) {
                 MiniPlayerBackgroundStyle.BLUR -> {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
                         mediaMetadata?.thumbnailUrl?.let { url ->
@@ -493,6 +484,9 @@ private fun NewMiniPlayer(
                     onSurfaceColor = onSurfaceColor,
                 )
                 }
+            }
+            Box(Modifier.align(Alignment.BottomStart).fillMaxWidth().height(2.dp).background(MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))) {
+                Box(Modifier.fillMaxWidth(progressState.progress.coerceIn(0f, 1f)).fillMaxHeight().background(MaterialTheme.colorScheme.primary))
             }
         }
     }

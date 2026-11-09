@@ -1,6 +1,8 @@
 # Huni Changelog
 ## 0.9.3 — Amber night redesign
 - Replaced the green theme with a fixed dark plum palette and amber accent.
+- Completed the Home, Search, mini-player, navigation, and Account/Stats UI refresh.
+- Used the repository-bundled BBH Bartle font for titles and the Huni wordmark.
 - Refined Huni release identity and About links for version 0.9.3.
 - Kept existing playback and service behavior unchanged.
 
