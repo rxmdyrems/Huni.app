@@ -65,8 +65,10 @@ fun NavigationTitle(
             label?.let { label ->
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.labelSmall,
                     overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    softWrap = false,
                 )
             }
 
@@ -77,6 +79,7 @@ fun NavigationTitle(
                 color = MaterialTheme.colorScheme.primary,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
+                softWrap = false,
             )
         }
 
@@ -95,7 +98,7 @@ fun NavigationTitle(
             ) {
                 Text(
                     text = stringResource(R.string.play_all),
-                    style = MaterialTheme.typography.labelSmall
+                    style = MaterialTheme.typography.labelLarge
                 )
             }
         }

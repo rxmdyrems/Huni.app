@@ -1,4 +1,4 @@
-name: Build Huni APK
+name: Build and Sign Huni APK
 
 on:
   push:
@@ -30,21 +30,38 @@ jobs:
           yes | "$SDKMANAGER" --licenses
           "$SDKMANAGER" --install 'platform-tools' 'platforms;android-37.0' 'build-tools;37.0.0'
 
-      - name: Create ephemeral debug signing key
-        run: |
-          mkdir -p "$HOME/.android"
-          keytool -genkeypair -noprompt -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
-
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build Foss debug APK
-        run: ./gradlew assembleFossDebug --console=plain -q
+      - name: Build Foss release APK
+        run: ./gradlew assembleFossRelease --console=plain -q
+        env:
+          METROLIST_APPLICATION_ID: com.remycamiguel.huni
+          METROLIST_APP_NAME: Huni
 
-      - name: Upload APK artifact
+      - name: Sign APK
+        uses: ilharp/sign-android-release@v2.0.0
+        with:
+          releaseDir: app/build/outputs/apk/foss/release/
+          signingKey: ${{ secrets.KEYSTORE_BASE64 }}
+          keyAlias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+          buildToolsVersion: 37.0.0
+
+      - name: Rename APK and create checksum
+        run: |
+          OUTPUT_DIR="app/build/outputs/apk/foss/release"
+          mkdir -p "$OUTPUT_DIR/out"
+          SIGNED_APK=$(find "$OUTPUT_DIR" -maxdepth 1 -type f -name '*-signed.apk' -print -quit)
+          test -n "$SIGNED_APK"
+          mv "$SIGNED_APK" "$OUTPUT_DIR/out/Huni-0.9.3.apk"
+          sha256sum "$OUTPUT_DIR/out/Huni-0.9.3.apk" > "$OUTPUT_DIR/out/Huni-0.9.3.apk.sha256"
+
+      - name: Upload signed APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: huni-0.9.3-redesign
-          path: app/build/outputs/apk/foss/debug/*.apk
+          name: huni-0.9.3-foss-universal
+          path: app/build/outputs/apk/foss/release/out/*
           if-no-files-found: error
           retention-days: 30

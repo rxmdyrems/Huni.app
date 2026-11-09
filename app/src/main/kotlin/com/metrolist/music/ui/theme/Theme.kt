@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.sp
 import androidx.palette.graphics.Palette
 import com.materialkolor.score.Score
 
@@ -26,15 +27,17 @@ val DefaultThemeColor = Color(0xFFFFB84D)
 
 private val HuniTypography = Typography().let { base ->
     base.copy(
-        displayLarge = base.displayLarge.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
-        displayMedium = base.displayMedium.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
-        displaySmall = base.displaySmall.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
-        headlineLarge = base.headlineLarge.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
-        headlineMedium = base.headlineMedium.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
-        headlineSmall = base.headlineSmall.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
-        titleLarge = base.titleLarge.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
-        titleMedium = base.titleMedium.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
-        titleSmall = base.titleSmall.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold),
+        headlineLarge = base.headlineLarge.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold, fontSize = 20.sp),
+        headlineMedium = base.headlineMedium.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold, fontSize = 20.sp),
+        headlineSmall = base.headlineSmall.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold, fontSize = 20.sp),
+        titleLarge = base.titleLarge.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold, fontSize = 20.sp),
+        titleMedium = base.titleMedium.copy(fontSize = 16.sp),
+        titleSmall = base.titleSmall.copy(fontSize = 16.sp),
+        bodyMedium = base.bodyMedium.copy(fontSize = 13.sp),
+        bodySmall = base.bodySmall.copy(fontSize = 13.sp),
+        labelLarge = base.labelLarge.copy(fontSize = 16.sp),
+        labelMedium = base.labelMedium.copy(fontSize = 16.sp),
+        labelSmall = base.labelSmall.copy(fontSize = 13.sp),
     )
 }
 

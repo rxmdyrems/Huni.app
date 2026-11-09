@@ -99,10 +99,12 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -199,6 +201,7 @@ import com.metrolist.music.ui.screens.settings.NavigationTab
 import com.metrolist.music.ui.theme.ColorSaver
 import com.metrolist.music.ui.theme.DefaultThemeColor
 import com.metrolist.music.ui.theme.MetrolistTheme
+import com.metrolist.music.ui.theme.bbhBartle
 import com.metrolist.music.ui.theme.extractThemeColor
 import com.metrolist.music.ui.utils.appBarScrollBehavior
 import com.metrolist.music.ui.utils.resetHeightOffset
@@ -228,8 +231,20 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.util.Calendar
 import java.util.Locale
 import javax.inject.Inject
+
+private fun chooseHomeGreeting(): String {
+    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+    val greetings = when (hour) {
+        in 5..11 -> listOf("Good morning", "Morning tunes await", "A fresh start sounds good")
+        in 12..16 -> listOf("Good afternoon", "A little music for the afternoon", "Take a music break")
+        in 17..21 -> listOf("Good evening", "Time to unwind", "Settle in with a song")
+        else -> listOf("Night owl", "A little music after hours", "Late nights sound better with Huni")
+    }
+    return greetings.random()
+}
 
 private data class AvailableUpdate(
     val release: ReleaseInfo,
@@ -850,7 +865,7 @@ class MainActivity : FragmentActivity() {
                         collapsedBound =
                             bottomInset +
                                 (if (!showRail && shouldShowNavigationBar) navPadding else 0.dp) +
-                                (if (useNewMiniPlayerDesign) MiniPlayerBottomSpacing else 0.dp) +
+                                MiniPlayerBottomSpacing +
                                 MiniPlayerHeight,
                         expandedBound = maxHeight,
                     )
@@ -872,7 +887,7 @@ class MainActivity : FragmentActivity() {
                         if (shouldShowNavigationBar && !showRail) {
                             bottom += NavigationBarHeight
                         }
-                        if (!playerBottomSheetState.isDismissed) bottom += MiniPlayerHeight
+                        if (!playerBottomSheetState.isDismissed) bottom += MiniPlayerBottomSpacing + MiniPlayerHeight
                         windowsInsets
                             .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
                             .add(WindowInsets(top = AppBarHeight, bottom = bottom))
@@ -1023,6 +1038,7 @@ class MainActivity : FragmentActivity() {
                     }
 
                 var showAccountDialog by remember { mutableStateOf(false) }
+                val homeGreeting = rememberSaveable { chooseHomeGreeting() }
 
                 val pauseListenHistory by rememberPreference(PauseListenHistoryKey, defaultValue = false)
                 val eventCount by database.eventCount().collectAsStateWithLifecycle(initialValue = 0)
@@ -1031,7 +1047,7 @@ class MainActivity : FragmentActivity() {
                         !(pauseListenHistory && eventCount == 0)
                     }
 
-                val baseBg = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer
+                val baseBg = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surface
                 val artistNameAliases by ArtistNameAliases.aliases.collectAsStateWithLifecycle()
 
                 CompositionLocalProvider(
@@ -1052,6 +1068,7 @@ class MainActivity : FragmentActivity() {
                     }
 
                     Scaffold(
+                        containerColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.background,
                         snackbarHost = { SnackbarHost(snackbarHostState) },
                         topBar = {
                             AnimatedVisibility(
@@ -1063,30 +1080,36 @@ class MainActivity : FragmentActivity() {
                                     TopAppBar(
                                         title = {
                                             if (navBackStackEntry?.destination?.route == Screens.Home.route) {
-                                                Surface(
-                                                    shape = RoundedCornerShape(18.dp),
-                                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.09f),
-                                                ) {
-                                                    Row(
-                                                        modifier = Modifier.padding(start = 7.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
-                                                        verticalAlignment = Alignment.CenterVertically,
-                                                    ) {
-                                                        androidx.compose.foundation.Image(
-                                                            painter = painterResource(R.mipmap.ic_launcher_foreground),
-                                                            contentDescription = null,
-                                                            modifier = Modifier.size(34.dp),
-                                                        )
-                                                        Column(modifier = Modifier.padding(start = 9.dp)) {
-                                                            Text("Huni", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                                                            Text("Your music, your mood", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                                        }
-                                                    }
+                                                Column {
+                                                    Text(
+                                                        text = "HUNI",
+                                                        style = MaterialTheme.typography.titleLarge.copy(
+                                                            fontFamily = bbhBartle,
+                                                            fontSize = 28.sp,
+                                                        ),
+                                                        fontWeight = FontWeight.SemiBold,
+                                                        color = MaterialTheme.colorScheme.onSurface,
+                                                        maxLines = 1,
+                                                        softWrap = false,
+                                                    )
+                                                    Text(
+                                                        text = homeGreeting,
+                                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                                            fontFamily = FontFamily.Default,
+                                                            fontSize = 13.sp,
+                                                        ),
+                                                        color = Color(0xFFA99FB8),
+                                                        maxLines = 1,
+                                                        softWrap = false,
+                                                    )
                                                 }
                                             } else {
                                                 Text(
                                                     text = currentTitleRes?.let { stringResource(it) } ?: "",
                                                     style = MaterialTheme.typography.titleLarge,
                                                     fontWeight = FontWeight.SemiBold,
+                                                    maxLines = 1,
+                                                    softWrap = false,
                                                 )
                                             }
                                         },
@@ -1136,8 +1159,8 @@ class MainActivity : FragmentActivity() {
                                         scrollBehavior = topAppBarScrollBehavior,
                                         colors =
                                             TopAppBarDefaults.topAppBarColors(
-                                                containerColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer,
-                                                scrolledContainerColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer,
+                                                containerColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.background,
+                                                scrolledContainerColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.background,
                                                 titleContentColor = MaterialTheme.colorScheme.onSurface,
                                                 actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                                 navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,

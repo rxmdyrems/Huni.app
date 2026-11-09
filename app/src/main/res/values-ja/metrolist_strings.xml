@@ -218,7 +218,7 @@
     <string name="equalizer_desc">オーディオイコライザーを調整します</string>
     <string name="listen_together">Listen Together</string>
     <string name="play_pause">再生/停止</string>
-    <string name="wrapped_intro_title">MELD</string>
+    <string name="wrapped_intro_title">Huni</string>
     <string name="none">なし</string>
     <string name="cache_size_warning_confirm">続行</string>
     <string name="wrapped_top_song_album_art_content_description">アルバムアート</string>
@@ -569,7 +569,7 @@
     <string name="credits_view_repo">リポジトリを表示</string>
     <string name="buy_mo_a_coffee">コーヒーをおごる</string>
     <string name="community_and_info">コミュニティと情報</string>
-    <string name="metrolist">MELD</string>
+    <string name="metrolist">Huni</string>
     <string name="wanna_play_favorite_song">お気に入りの曲を再生しますか？</string>
     <string name="yeah">はい</string>
     <string name="stands_with_palestine">このプロジェクトはパレスチナを支持しています 🇵🇸</string>

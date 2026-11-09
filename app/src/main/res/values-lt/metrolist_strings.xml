@@ -190,10 +190,10 @@
     <string name="wrapped_total_artists_subtitle">unikalių kūrėjų</string>
     <string name="wrapped_total_songs_title">Jūs klausėtės</string>
     <string name="wrapped_total_songs_subtitle">unikalių dainų</string>
-    <string name="wrapped_intro_title">MELD</string>
+    <string name="wrapped_intro_title">Huni</string>
     <string name="wrapped_intro_subtitle">laikas pamatyti, ką jūs klausėtės</string>
     <string name="wrapped_intro_button">pirmyn!</string>
-    <string name="wrapped_logo_content_description">„Meld” logotipas</string>
+    <string name="wrapped_logo_content_description">„Huni” logotipas</string>
     <string name="wrapped_year">2025</string>
     <string name="wrapped_ready_title">JŪSŲ WRAPPED YRA PARUOŠTAS!</string>
     <string name="wrapped_ready_subtitle">Metas pamatyti, kas jums patiko šiais metais.</string>
@@ -230,7 +230,7 @@
     <string name="error_playback_failed">Atkūrimo klaida</string>
     <string name="album_art">Albumo viršelis</string>
     <string name="no_song_playing">Nėra grojančios dainos</string>
-    <string name="tap_to_open">Spauskite, kad atidarytumėte „Meld”</string>
+    <string name="tap_to_open">Spauskite, kad atidarytumėte „Huni”</string>
     <string name="previous">Ankstesnis</string>
     <string name="play_pause">Leisti / pristabdyti</string>
     <string name="next">Kitas</string>
@@ -360,7 +360,7 @@
     <string name="lyrics_romanize_as_main">Rodyti romanizuotus dainų žodžius kaip pagrindinius</string>
     <string name="lastfm_now_playing">Siųsti dabar grojančią dainą</string>
     <string name="last_fm_send_likes">Siųsti Mėgiamus/Nemėgiamus</string>
-    <string name="last_fm_send_likes_description">Mylėti/Nemylėti dainas Last.fm kai jos yra susietos su Mėgiamomis/Nemėgiamomis Meld</string>
+    <string name="last_fm_send_likes_description">Mylėti/Nemylėti dainas Last.fm kai jos yra susietos su Mėgiamomis/Nemėgiamomis Huni</string>
     <string name="logging_in">Prisijungiama…</string>
     <string name="scrobbling_configuration">Skroblavimo konfigūracija</string>
     <string name="scrobble_min_track_duration">Skrobluoti dainas ilgesnes nei</string>
@@ -385,7 +385,7 @@
         <item quantity="many">%d Profilių</item>
         <item quantity="other">%d Profilių</item>
     </plurals>
-    <string name="listening_to_metrolist">Klausomasi „Meld”</string>
+    <string name="listening_to_metrolist">Klausomasi „Huni”</string>
     <string name="discord_use_details">Naudoti detalesnę informaciją, vietoje būsenos</string>
     <string name="discord_use_details_description">Aiškiai matyti dainos pavadinimą, o ne atlikėjo vardą</string>
     <string name="crossfade_beta_title">Beta funkcija</string>

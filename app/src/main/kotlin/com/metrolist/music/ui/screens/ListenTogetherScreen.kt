@@ -824,7 +824,7 @@ private fun UserAvatar(
                 ) {
                     Text(
                         text = user.username.take(1).uppercase(),
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color =
                             when {

@@ -270,7 +270,7 @@ fun SettingsScreen(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.settings)) },
+        title = { Text(stringResource(R.string.settings), maxLines = 1, softWrap = false) },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,
@@ -281,6 +281,10 @@ fun SettingsScreen(
                     contentDescription = null
                 )
             }
-        }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.background,
+            scrolledContainerColor = MaterialTheme.colorScheme.background,
+        ),
     )
 }

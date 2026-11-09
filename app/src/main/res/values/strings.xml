@@ -22,7 +22,7 @@
     <!-- Home -->
     <string name="history">History</string>
     <string name="stats">Stats</string>
-    <string name="mood_and_genres">Mood and Genres</string>
+    <string name="mood_and_genres">Moods &amp; genres</string>
     <string name="account">Account</string>
     <string name="quick_picks">Quick picks</string>
     <string name="quick_picks_empty">Listen to songs to generate your quick picks</string>
@@ -344,7 +344,7 @@
     <string name="translation_models">Translation Models</string>
     <string name="clear_translation_models">Clear translation models</string>
 
-    <string name="discord_information">Meld sets your Discord account\'s status over the Discord Gateway, which may be considered a violation of Discord\'s TOS. There are no known cases of user accounts being suspended for this reason. Use at your own risk.\n\nMeld only extracts your token; everything else is stored locally.</string>
+    <string name="discord_information">Huni sets your Discord account\'s status over the Discord Gateway, which may be considered a violation of Discord\'s TOS. There are no known cases of user accounts being suspended for this reason. Use at your own risk.\n\nMeld only extracts your token; everything else is stored locally.</string>
 
     <string name="filter_spotify">Spotify</string>
     <string name="show_recognize_music_button">Show music recognition button</string>

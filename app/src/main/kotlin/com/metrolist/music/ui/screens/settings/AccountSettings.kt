@@ -108,7 +108,7 @@ fun AccountSettings(
 
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
@@ -138,6 +138,7 @@ fun AccountSettings(
             Spacer(Modifier.width(8.dp))
             Text(stringResource(R.string.stats))
         }
+        Spacer(Modifier.height(12.dp))
 
         // Logout confirmation dialog
         if (showLogoutDialog) {

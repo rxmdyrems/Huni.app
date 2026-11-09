@@ -1311,7 +1311,6 @@ fun HomeScreen(
 
             LazyColumn(
                 state = lazylistState,
-                modifier = Modifier.padding(bottom = 24.dp),
                 contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
             ) {
                 item {
@@ -2688,26 +2687,32 @@ fun HomeScreen(
                                     )
                                 }
                                 item(key = "mood_and_genres_list") {
-                                    LazyHorizontalGrid(
-                                        rows = GridCells.Fixed(4),
-                                        contentPadding = PaddingValues(6.dp),
-                                        modifier =
-                                            Modifier
-                                                .height((MoodAndGenresButtonHeight + 12.dp) * 4 + 12.dp),
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                                        verticalArrangement = Arrangement.spacedBy(12.dp),
                                     ) {
-                                        items(moodAndGenres.distinctBy { "${it.title}_${it.endpoint.browseId}_${it.endpoint.params}" }, key = { "${it.title}_${it.endpoint.browseId}_${it.endpoint.params}" }) {
-                                            MoodAndGenresButton(
-                                                title = it.title,
-                                                onClick = {
-                                                    navController.navigate(
-                                                        "youtube_browse/${it.endpoint.browseId}?params=${it.endpoint.params}",
-                                                    )
-                                                },
-                                                modifier =
-                                                    Modifier
-                                                        .padding(6.dp)
-                                                        .width(180.dp),
-                                            )
+                                        moodAndGenres
+                                            .distinctBy { "${it.title}_${it.endpoint.browseId}_${it.endpoint.params}" }
+                                            .chunked(2)
+                                            .forEach { row ->
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                                ) {
+                                                    row.forEach { item ->
+                                                        MoodAndGenresButton(
+                                                            title = item.title,
+                                                            onClick = {
+                                                                navController.navigate(
+                                                                    "youtube_browse/${item.endpoint.browseId}?params=${item.endpoint.params}",
+                                                                )
+                                                            },
+                                                            modifier = Modifier.weight(1f),
+                                                        )
+                                                    }
+                                                    if (row.size == 1) Spacer(Modifier.weight(1f))
+                                                }
+                                            }
                                         }
                                     }
                                 }
