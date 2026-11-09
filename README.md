@@ -1,10 +1,13 @@
-# Huni for Android
+<div align="center">
+  <img src="app/src/main/res/drawable-nodpi/huni_avatar.png" alt="Huni logo" width="180" />
+  <h1>Huni</h1>
+  <p>A focused, personal music listening experience for Android.</p>
+  <a href="https://github.com/rxmdyrems/Huni.app">Source code</a> · <a href="https://github.com/rxmdyrems/Huni.app/releases">Huni releases</a>
+</div>
 
-Huni is an Android music client combining Spotify-powered discovery with YouTube Music playback. This repository contains the Android application source.
+## About Huni
 
-## Project status
-
-The Android project retains the upstream app's existing playback, library, account, integration, and settings functionality. Huni changes in this repository focus on branding and a dark-green visual system; they do not replace the original service implementations.
+Huni brings together music discovery, playback, and library tools in one Android app. This repository is the home for Huni's Android source, release notes, and future builds.
 
 ## Build
 
@@ -14,10 +17,12 @@ Use the included Gradle wrapper with Android SDK API 37 and JDK 21:
 ./gradlew assembleFossDebug
 ```
 
-The debug APK is written under `app/build/outputs/apk/foss/debug/`. The project also defines GMS and Izzy variants.
+The FOSS debug APK is written to `app/build/outputs/apk/foss/debug/`. GMS and Izzy variants are also configured. For local builds, optional web-token integration credentials belong in ignored `local.properties`; never commit credentials.
 
-## Attribution and license
+## Huni changelog
 
-Huni is derived from Meld and the Metrolist open-source project. Their source notices and GPL-3.0 license are retained. See [`LICENSE`](LICENSE), source-file headers, and the existing lower-case [`changelog.md`](changelog.md) for upstream release history. This repository's Huni-specific release notes are in [`CHANGELOG.md`](CHANGELOG.md).
+See [`CHANGELOG.md`](CHANGELOG.md) for Huni-authored release notes. In-app Changelog content is maintained for Huni and links to [Huni releases](https://github.com/rxmdyrems/Huni.app/releases).
 
-Upstream project links are retained where required for attribution, dependency provenance, or existing release/update behavior. They are not Huni support or release channels.
+## License and upstream attribution
+
+Huni is distributed under the GNU General Public License v3.0 and builds on GPL-licensed open-source components. Original copyright notices, source headers, and required attribution are preserved. See [`LICENSE`](LICENSE). Huni's product identity, release notes, and public repository are maintained here.

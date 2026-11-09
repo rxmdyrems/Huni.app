@@ -49,9 +49,8 @@ import com.metrolist.music.ui.utils.backToMain
 private data class AboutLink(val labelRes: Int, val iconRes: Int, val url: String, val descriptionRes: Int? = null)
 
 private val aboutLinks = listOf(
-    AboutLink(R.string.credits_discord, R.drawable.discord, "https://discord.gg/sAErRUVbsK"),
-    AboutLink(R.string.credits_view_repo, R.drawable.github, "https://github.com/FrancescoGrazioso/Meld"),
-    AboutLink(R.string.credits_license_name, R.drawable.info, "https://github.com/FrancescoGrazioso/Meld/blob/main/LICENSE", R.string.credits_license_desc),
+    AboutLink(R.string.credits_view_repo, R.drawable.github, "https://github.com/rxmdyrems/Huni.app"),
+    AboutLink(R.string.credits_license_name, R.drawable.info, "https://github.com/rxmdyrems/Huni.app/blob/main/LICENSE", R.string.credits_license_desc),
 )
 
 @Composable
@@ -140,7 +139,7 @@ fun AboutScreen(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Box(Modifier.size(width = 4.dp, height = 20.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
-                Text(stringResource(R.string.community_and_info), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold)
+                Text("Huni links", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold)
             }
             Spacer(Modifier.height(12.dp))
             Surface(

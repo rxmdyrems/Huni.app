@@ -1065,11 +1065,30 @@ class MainActivity : FragmentActivity() {
                                 Row {
                                     TopAppBar(
                                         title = {
-                                            Text(
-                                                text = if (navBackStackEntry?.destination?.route == Screens.Home.route) "Huni" else currentTitleRes?.let { stringResource(it) } ?: "",
-                                                style = MaterialTheme.typography.titleLarge,
-                                                fontWeight = FontWeight.SemiBold,
-                                            )
+                                            if (navBackStackEntry?.destination?.route == Screens.Home.route) {
+                                                Surface(
+                                                    shape = RoundedCornerShape(18.dp),
+                                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.09f),
+                                                ) {
+                                                    Row(
+                                                        modifier = Modifier.padding(start = 7.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                    ) {
+                                                        androidx.compose.foundation.Image(
+                                                            painter = painterResource(R.mipmap.ic_launcher_foreground),
+                                                            contentDescription = null,
+                                                            modifier = Modifier.size(34.dp),
+                                                        )
+                                                        Text("Huni", modifier = Modifier.padding(start = 9.dp), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                                                    }
+                                                }
+                                            } else {
+                                                Text(
+                                                    text = currentTitleRes?.let { stringResource(it) } ?: "",
+                                                    style = MaterialTheme.typography.titleLarge,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                )
+                                            }
                                         },
                                         actions = {
                                             if (showHistoryButton) {

@@ -5,7 +5,10 @@
 - Applied the Huni dark-green palette and shared rounded shape tokens to the Compose theme.
 - Refined filter chips, Speed Dial artwork tiles, settings groups, and the bottom navigation surface.
 - Redesigned the About screen with Huni identity, app version information, and Remy Camiguel as the displayed developer.
-- Used the supplied Huni graphic in the About profile/avatar slot.
+- Used the supplied Huni graphic in the About profile/avatar slot and in the README.
+- Replaced About-page upstream/Discord links with the Huni.app repository and license file.
+- Made the in-app changelog Huni-authored and linked its release button to Huni.app.
+- Repointed the update feed to Huni.app and redesigned the home toolbar around the Huni logo.
 - Preserved existing playback, library, navigation, account, settings, and service behavior.
 
-This release retains upstream source notices and GPL-3.0 licensing. The Settings changelog and updater remain connected to the original public release source until Huni has a compatible public release feed; the pre-existing private `Huni` repository is a separate project. The public `Huni.app` repository exists, but no Huni release has been published yet. Embedding a credential in the APK would be unsafe.
+This release retains upstream source notices and GPL-3.0 licensing. The Settings changelog and updater remain connected to the original public release source until a Huni release is published; the pre-existing private `Huni` repository is a separate project. The public `Huni.app` repository exists, but no Huni release has been published yet. Embedding a credential in the APK would be unsafe.
