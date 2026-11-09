@@ -573,7 +573,7 @@ fun SpotifyPlaylistScreen(
                             )
                         },
                         singleLine = true,
-                        MaterialTheme.typography.titleMedium,
+                        textStyle = MaterialTheme.typography.titleMedium,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,

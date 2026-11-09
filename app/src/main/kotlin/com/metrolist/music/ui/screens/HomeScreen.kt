@@ -2719,7 +2719,6 @@ fun HomeScreen(
                             }
                         }
                     }
-                }
 
                 // Spotify Home Sections (shown when Spotify home is active)
                 if (isSpotifyHome && spotifyHomeSections != null) {
