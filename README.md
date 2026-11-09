@@ -2,6 +2,8 @@
   <img src="app/src/main/res/drawable-nodpi/huni_avatar.png" alt="Huni logo" width="180" />
   <h1>Huni</h1>
   <p>A focused, personal music listening experience for Android.</p>
+  <a href="https://github.com/rxmdyrems/Huni.app/releases/download/v0.9.2/Huni.apk"><strong>Download Huni 0.9.2 APK</strong></a><br />
+  <sub>Credential-free test build · debug-signed · streaming not device-verified</sub><br />
   <a href="https://github.com/rxmdyrems/Huni.app">Source code</a> · <a href="https://github.com/rxmdyrems/Huni.app/releases">Huni releases</a>
 </div>
 
@@ -17,7 +19,7 @@ Use the included Gradle wrapper with Android SDK API 37 and JDK 21:
 ./gradlew assembleFossDebug
 ```
 
-The FOSS debug APK is written to `app/build/outputs/apk/foss/debug/`. GMS and Izzy variants are also configured. For local builds, optional web-token integration credentials belong in ignored `local.properties`; never commit credentials.
+The FOSS debug APK is written to `app/build/outputs/apk/foss/debug/`. GMS and Izzy variants are also configured. For local builds, optional web-token integration credentials belong in ignored `local.properties`; never commit credentials. The linked public test APK is built without that local credential. Streaming has not been verified on a device, and it uses a debug signing certificate.
 
 ## Huni changelog
 

@@ -12,3 +12,8 @@
 - Preserved existing playback, library, navigation, account, settings, and service behavior.
 
 This release retains upstream source notices and GPL-3.0 licensing. The in-app changelog is Huni-authored, and update checks now target the public Huni.app repository. No Huni release has been published yet, so update downloads will become available only after a compatible Huni release and APK assets are published. The pre-existing private `Huni` repository is a separate project. Credentials are kept out of the public source.
+
+
+### Distribution note
+
+The initial downloadable v0.9.2 build is a credential-free, debug-signed pre-release. Automated unit tests pass, but real streaming has not been tested on an Android device; service-token-dependent playback may rely on the app's fallback clients.
