@@ -16,4 +16,4 @@ This release retains upstream source notices and GPL-3.0 licensing. The in-app c
 
 ### Distribution note
 
-The initial downloadable v0.9.2 build is a credential-free, debug-signed pre-release. Automated unit tests pass, but real streaming has not been tested on an Android device; PO-token-dependent playback may fail because this build omits the local service credential.
+The initial downloadable v0.9.2 build is a debug-signed pre-release built without the Huni-local service credential. Third-party dependencies may include their own client identifiers. Automated unit tests pass, but real streaming has not been tested on an Android device; PO-token-dependent playback may fail.
