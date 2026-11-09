@@ -604,10 +604,7 @@ class MainActivity : FragmentActivity() {
 
         val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
         val isSystemInDarkTheme = isSystemInDarkTheme()
-        val useDarkTheme =
-            remember(darkTheme, isSystemInDarkTheme) {
-                if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
-            }
+        val useDarkTheme = true
 
         LaunchedEffect(useDarkTheme) {
             setSystemBarAppearance(useDarkTheme)
@@ -685,7 +682,7 @@ class MainActivity : FragmentActivity() {
         }
 
         MetrolistTheme(
-            darkTheme = useDarkTheme,
+            darkTheme = true,
             pureBlack = pureBlack,
             themeColor = themeColor,
         ) {

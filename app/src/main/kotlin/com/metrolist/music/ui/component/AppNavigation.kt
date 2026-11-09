@@ -63,7 +63,7 @@ fun AppNavigationRail(
     onSearchLongClick: (() -> Unit)? = null,
     onHomeLongHold: (() -> Unit)? = null,
 ) {
-    val containerColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer
+    val containerColor = MaterialTheme.colorScheme.surface
     val haptics = LocalHapticFeedback.current
     val viewConfiguration = LocalViewConfiguration.current
 
@@ -145,7 +145,7 @@ fun AppNavigationBar(
     onSearchLongClick: (() -> Unit)? = null,
     onHomeLongHold: (() -> Unit)? = null,
 ) {
-    val containerColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer
+    val containerColor = MaterialTheme.colorScheme.surface
     val contentColor = if (pureBlack) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
     val haptics = LocalHapticFeedback.current
     val viewConfiguration = LocalViewConfiguration.current
@@ -156,7 +156,7 @@ fun AppNavigationBar(
             .padding(horizontal = 12.dp, vertical = 6.dp)
             .clip(barShape)
             .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)), barShape),
-        containerColor = if (pureBlack) containerColor else MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.94f),
+        containerColor = containerColor,
         contentColor = contentColor
     ) {
         navigationItems.forEach { screen ->
@@ -200,6 +200,13 @@ fun AppNavigationBar(
 
             NavigationBarItem(
                 selected = isSelected,
+                colors = androidx.compose.material3.NavigationBarItemDefaults.colors(
+                    indicatorColor = MaterialTheme.colorScheme.primary,
+                    selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
                 onClick = {
                     if (!isSearchItem && !isHomeHoldItem) {
                         onItemClick(screen, currentIsSelected)

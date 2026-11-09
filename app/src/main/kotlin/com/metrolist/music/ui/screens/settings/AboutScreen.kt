@@ -51,6 +51,7 @@ private data class AboutLink(val labelRes: Int, val iconRes: Int, val url: Strin
 private val aboutLinks = listOf(
     AboutLink(R.string.credits_view_repo, R.drawable.github, "https://github.com/rxmdyrems/Huni.app"),
     AboutLink(R.string.credits_license_name, R.drawable.info, "https://github.com/rxmdyrems/Huni.app/blob/main/LICENSE", R.string.credits_license_desc),
+    AboutLink(R.string.changelog, R.drawable.info, "https://github.com/rxmdyrems/Huni.app/blob/main/CHANGELOG.md"),
 )
 
 @Composable
@@ -122,7 +123,7 @@ fun AboutScreen(
                     Spacer(Modifier.height(14.dp))
                     Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.65f)) {
                         Text(
-                            text = stringResource(R.string.app_version_info, BuildConfig.VERSION_NAME, BuildConfig.ARCHITECTURE.uppercase()),
+                            text = "${BuildConfig.VERSION_NAME} · ${BuildConfig.ARCHITECTURE.uppercase()}",
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -169,6 +170,13 @@ fun AboutScreen(
                     }
                 }
             }
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = "Built on · upstream project licences: see repository\nGPL v3.0 · full licence in LICENSE",
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Spacer(Modifier.height(28.dp))
         }
     TopAppBar(

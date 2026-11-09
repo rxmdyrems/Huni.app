@@ -10,6 +10,7 @@ import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -21,14 +22,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.palette.graphics.Palette
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.rememberDynamicColorScheme
 import com.materialkolor.score.Score
 
-val DefaultThemeColor = Color(0xFF20C978)
+val DefaultThemeColor = Color(0xFFFFB84D)
 
 private val HuniShapes = Shapes(
     extraSmall = RoundedCornerShape(12.dp),
@@ -40,60 +40,28 @@ private val HuniShapes = Shapes(
 
 @Composable
 fun MetrolistTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true,
     pureBlack: Boolean = false,
     themeColor: Color = DefaultThemeColor,
     content: @Composable () -> Unit,
 ) {
-    val context = LocalContext.current
-    // Determine if system dynamic colors should be used (Android S+ and default theme color)
-    val useSystemDynamicColor = (themeColor == DefaultThemeColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-
-    // Select the appropriate color scheme generation method
-    val baseColorScheme = if (useSystemDynamicColor) {
-        // Use standard Material 3 dynamic color functions for system wallpaper colors
-        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-    } else {
-        // Use materialKolor only when a specific seed color is provided
-        rememberDynamicColorScheme(
-            seedColor = themeColor, // themeColor is guaranteed non-default here
-            isDark = darkTheme,
-            specVersion = ColorSpec.SpecVersion.SPEC_2025,
-            style = PaletteStyle.TonalSpot // Keep existing style
-        )
-    }
-
-    // Apply pureBlack modification if needed, similar to original logic
-    val colorScheme = remember(baseColorScheme, pureBlack, darkTheme) {
-        val huniDarkScheme = if (darkTheme) {
-            baseColorScheme.copy(
-                primary = Color(0xFF20C978),
-                onPrimary = Color(0xFF07110C),
-                primaryContainer = Color(0xFF123B29),
-                onPrimaryContainer = Color(0xFFA5EBC8),
-                secondary = Color(0xFFA5EBC8),
-                onSecondary = Color(0xFF092016),
-                secondaryContainer = Color(0xFF193A2B),
-                onSecondaryContainer = Color(0xFFC6F5DC),
-                background = Color(0xFF090D0C),
-                onBackground = Color(0xFFFFFFFF),
-                surface = Color(0xFF090D0C),
-                onSurface = Color(0xFFFFFFFF),
-                surfaceVariant = Color(0xFF141A18),
-                onSurfaceVariant = Color(0xFF929B96),
-                surfaceTint = Color(0xFF20C978),
-                outline = Color(0xFF46524B),
-                outlineVariant = Color(0xFF29332E),
-                surfaceContainerLowest = Color(0xFF090D0C),
-                surfaceContainerLow = Color(0xFF101513),
-                surfaceContainer = Color(0xFF141A18),
-                surfaceContainerHigh = Color(0xFF1A211E),
-                surfaceContainerHighest = Color(0xFF202824),
-            )
-        } else baseColorScheme
-        if (darkTheme && pureBlack) huniDarkScheme.pureBlack(true) else huniDarkScheme
-    }
-
+    // Huni uses a fixed dark palette; retain parameters for existing callers/preferences.
+    val colorScheme = darkColorScheme(
+        primary = Color(0xFFFFB84D), onPrimary = Color(0xFF2A1B00),
+        primaryContainer = Color(0xFF5A3B13), onPrimaryContainer = Color(0xFFFFDDAA),
+        secondary = Color(0xFFD9C7E8), onSecondary = Color(0xFF30243B),
+        secondaryContainer = Color(0xFF44364F), onSecondaryContainer = Color(0xFFEADCF5),
+        background = Color(0xFF16121C), onBackground = Color(0xFFF4EEF8),
+        surface = Color(0xFF211B2A), onSurface = Color(0xFFF4EEF8),
+        surfaceVariant = Color(0xFF2C2437), onSurfaceVariant = Color(0xFFA99FB8),
+        surfaceTint = Color(0xFFFFB84D), outline = Color(0xFF3A3147),
+        outlineVariant = Color(0xFF3A3147),
+        surfaceContainerLowest = Color(0xFF16121C),
+        surfaceContainerLow = Color(0xFF211B2A),
+        surfaceContainer = Color(0xFF211B2A),
+        surfaceContainerHigh = Color(0xFF2C2437),
+        surfaceContainerHighest = Color(0xFF332B3F),
+    )
     // Use standard MaterialTheme instead of MaterialExpressiveTheme
     MaterialTheme(
         colorScheme = colorScheme,

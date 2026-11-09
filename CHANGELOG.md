@@ -1,4 +1,9 @@
 # Huni Changelog
+## 0.9.3 — Amber night redesign
+- Replaced the green theme with a fixed dark plum palette and amber accent.
+- Refined Huni release identity and About links for version 0.9.3.
+- Kept existing playback and service behavior unchanged.
+
 
 ## 0.9.2 — Huni branding and visual polish
 
