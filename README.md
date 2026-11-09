@@ -19,7 +19,7 @@ Use the included Gradle wrapper with Android SDK API 37 and JDK 21:
 ./gradlew assembleFossDebug
 ```
 
-The FOSS debug APK is written to `app/build/outputs/apk/foss/debug/`. GMS and Izzy variants are also configured. For local builds, optional web-token integration credentials belong in ignored `local.properties`; never commit credentials. The linked public test APK is built without that local credential. Streaming has not been verified on a device, and it uses a debug signing certificate.
+The FOSS debug APK is written to `app/build/outputs/apk/foss/debug/`. GMS and Izzy variants are also configured. For local builds, optional web-token integration credentials belong in ignored `local.properties`; never commit credentials. The linked public test APK is built without that local credential. Streaming has not been verified on a device, and PO-token-dependent playback may fail. It uses a debug signing certificate.
 
 ## Huni changelog
 
