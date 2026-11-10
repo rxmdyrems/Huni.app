@@ -5,14 +5,20 @@
 
 package com.metrolist.music.utils
 
+import android.content.Context
+import android.content.Intent
+import androidx.core.content.FileProvider
 import com.metrolist.music.BuildConfig
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
+import java.security.MessageDigest
 
 data class ReleaseInfo(
     val tagName: String,
@@ -38,7 +44,7 @@ object Updater {
     private var cachedReleaseInfo: ReleaseInfo? = null
     private var cachedAllReleases: List<ReleaseInfo> = emptyList()
     
-    private const val CHECK_INTERVAL_MILLIS = 2 * 60 * 60 * 1000L // 2 hours
+    private const val CHECK_INTERVAL_MILLIS = 24 * 60 * 60 * 1000L
     private const val GITHUB_API_BASE = "https://api.github.com/repos/rxmdyrems/Huni.app"
 
     /**
@@ -96,7 +102,7 @@ object Updater {
             
             // Parse architecture and variant from filename
             val (arch, variant) = when {
-                name == "Huni.apk" -> "universal" to "foss"
+                name == "Huni.apk" || name.startsWith("Huni-") -> "universal" to "foss"
                 name == "Huni-with-Google-Cast.apk" -> "universal" to "gms"
                 name.startsWith("app-") && name.endsWith("-release.apk") -> {
                     val arch = name.removePrefix("app-").removeSuffix("-release.apk")
@@ -134,7 +140,7 @@ object Updater {
                 
                 val releaseInfo = ReleaseInfo(
                     tagName = json.getString("tag_name"),
-                    versionName = json.getString("name"),
+                    versionName = json.getString("tag_name").removePrefix("v"),
                     description = json.getString("body"),
                     releaseDate = json.getString("published_at"),
                     assets = parseAssets(json.getJSONArray("assets"))
@@ -174,7 +180,7 @@ object Updater {
                         val releaseObj = json.getJSONObject(i)
                         releases.add(ReleaseInfo(
                             tagName = releaseObj.getString("tag_name"),
-                            versionName = releaseObj.getString("name"),
+                            versionName = releaseObj.getString("tag_name").removePrefix("v"),
                             description = releaseObj.getString("body"),
                             releaseDate = releaseObj.getString("published_at"),
                             assets = parseAssets(releaseObj.getJSONArray("assets"))
@@ -199,6 +205,27 @@ object Updater {
             .find { it.architecture == currentArch && it.variant == currentVariant }
             ?.downloadUrl
     }
+
+    suspend fun downloadAndInstall(context: Context, releaseInfo: ReleaseInfo): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val apkUrl = getDownloadUrlForCurrentVariant(releaseInfo)
+                    ?: error("No APK asset is available for this build")
+                val apkBytes = client.get(apkUrl).body<ByteArray>()
+                val checksumText = client.get("$apkUrl.sha256").bodyAsText()
+                val expected = checksumText.trim().substringBefore(" ").substringBefore("\t")
+                val actual = MessageDigest.getInstance("SHA-256")
+                    .digest(apkBytes).joinToString("") { "%02x".format(it) }
+                check(expected.equals(actual, ignoreCase = true)) { "Downloaded update checksum does not match" }
+                val apkFile = File(context.cacheDir, "huni-update.apk")
+                apkFile.writeBytes(apkBytes)
+                val uri = FileProvider.getUriForFile(context, "${context.packageName}.FileProvider", apkFile)
+                context.startActivity(Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, "application/vnd.android.package-archive")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+                })
+            }
+        }
 
     /**
      * Check if update is needed (respects 2-hour cache)
