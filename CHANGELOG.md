@@ -1,4 +1,17 @@
 # Huni Changelog
+## Unreleased
+
+## v0.9.7 (2026-11-10)
+### Added
+- Added the local crash-report flow with a redacted preview and user-controlled GitHub, email, copy, or dismiss actions.
+- Added an offline in-app Changelog screen backed by this file.
+- Added a Report a bug link that opens the Huni issue chooser.
+
+### Changed
+- Unified section headers and responsive screen titles; settings-row titles now wrap within two lines.
+- Improved Home card alignment, subtitles, speed-dial labels, and mini-player progress/fade treatment.
+- Refined the About layout, Privacy crash-report controls and switch contrast, Android Auto rows, and Appearance settings.
+- Documented the shared screen header and title conventions for new screens.
 
 ## v0.9.6 (2026-11-10)
 - Fixed a crash caused by switching launcher aliases from the Dynamic icon colors setting.
@@ -8,11 +21,6 @@
 ## v0.9.5 (2026-11-10)
 - Replaced the launcher artwork with a transparent glass Huni icon.
 - Added adaptive monochrome icon support so Android can apply dynamic theme colors.
-
-## Unreleased
-- Added the local crash-report flow with a redacted preview and user-controlled GitHub, email, copy, or dismiss actions.
-- Added an offline in-app Changelog screen backed by this file.
-- Corrected CONTRIBUTING.md for the Huni repository.
 
 ## v0.9.4 (2026-11-10)
 - Added color themes and appearance modes.

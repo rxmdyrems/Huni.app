@@ -16,6 +16,8 @@ The normal local build is the `foss` flavor. `gms` adds Google Cast support and 
 
 For optional local values, copy `local.properties.sample` to `local.properties`. Never commit it or any credentials. Source strings are in `app/src/main/res/values/metrolist_strings.xml`; do not rename the file.
 
+New screens must use the shared `HuniSectionHeader` and `HuniScreenTitle` composables for section headings and top-app-bar titles so wrapping, sizing, and ellipsis stay consistent. Settings screens should use the shared `Material3SettingsGroup` and `HuniSwitch` components.
+
 ## Checks
 
 ```bash

@@ -2,14 +2,22 @@
   <img src="app/src/main/res/drawable-nodpi/huni_avatar.png" alt="Huni logo" width="180" />
   <h1>Huni</h1>
   <p>A focused, personal music listening experience for Android.</p>
-  <a href="https://github.com/rxmdyrems/Huni.app/releases/download/v0.9.2/Huni.apk"><strong>Download Huni 0.9.2 APK</strong></a><br />
-  <sub>Local credential omitted · debug-signed · streaming not device-verified</sub><br />
+  <a href="https://github.com/rxmdyrems/Huni.app/releases/download/v0.9.7/Huni.apk"><strong>Download Huni 0.9.7 APK</strong></a><br />
+  <sub>Signed release build · see the release notes for changes</sub><br />
   <a href="https://github.com/rxmdyrems/Huni.app">Source code</a> · <a href="https://github.com/rxmdyrems/Huni.app/releases">Huni releases</a>
 </div>
 
 ## About Huni
 
-Huni brings together music discovery, playback, and library tools in one Android app. This repository is the home for Huni's Android source, release notes, and future builds.
+Huni is an open-source Android music player for discovering music, organizing a personal library, and shaping a listening experience around your preferences.
+
+## Features
+
+- Browse music and playlists, with Home shortcuts for frequently used content.
+- Manage a personal library, playlists, listening history, downloads, and offline caching.
+- Customize themes, playback controls, lyrics, and the Home layout.
+- Use Android Auto and optional service integrations.
+- Review a redacted crash-report preview and choose whether to share it; crash data is never sent automatically.
 
 ## Build
 
@@ -19,11 +27,11 @@ Use the included Gradle wrapper with Android SDK API 37 and JDK 21:
 ./gradlew assembleFossDebug
 ```
 
-The FOSS debug APK is written to `app/build/outputs/apk/foss/debug/`. GMS and Izzy variants are also configured. For local builds, optional web-token integration credentials belong in ignored `local.properties`; never commit credentials. The linked public test APK is built without the Huni-local service credential. Third-party dependencies may include their own client identifiers. Streaming has not been verified on a device, and PO-token-dependent playback may fail. It uses a debug signing certificate.
+The local FOSS debug APK is written to `app/build/outputs/apk/foss/debug/`. GMS and Izzy variants are also configured. Optional local integration values belong in ignored `local.properties`; never commit credentials. Official release APKs are built and signed by GitHub Actions and published on the [Huni releases page](https://github.com/rxmdyrems/Huni.app/releases).
 
 ## Huni changelog
 
-See [`CHANGELOG.md`](CHANGELOG.md) for Huni-authored release notes. In-app Changelog content is maintained for Huni and links to [Huni releases](https://github.com/rxmdyrems/Huni.app/releases).
+See [`CHANGELOG.md`](CHANGELOG.md) for Huni-authored release notes. The in-app Changelog is bundled with the same Huni release history.
 
 ## License and upstream attribution
 
