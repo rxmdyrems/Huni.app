@@ -37,10 +37,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -49,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -65,7 +69,6 @@ import com.metrolist.music.constants.DensityScale
 import com.metrolist.music.constants.DensityScaleKey
 import com.metrolist.music.constants.DarkModeKey
 import com.metrolist.music.constants.DynamicThemeKey
-import com.metrolist.music.constants.EnableDynamicIconKey
 import com.metrolist.music.constants.EnableHighRefreshRateKey
 import com.metrolist.music.constants.EnableLandscapeScalingKey
 import com.metrolist.music.constants.ExperimentalLyricsKey
@@ -75,6 +78,7 @@ import com.metrolist.music.constants.HidePlayerThumbnailKey
 import com.metrolist.music.constants.HideStatusBarOnFullscreenKey
 import com.metrolist.music.constants.LibraryFilter
 import com.metrolist.music.constants.ListenTogetherInTopBarKey
+import com.metrolist.music.constants.MatchAppIconToColorKey
 import com.metrolist.music.constants.LyricsAnimationStyle
 import com.metrolist.music.constants.LyricsAnimationStyleKey
 import com.metrolist.music.constants.LyricsClickKey
@@ -121,8 +125,10 @@ import com.metrolist.music.ui.theme.DefaultPalette
 import com.metrolist.music.ui.theme.HuniPalettes
 import com.metrolist.music.ui.theme.PlayerSliderColors
 import com.metrolist.music.ui.utils.backToMain
+import com.metrolist.music.utils.IconUtils
 import com.metrolist.music.utils.rememberEnumPreference
 import com.metrolist.music.utils.rememberPreference
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -151,6 +157,19 @@ fun AppearanceSettings(
     val (darkMode, onDarkModeChange) = rememberEnumPreference(DarkModeKey, DarkMode.ON)
     val (selectedPaletteId, onSelectedPaletteChange) = rememberPreference(ThemePaletteKey, DefaultPalette.id)
     val selectedPalette = HuniPalettes.find { it.id == selectedPaletteId } ?: DefaultPalette
+    val (matchAppIconToColor, onMatchAppIconToColorChange) =
+        rememberPreference(MatchAppIconToColorKey, defaultValue = false)
+    val context = LocalContext.current
+    val iconPaletteId = if (matchAppIconToColor) selectedPalette.id else DefaultPalette.id
+    val latestIconPaletteId by rememberUpdatedState(iconPaletteId)
+
+    LaunchedEffect(iconPaletteId) {
+        delay(1_500)
+        IconUtils.setIcon(context, iconPaletteId)
+    }
+    DisposableEffect(Unit) {
+        onDispose { IconUtils.setIcon(context, latestIconPaletteId) }
+    }
     val isDark = when (darkMode) {
         DarkMode.AUTO -> isSystemInDarkTheme()
         DarkMode.ON -> true
@@ -969,6 +988,37 @@ fun AppearanceSettings(
             Spacer(Modifier.height(12.dp))
         }
         Spacer(Modifier.height(8.dp))
+        Material3SettingsGroup(
+            items =
+                listOf(
+                    Material3SettingsItem(
+                        icon = painterResource(R.drawable.palette),
+                        title = { Text(stringResource(R.string.enable_dynamic_icon), maxLines = 2, overflow = TextOverflow.Ellipsis) },
+                        description = { Text(stringResource(R.string.enable_dynamic_icon_desc)) },
+                        trailingContent = {
+                            HuniSwitch(
+                                checked = matchAppIconToColor,
+                                onCheckedChange = onMatchAppIconToColorChange,
+                                thumbContent = {
+                                    Icon(
+                                        painter = painterResource(if (matchAppIconToColor) R.drawable.check else R.drawable.close),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(SwitchDefaults.IconSize),
+                                    )
+                                },
+                            )
+                        },
+                        onClick = { onMatchAppIconToColorChange(!matchAppIconToColor) },
+                    ),
+                ),
+        )
+        Text(
+            text = stringResource(R.string.themed_icons_note),
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = 8.dp),
+        )
+        Spacer(Modifier.height(19.dp))
         Material3SettingsGroup(
             title = "Display",
             items =

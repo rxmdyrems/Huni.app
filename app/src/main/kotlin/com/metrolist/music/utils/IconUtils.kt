@@ -5,20 +5,40 @@ import android.content.Context
 import android.content.pm.PackageManager
 
 object IconUtils {
-    fun setIcon(context: Context, enabled: Boolean) {
-        val pm = context.packageManager
-        val dynamic = ComponentName(context, "com.metrolist.music.MainActivityAlias")
-        val static = ComponentName(context, "com.metrolist.music.MainActivityStatic")
+    private const val DEFAULT_PALETTE = "amber"
 
-        pm.setComponentEnabledSetting(
-            dynamic,
-            if (enabled) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-            PackageManager.DONT_KILL_APP
-        )
-        pm.setComponentEnabledSetting(
-            static,
-            if (enabled) PackageManager.COMPONENT_ENABLED_STATE_DISABLED else PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-            PackageManager.DONT_KILL_APP
+    private val paletteAliases = linkedMapOf(
+        "amber" to "com.metrolist.music.MainActivityAlias",
+        "violet" to "com.metrolist.music.MainActivityViolet",
+        "green" to "com.metrolist.music.MainActivityGreen",
+        "maroon" to "com.metrolist.music.MainActivityMaroon",
+        "ocean" to "com.metrolist.music.MainActivityOcean",
+        "teal" to "com.metrolist.music.MainActivityTeal",
+        "rose" to "com.metrolist.music.MainActivityRose",
+        "orange" to "com.metrolist.music.MainActivityOrange",
+        "indigo" to "com.metrolist.music.MainActivityIndigo",
+        "slate" to "com.metrolist.music.MainActivitySlate",
+    )
+
+    /** Enable the alias matching [paletteId], disabling every other launcher alias. */
+    fun setIcon(context: Context, paletteId: String) {
+        val targetClass = paletteAliases[paletteId] ?: paletteAliases.getValue(DEFAULT_PALETTE)
+        val packageManager = context.packageManager
+
+        paletteAliases.values
+            .filterNot { it == targetClass }
+            .forEach { aliasClass ->
+                packageManager.setComponentEnabledSetting(
+                    ComponentName(context, aliasClass),
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP,
+                )
+            }
+
+        packageManager.setComponentEnabledSetting(
+            ComponentName(context, targetClass),
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+            PackageManager.DONT_KILL_APP,
         )
     }
 }

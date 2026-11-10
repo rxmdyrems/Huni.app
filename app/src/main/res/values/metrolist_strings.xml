@@ -976,8 +976,9 @@
     <string name="not_applicable">N/A</string>
 
     <!-- Stream sources -->
-    <string name="enable_dynamic_icon">Dynamic icon colors</string>
-    <string name="enable_dynamic_icon_desc">Android launchers apply the monochrome icon when themed icons are enabled. This setting does not restart the app.</string>
+    <string name="enable_dynamic_icon">Match app icon to color</string>
+    <string name="enable_dynamic_icon_desc">Changes the launcher icon. Some launchers remove pinned shortcuts.</string>
+    <string name="themed_icons_note">Themed icons (Android 13+) are controlled by your launcher.</string>
     <string name="stream_sources">Stream sources</string>
     <string name="stream_source_order">Stream order</string>
     <string name="stream_source_web_clients">Web clients</string>

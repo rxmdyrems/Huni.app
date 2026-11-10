@@ -164,7 +164,7 @@ val PauseSearchHistoryKey = booleanPreferencesKey("pauseSearchHistory")
 val DisableScreenshotKey = booleanPreferencesKey("disableScreenshot")
 val CrashReportingEnabledKey = booleanPreferencesKey("crashReportingEnabled")
 
-val EnableDynamicIconKey = booleanPreferencesKey("enableDynamicIcon")
+val MatchAppIconToColorKey = booleanPreferencesKey("matchAppIconToColor")
 
 val EnableDiscordRPCKey = booleanPreferencesKey("discordRPCEnable")
 val DiscordInfoDismissedKey = booleanPreferencesKey("discordInfoDismissed")

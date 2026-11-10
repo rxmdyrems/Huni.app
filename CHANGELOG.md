@@ -1,6 +1,10 @@
 # Huni Changelog
 ## Unreleased
 
+## v0.9.8 (2026-11-11)
+### Added
+- Added an optional launcher icon that matches the selected color palette, with adaptive and monochrome variants.
+
 ## v0.9.7 (2026-11-10)
 ### Added
 - Added the local crash-report flow with a redacted preview and user-controlled GitHub, email, copy, or dismiss actions.
