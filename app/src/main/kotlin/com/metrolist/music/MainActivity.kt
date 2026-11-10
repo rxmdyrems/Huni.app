@@ -99,7 +99,6 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Density
@@ -202,7 +201,6 @@ import com.metrolist.music.ui.screens.settings.NavigationTab
 import com.metrolist.music.ui.theme.DefaultPalette
 import com.metrolist.music.ui.theme.HuniPalettes
 import com.metrolist.music.ui.theme.MetrolistTheme
-import com.metrolist.music.ui.theme.bbhBartle
 import com.metrolist.music.ui.utils.appBarScrollBehavior
 import com.metrolist.music.ui.utils.resetHeightOffset
 import com.metrolist.music.utils.ReleaseInfo
@@ -852,6 +850,7 @@ class MainActivity : FragmentActivity() {
                             bottom += NavigationBarHeight
                         }
                         if (!playerBottomSheetState.isDismissed) bottom += MiniPlayerBottomSpacing + MiniPlayerHeight
+                        bottom += 16.dp
                         windowsInsets
                             .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
                             .add(WindowInsets(top = AppBarHeight, bottom = bottom))
@@ -1047,36 +1046,10 @@ class MainActivity : FragmentActivity() {
                                     TopAppBar(
                                         title = {
                                             if (navBackStackEntry?.destination?.route == Screens.Home.route) {
-                                                Column {
-                                                    Text(
-                                                        text = "HUNI",
-                                                        style = MaterialTheme.typography.titleLarge.copy(
-                                                            fontFamily = bbhBartle,
-                                                            fontSize = 28.sp,
-                                                        ),
-                                                        fontWeight = FontWeight.SemiBold,
-                                                        color = MaterialTheme.colorScheme.onSurface,
-                                                        maxLines = 1,
-                                                        softWrap = false,
-                                                    )
-                                                    Text(
-                                                        text = homeGreeting,
-                                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                                            fontFamily = FontFamily.Default,
-                                                            fontSize = 13.sp,
-                                                        ),
-                                                        color = Color(0xFFA99FB8),
-                                                        maxLines = 1,
-                                                        softWrap = false,
-                                                    )
-                                                }
+                                                com.metrolist.music.ui.component.HuniWordmark(homeGreeting)
                                             } else {
-                                                Text(
-                                                    text = currentTitleRes?.let { stringResource(it) } ?: "",
-                                                    style = MaterialTheme.typography.titleLarge,
-                                                    fontWeight = FontWeight.SemiBold,
-                                                    maxLines = 1,
-                                                    softWrap = false,
+                                                com.metrolist.music.ui.component.HuniScreenTitle(
+                                                    currentTitleRes?.let { stringResource(it) } ?: "",
                                                 )
                                             }
                                         },

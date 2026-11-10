@@ -411,11 +411,11 @@ fun GridItem(
     Column(
         modifier = if (fillMaxWidth) {
             modifier
-                .padding(12.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
                 .fillMaxWidth()
         } else {
             modifier
-                .padding(12.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
                 .width(gridHeight * thumbnailRatio)
         }
     ) {
@@ -437,8 +437,9 @@ fun GridItem(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             badges()
-
-            subtitle()
+            Box(Modifier.weight(1f)) {
+                subtitle()
+            }
         }
     }
 }
@@ -1284,8 +1285,8 @@ fun YouTubeGridItem(
             fontWeight = FontWeight.Bold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            textAlign = if (item is ArtistItem) TextAlign.Center else TextAlign.Start,
-            modifier = Modifier.basicMarquee().fillMaxWidth()
+            textAlign = TextAlign.Start,
+            modifier = Modifier.fillMaxWidth()
         )
     },
      subtitle = {
@@ -1303,7 +1304,7 @@ fun YouTubeGridItem(
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.secondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )

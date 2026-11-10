@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.metrolist.music.ui.screens.wrapped.LocalWrappedManager
 import com.metrolist.music.ui.screens.wrapped.MessagePair
-import com.metrolist.music.ui.theme.bbh_bartle
 import kotlinx.coroutines.delay
 
 @Composable
@@ -46,8 +45,7 @@ fun WrappedMinutesTease(
             Text(
                 text = messagePair?.tease ?: "", modifier = Modifier.padding(horizontal = 24.dp),
                 color = Color.White, fontSize = 30.sp, lineHeight = 34.sp, textAlign = TextAlign.Center,
-                fontFamily = try { bbh_bartle } catch (e: Exception) { FontFamily.Default }
-            )
+                )
         }
     }
 }

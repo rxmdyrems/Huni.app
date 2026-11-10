@@ -83,8 +83,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -1326,7 +1324,10 @@ fun HomeScreen(
                 recentlyPlayed?.firstOrNull()?.let { lastSong ->
                     item(key = "jump_back_in") {
                         Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-                            Text("Jump back in", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurface)
+                            com.metrolist.music.ui.component.HuniSectionHeader(
+                                text = "Jump back in",
+                                modifier = Modifier.fillMaxWidth(),
+                            )
                             Spacer(Modifier.height(8.dp))
                             Card(
                                 modifier = Modifier.fillMaxWidth().height(96.dp).combinedClickable(onClick = {
@@ -1545,12 +1546,6 @@ fun HomeScreen(
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     if (isWrappedDataReady) {
-                                        val bbhFont =
-                                            try {
-                                                FontFamily(Font(R.font.bbh_bartle_regular))
-                                            } catch (e: Exception) {
-                                                FontFamily.Default
-                                            }
                                         Column(
                                             modifier = Modifier.padding(16.dp),
                                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -1560,8 +1555,7 @@ fun HomeScreen(
                                                 text = stringResource(R.string.wrapped_ready_title),
                                                 style =
                                                     MaterialTheme.typography.headlineLarge.copy(
-                                                        fontFamily = bbhFont,
-                                                        textAlign = TextAlign.Center,
+                                                                                                                textAlign = TextAlign.Center,
                                                     ),
                                             )
                                             Spacer(modifier = Modifier.height(8.dp))

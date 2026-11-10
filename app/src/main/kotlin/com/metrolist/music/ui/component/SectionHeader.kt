@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.sp
 fun HuniSectionHeader(
     text: String,
     modifier: Modifier = Modifier,
-    style: TextStyle = MaterialTheme.typography.titleLarge,
+    style: TextStyle = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp),
     maxLines: Int = 2,
     minSize: Int = 14,
 ) {
@@ -27,7 +27,7 @@ fun HuniSectionHeader(
         color = MaterialTheme.colorScheme.primary,
         maxLines = maxLines,
         softWrap = true,
-        overflow = androidx.compose.ui.text.style.TextOverflow.Clip,
+        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
         onTextLayout = { result ->
             if ((result.didOverflowHeight || result.lineCount > maxLines) && fontSize > minSize) {
                 fontSize -= 1f
