@@ -7,13 +7,8 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.metrolist.music.R
@@ -31,34 +26,22 @@ fun HuniSwitch(
     Switch(
         checked = checked,
         onCheckedChange = onCheckedChange,
-        modifier = modifier.drawWithContent {
-            drawContent()
-            if (!checked) {
-                val stroke = 2.dp.toPx()
-                drawRoundRect(
-                    color = offOutline,
-                    topLeft = Offset(stroke / 2, stroke / 2),
-                    size = Size(size.width - stroke, size.height - stroke),
-                    cornerRadius = CornerRadius((size.height - stroke) / 2),
-                    style = Stroke(width = stroke),
-                )
-            }
-        },
-        thumbContent = thumbContent ?: {
+        modifier = modifier,
+        thumbContent = if (checked) thumbContent ?: {
             Icon(
-                painter = painterResource(if (checked) R.drawable.check else R.drawable.close),
+                painter = painterResource(R.drawable.check),
                 contentDescription = null,
                 modifier = Modifier.size(SwitchDefaults.IconSize),
-                tint = if (checked) colors.primary else colors.onSurfaceVariant,
+                tint = colors.primary,
             )
-        },
+        } else null,
         colors = SwitchDefaults.colors(
             checkedThumbColor = colors.onPrimary,
             checkedTrackColor = colors.primary,
             checkedBorderColor = colors.primary,
             checkedIconColor = colors.primary,
-            uncheckedThumbColor = colors.onSurfaceVariant,
-            uncheckedTrackColor = Color.Transparent,
+            uncheckedThumbColor = Color(0xFFA99FB8),
+            uncheckedTrackColor = colors.surfaceContainerHigh,
             uncheckedBorderColor = offOutline,
             uncheckedIconColor = colors.onSurfaceVariant,
         ),
