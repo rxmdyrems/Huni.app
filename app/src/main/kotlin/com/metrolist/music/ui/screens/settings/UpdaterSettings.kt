@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -86,14 +88,14 @@ fun UpdaterScreen(navController: NavController) {
         Spacer(Modifier.height(4.dp))
         Material3SettingsGroup(
             title = "Current version",
-            items = listOf(Material3SettingsItem(title = { Text("${BuildConfig.VERSION_NAME} · Universal") }, description = { Text("Package: ${BuildConfig.APPLICATION_ID}") })),
+            items = listOf(Material3SettingsItem(title = { Text("${BuildConfig.VERSION_NAME} · Universal", maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) }, description = { Text("Package: ${BuildConfig.APPLICATION_ID}") })),
         )
         Spacer(Modifier.height(16.dp))
         Material3SettingsGroup(
             title = "Update settings",
             items = listOf(
-                Material3SettingsItem(title = { Text("Check for updates") }, icon = painterResource(R.drawable.update), trailingContent = { androidx.compose.material3.Switch(checked = checkForUpdates, onCheckedChange = onCheckForUpdatesChange) }, onClick = { onCheckForUpdatesChange(!checkForUpdates) }),
-                Material3SettingsItem(title = { Text("Update notifications") }, icon = painterResource(R.drawable.notification), trailingContent = { androidx.compose.material3.Switch(checked = notifications, onCheckedChange = onNotificationsChange) }, onClick = { onNotificationsChange(!notifications) }),
+                Material3SettingsItem(title = { Text("Check for updates", maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) }, icon = painterResource(R.drawable.update), trailingContent = { com.metrolist.music.ui.component.HuniSwitch(checked = checkForUpdates, onCheckedChange = onCheckForUpdatesChange) }, onClick = { onCheckForUpdatesChange(!checkForUpdates) }),
+                Material3SettingsItem(title = { Text("Update notifications", maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) }, icon = painterResource(R.drawable.notification), trailingContent = { com.metrolist.music.ui.component.HuniSwitch(checked = notifications, onCheckedChange = onNotificationsChange) }, onClick = { onNotificationsChange(!notifications) }),
             ),
         )
         Spacer(Modifier.height(16.dp))
@@ -101,7 +103,7 @@ fun UpdaterScreen(navController: NavController) {
             title = "Updates",
             items = listOf(Material3SettingsItem(
                 icon = painterResource(R.drawable.refresh),
-                title = { Text(if (checking) "Checking for updates…" else if (available && release != null) "Update available: v${release!!.versionName}" else "Check for updates") },
+                title = { Text(if (checking) "Checking for updates…" else if (available && release != null) "Update available: v${release!!.versionName}" else "Check for updates", maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                 description = { Text(if (error) "Couldn't check for updates. Try again." else if (!available && release != null) "You're on the latest version (${BuildConfig.BASE_VERSION_NAME})" else lastChecked?.let { "Last checked: ${DateFormat.getDateTimeInstance().format(Date(it))}" } ?: "GitHub releases/latest") },
                 trailingContent = { if (checking) CircularProgressIndicator(Modifier.padding(end = 12.dp), strokeWidth = 2.dp) },
                 onClick = { check(true) },
@@ -123,7 +125,9 @@ fun UpdaterScreen(navController: NavController) {
         }
         Spacer(Modifier.height(32.dp))
     }
-    TopAppBar(title = { Text(stringResource(R.string.updater)) }, navigationIcon = {
+    TopAppBar(title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.updater))
+                        }, navigationIcon = {
         IconButton(onClick = navController::navigateUp, onLongClick = navController::backToMain) { Icon(painterResource(R.drawable.arrow_back), null) }
     })
 }

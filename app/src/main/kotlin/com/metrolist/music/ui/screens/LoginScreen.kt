@@ -367,12 +367,10 @@ fun LoginScreen(
 
         TopAppBar(
             title = {
-                Text(
-                    stringResource(
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(
                         if (isSwitchingChannel) R.string.switch_youtube_channel else R.string.login,
-                    ),
-                )
-            },
+                    ))
+                        },
             navigationIcon = {
                 IconButton(
                     onClick = navController::navigateUp,

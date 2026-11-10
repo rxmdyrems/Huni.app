@@ -508,7 +508,9 @@ fun SpotifySettings(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.spotify_integration)) },
+        title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.spotify_integration))
+                        },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

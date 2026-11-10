@@ -201,7 +201,9 @@ fun RecognitionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.recognize_music)) },
+                title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.recognize_music))
+                        },
                 navigationIcon = {
                     IconButton(
                         onClick = { navController.navigateUp() },

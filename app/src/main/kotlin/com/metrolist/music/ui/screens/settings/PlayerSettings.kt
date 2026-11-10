@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -18,7 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -293,7 +294,7 @@ fun PlayerSettings(
             items = buildList {
                 add(Material3SettingsItem(
                     icon = painterResource(R.drawable.graphic_eq),
-                    title = { Text(stringResource(R.string.audio_quality)) },
+                    title = { Text(stringResource(R.string.audio_quality), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = {
                         Text(
                             when (audioQuality) {
@@ -307,10 +308,10 @@ fun PlayerSettings(
                 ))
                 add(Material3SettingsItem(
                     icon = painterResource(R.drawable.linear_scale),
-                    title = { Text(stringResource(R.string.crossfade)) },
+                    title = { Text(stringResource(R.string.crossfade), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.crossfade_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = crossfadeEnabled,
                             onCheckedChange = onCrossfadeEnabledChange,
                             thumbContent = {
@@ -329,7 +330,7 @@ fun PlayerSettings(
                 if (crossfadeEnabled) {
                     add(Material3SettingsItem(
                         icon = painterResource(R.drawable.timer),
-                        title = { Text(stringResource(R.string.crossfade_duration)) },
+                        title = { Text(stringResource(R.string.crossfade_duration), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = {
                             Column {
                                 Text(pluralStringResource(R.plurals.seconds, crossfadeDuration.toInt(), crossfadeDuration.toInt()))
@@ -344,10 +345,10 @@ fun PlayerSettings(
                     ))
                     add(Material3SettingsItem(
                         icon = painterResource(R.drawable.album),
-                        title = { Text(stringResource(R.string.crossfade_gapless)) },
+                        title = { Text(stringResource(R.string.crossfade_gapless), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = { Text(stringResource(R.string.crossfade_gapless_desc)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = crossfadeGapless,
                                 onCheckedChange = onCrossfadeGaplessChange,
                                 thumbContent = {
@@ -366,7 +367,7 @@ fun PlayerSettings(
                 }
                 add(Material3SettingsItem(
                     icon = painterResource(R.drawable.history),
-                    title = { Text(stringResource(R.string.history_duration)) },
+                    title = { Text(stringResource(R.string.history_duration), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = {
                         Column {
                             Text(historyDuration.roundToInt().toString())
@@ -380,10 +381,10 @@ fun PlayerSettings(
                 ))
                 add(Material3SettingsItem(
                     icon = painterResource(R.drawable.fast_forward),
-                    title = { Text(stringResource(R.string.skip_silence)) },
+                    title = { Text(stringResource(R.string.skip_silence), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.skip_silence_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = skipSilence,
                             onCheckedChange = onSkipSilenceChange,
                             thumbContent = {
@@ -401,10 +402,10 @@ fun PlayerSettings(
                 ))
                 add(Material3SettingsItem(
                     icon = painterResource(R.drawable.skip_next),
-                    title = { Text(stringResource(R.string.skip_silence_instant)) },
+                    title = { Text(stringResource(R.string.skip_silence_instant), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.skip_silence_instant_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = skipSilenceInstant,
                             onCheckedChange = { onSkipSilenceInstantChange(it) },
                             enabled = skipSilence,
@@ -423,9 +424,9 @@ fun PlayerSettings(
                 ))
                 add(Material3SettingsItem(
                     icon = painterResource(R.drawable.volume_up),
-                    title = { Text(stringResource(R.string.audio_normalization)) },
+                    title = { Text(stringResource(R.string.audio_normalization), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = audioNormalization,
                             onCheckedChange = onAudioNormalizationChange,
                             thumbContent = {
@@ -444,7 +445,7 @@ fun PlayerSettings(
                 if (audioNormalization) {
                     add(Material3SettingsItem(
                         icon = painterResource(R.drawable.volume_up),
-                        title = { Text(stringResource(R.string.loudness_level)) },
+                        title = { Text(stringResource(R.string.loudness_level), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = {
                             Text(getLoudnessLevelLabel(loudnessLevel))
                         },
@@ -453,10 +454,10 @@ fun PlayerSettings(
                 }
                 add(Material3SettingsItem(
                     icon = painterResource(R.drawable.music_note),
-                    title = { Text(stringResource(R.string.play_over_other_audio)) },
+                    title = { Text(stringResource(R.string.play_over_other_audio), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.play_over_other_audio_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = !audioFocusEnabled,
                             onCheckedChange = { onAudioFocusEnabledChange(!it) },
                             thumbContent = {
@@ -474,7 +475,7 @@ fun PlayerSettings(
                 ))
                 add(Material3SettingsItem(
                     icon = painterResource(R.drawable.graphic_eq),
-                    title = { Text(stringResource(R.string.audio_offload)) },
+                    title = { Text(stringResource(R.string.audio_offload), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = {
                         Text(
                             if (crossfadeEnabled) stringResource(R.string.audio_offload_disabled_by_crossfade)
@@ -482,7 +483,7 @@ fun PlayerSettings(
                         )
                     },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = if (crossfadeEnabled) false else audioOffload,
                             onCheckedChange = onAudioOffloadChange,
                             enabled = !crossfadeEnabled,
@@ -501,14 +502,14 @@ fun PlayerSettings(
                 ))
                 add(Material3SettingsItem(
                     icon = painterResource(R.drawable.graphic_eq),
-                    title = { Text(stringResource(R.string.varispeed)) },
+                    title = { Text(stringResource(R.string.varispeed), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = {
                         Text(
                             stringResource(R.string.varispeed_description)
                         )
                     },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = varispeed,
                             onCheckedChange = onVarispeedChange,
                             thumbContent = {
@@ -526,12 +527,12 @@ fun PlayerSettings(
                 ))
                 add(Material3SettingsItem(
                     icon = painterResource(R.drawable.speed),
-                    title = { Text(stringResource(R.string.audio_track_playback_params)) },
+                    title = { Text(stringResource(R.string.audio_track_playback_params), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = {
                         Text(stringResource(R.string.audio_track_playback_params_description))
                     },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = audioTrackPlaybackParams,
                             onCheckedChange = onAudioTrackPlaybackParamsChange,
                             thumbContent = {
@@ -551,10 +552,10 @@ fun PlayerSettings(
                 if (BuildConfig.CAST_AVAILABLE) {
                     add(Material3SettingsItem(
                         icon = painterResource(R.drawable.cast),
-                        title = { Text(stringResource(R.string.google_cast)) },
+                        title = { Text(stringResource(R.string.google_cast), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = { Text(stringResource(R.string.google_cast_description)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = enableGoogleCast,
                                 onCheckedChange = onEnableGoogleCastChange,
                                 thumbContent = {
@@ -573,10 +574,10 @@ fun PlayerSettings(
                 }
                 add(Material3SettingsItem(
                     icon = painterResource(R.drawable.arrow_forward),
-                    title = { Text(stringResource(R.string.seek_seconds_addup)) },
+                    title = { Text(stringResource(R.string.seek_seconds_addup), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.seek_seconds_addup_description)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = seekExtraSeconds,
                             onCheckedChange = onSeekExtraSeconds,
                             thumbContent = {
@@ -662,10 +663,10 @@ fun PlayerSettings(
                 add(
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.time_auto),
-                        title = { Text(stringResource(R.string.enable_automatic_sleeptimer)) },
+                        title = { Text(stringResource(R.string.enable_automatic_sleeptimer), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = { Text(stringResource(R.string.sleeptimer_description)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = sleepTimerEnabled,
                                 onCheckedChange = onSleepTimerEnabledChange,
                                 thumbContent = {
@@ -686,14 +687,14 @@ fun PlayerSettings(
                     add(
                         Material3SettingsItem(
                             icon = painterResource(R.drawable.baseline_event_repeat_24),
-                            title = { Text(stringResource(R.string.sleep_timer_repeat)) },
+                            title = { Text(stringResource(R.string.sleep_timer_repeat), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             description = {
                                 Text(
                                     stringResource(R.string.sleep_timer_repeat_description)
                                 )
                             },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = sleepTimerEnabled,
                                     onCheckedChange = {showSleepTimerDialog = true},
                                     thumbContent = {
@@ -715,10 +716,10 @@ fun PlayerSettings(
                 add(
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.more_time),
-                        title = { Text(stringResource(R.string.sleep_timer_stop_after_current_song_title)) },
+                        title = { Text(stringResource(R.string.sleep_timer_stop_after_current_song_title), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = { Text(stringResource(R.string.sleep_timer_stop_after_current_song_description)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = sleepTimerStopAfterCurrentSong,
                                 onCheckedChange = onSleepTimerStopAfterCurrentSongChange,
                                 thumbContent = {
@@ -739,10 +740,10 @@ fun PlayerSettings(
                 add(
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.timer_arrow_down),
-                        title = { Text(stringResource(R.string.sleep_timer_fade_out_title)) },
+                        title = { Text(stringResource(R.string.sleep_timer_fade_out_title), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = { Text(stringResource(R.string.sleep_timer_fade_out_description)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = sleepTimerFadeOut,
                                 onCheckedChange = onSleepTimerFadeOutChange,
                                 thumbContent = {
@@ -772,10 +773,10 @@ fun PlayerSettings(
             items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.queue_music),
-                    title = { Text(stringResource(R.string.persistent_queue)) },
+                    title = { Text(stringResource(R.string.persistent_queue), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.persistent_queue_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = persistentQueue,
                             onCheckedChange = onPersistentQueueChange,
                             thumbContent = {
@@ -793,10 +794,10 @@ fun PlayerSettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.playlist_add),
-                    title = { Text(stringResource(R.string.auto_load_more)) },
+                    title = { Text(stringResource(R.string.auto_load_more), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.auto_load_more_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = autoLoadMore,
                             onCheckedChange = onAutoLoadMoreChange,
                             thumbContent = {
@@ -814,10 +815,10 @@ fun PlayerSettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.radio),
-                    title = { Text(stringResource(R.string.auto_radio_queue)) },
+                    title = { Text(stringResource(R.string.auto_radio_queue), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.auto_radio_queue_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = autoRadioQueue,
                             onCheckedChange = onAutoRadioQueueChange,
                             thumbContent = {
@@ -835,10 +836,10 @@ fun PlayerSettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.skip_next),
-                    title = { Text(stringResource(R.string.autoplay)) },
+                    title = { Text(stringResource(R.string.autoplay), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.autoplay_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = autoplay,
                             onCheckedChange = onAutoplayChange,
                             thumbContent = {
@@ -856,10 +857,10 @@ fun PlayerSettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.repeat),
-                    title = { Text(stringResource(R.string.disable_load_more_when_repeat_all)) },
+                    title = { Text(stringResource(R.string.disable_load_more_when_repeat_all), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.disable_load_more_when_repeat_all_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = disableLoadMoreWhenRepeatAll,
                             onCheckedChange = onDisableLoadMoreWhenRepeatAllChange,
                             thumbContent = {
@@ -877,10 +878,10 @@ fun PlayerSettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.download),
-                    title = { Text(stringResource(R.string.auto_download_on_like)) },
+                    title = { Text(stringResource(R.string.auto_download_on_like), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.auto_download_on_like_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = autoDownloadOnLike,
                             onCheckedChange = onAutoDownloadOnLikeChange,
                             thumbContent = {
@@ -898,10 +899,10 @@ fun PlayerSettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.similar),
-                    title = { Text(stringResource(R.string.enable_similar_content)) },
+                    title = { Text(stringResource(R.string.enable_similar_content), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.similar_content_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = similarContentEnabled,
                             onCheckedChange = similarContentEnabledChange,
                             thumbContent = {
@@ -919,10 +920,10 @@ fun PlayerSettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.shuffle),
-                    title = { Text(stringResource(R.string.persistent_shuffle_title)) },
+                    title = { Text(stringResource(R.string.persistent_shuffle_title), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.persistent_shuffle_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = persistentShuffleAcrossQueues,
                             onCheckedChange = onPersistentShuffleAcrossQueuesChange,
                             thumbContent = {
@@ -940,10 +941,10 @@ fun PlayerSettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.shuffle),
-                    title = { Text(stringResource(R.string.remember_shuffle_and_repeat)) },
+                    title = { Text(stringResource(R.string.remember_shuffle_and_repeat), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.remember_shuffle_and_repeat_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = rememberShuffleAndRepeat,
                             onCheckedChange = onRememberShuffleAndRepeatChange,
                             thumbContent = {
@@ -961,10 +962,10 @@ fun PlayerSettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.shuffle),
-                    title = { Text(stringResource(R.string.shuffle_playlist_first)) },
+                    title = { Text(stringResource(R.string.shuffle_playlist_first), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.shuffle_playlist_first_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = shufflePlaylistFirst,
                             onCheckedChange = onShufflePlaylistFirstChange,
                             thumbContent = {
@@ -982,10 +983,10 @@ fun PlayerSettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.queue_music),
-                    title = { Text(stringResource(R.string.prevent_duplicate_tracks_in_queue)) },
+                    title = { Text(stringResource(R.string.prevent_duplicate_tracks_in_queue), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.prevent_duplicate_tracks_in_queue_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = preventDuplicateTracksInQueue,
                             onCheckedChange = onPreventDuplicateTracksInQueueChange,
                             thumbContent = {
@@ -1003,10 +1004,10 @@ fun PlayerSettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.skip_next),
-                    title = { Text(stringResource(R.string.auto_skip_next_on_error)) },
+                    title = { Text(stringResource(R.string.auto_skip_next_on_error), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.auto_skip_next_on_error_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = autoSkipNextOnError,
                             onCheckedChange = onAutoSkipNextOnErrorChange,
                             thumbContent = {
@@ -1032,9 +1033,9 @@ fun PlayerSettings(
             items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.clear_all),
-                    title = { Text(stringResource(R.string.stop_music_on_task_clear)) },
+                    title = { Text(stringResource(R.string.stop_music_on_task_clear), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = stopMusicOnTaskClear,
                             onCheckedChange = onStopMusicOnTaskClearChange,
                             thumbContent = {
@@ -1052,9 +1053,9 @@ fun PlayerSettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.volume_off_pause),
-                    title = { Text(stringResource(R.string.pause_music_when_media_is_muted)) },
+                    title = { Text(stringResource(R.string.pause_music_when_media_is_muted), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = pauseOnMute,
                             onCheckedChange = onPauseOnMuteChange,
                             thumbContent = {
@@ -1072,9 +1073,9 @@ fun PlayerSettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.bluetooth),
-                    title = { Text(stringResource(R.string.resume_on_bluetooth_connect)) },
+                    title = { Text(stringResource(R.string.resume_on_bluetooth_connect), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = resumeOnBluetoothConnect,
                             onCheckedChange = onResumeOnBluetoothConnectChange,
                             thumbContent = {
@@ -1092,9 +1093,9 @@ fun PlayerSettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.screenshot),
-                    title = { Text(stringResource(R.string.keep_screen_on_when_player_is_expanded)) },
+                    title = { Text(stringResource(R.string.keep_screen_on_when_player_is_expanded), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = keepScreenOn,
                             onCheckedChange = onKeepScreenOnChange,
                             thumbContent = {
@@ -1112,7 +1113,7 @@ fun PlayerSettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.fast_forward),
-                    title = { Text(stringResource(R.string.sponsorblock)) },
+                    title = { Text(stringResource(R.string.sponsorblock), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.sponsorblock_desc)) },
                     onClick = { navController.navigate("settings/player/sponsorblock") }
                 )
@@ -1122,7 +1123,9 @@ fun PlayerSettings(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.player_and_audio)) },
+        title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.player_and_audio))
+                        },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

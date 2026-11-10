@@ -418,7 +418,9 @@ fun ListenTogetherScreen(
 
     if (shouldShowTopBar) {
         TopAppBar(
-            title = { Text(stringResource(R.string.together)) },
+            title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.together))
+                        },
             navigationIcon = {
                 IconButton(
                     onClick = navController::navigateUp,

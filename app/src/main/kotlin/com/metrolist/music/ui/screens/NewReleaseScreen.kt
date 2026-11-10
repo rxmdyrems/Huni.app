@@ -139,7 +139,9 @@ fun NewReleaseScreen(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.new_release_albums)) },
+        title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.new_release_albums))
+                        },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

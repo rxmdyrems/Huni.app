@@ -380,5 +380,8 @@
     <string name="pre_cache_count">%d tracks</string>
     <string name="spotify_folder_empty">This folder is empty.</string>
     <string name="crash_reporting">Crash reports</string>
-    <string name="crash_reporting_desc">Ask before sharing a redacted crash report. The app never sends it automatically.</string>
+    <string name="crash_reporting_desc">After a crash, Huni asks before sharing a redacted report. Nothing is sent automatically.</string>
+    <string name="ask_before_sending_crash_reports">Ask before sending crash reports</string>
+    <string name="preview_crash_report">Preview crash report</string>
+    <string name="preview_crash_report_desc">Shows a sample report. Nothing is sent.</string>
 </resources>

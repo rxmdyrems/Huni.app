@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -18,7 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -73,10 +74,10 @@ fun SponsorBlockSettings(navController: NavController) {
             items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.fast_forward),
-                    title = { Text(stringResource(R.string.sponsorblock_enable)) },
+                    title = { Text(stringResource(R.string.sponsorblock_enable), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.sponsorblock_enable_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = enabled,
                             onCheckedChange = onEnabledChange,
                             thumbContent = {
@@ -94,11 +95,11 @@ fun SponsorBlockSettings(navController: NavController) {
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.notification),
-                    title = { Text(stringResource(R.string.sponsorblock_show_toast)) },
+                    title = { Text(stringResource(R.string.sponsorblock_show_toast), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.sponsorblock_show_toast_desc)) },
                     enabled = enabled,
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = showToast,
                             enabled = enabled,
                             onCheckedChange = onShowToastChange,
@@ -125,7 +126,7 @@ fun SponsorBlockSettings(navController: NavController) {
             items = SPONSORBLOCK_ALL_CATEGORIES.map { category ->
                 val isChecked = category in selected
                 Material3SettingsItem(
-                    title = { Text(stringResource(categoryLabel(category))) },
+                    title = { Text(stringResource(categoryLabel(category)), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     enabled = enabled,
                     trailingContent = {
                         Checkbox(
@@ -150,7 +151,9 @@ fun SponsorBlockSettings(navController: NavController) {
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.sponsorblock)) },
+        title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.sponsorblock))
+                        },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

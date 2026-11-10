@@ -108,7 +108,9 @@ fun ChartsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.charts)) },
+                title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.charts))
+                        },
                 navigationIcon = {
                     IconButton(
                         onClick = { navController.navigateUp() },

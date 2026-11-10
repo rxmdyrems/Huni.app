@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -97,11 +98,12 @@ private fun Material3SettingsItemRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 64.dp)
             .clickable(
                 enabled = item.enabled && item.onClick != null,
                 onClick = { item.onClick?.invoke() }
             )
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Custom leading content or Icon with background

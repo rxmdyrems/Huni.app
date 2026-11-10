@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -312,7 +313,7 @@ fun AccountSettings(
                 ),
                 if (isLoggedIn) {
                     Material3SettingsItem(
-                        title = { Text(stringResource(R.string.switch_youtube_channel)) },
+                        title = { Text(stringResource(R.string.switch_youtube_channel), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         icon = painterResource(R.drawable.account),
                         onClick = {
                             onClose()
@@ -336,7 +337,7 @@ fun AccountSettings(
                                 showToken -> stringResource(R.string.token_shown)
                                 else -> stringResource(R.string.token_hidden)
                             }
-                        )
+                        , maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     },
                     icon = painterResource(R.drawable.token),
                     onClick = {
@@ -346,10 +347,10 @@ fun AccountSettings(
                     }
                 ),
                 Material3SettingsItem(
-                    title = { Text(stringResource(R.string.more_content)) },
+                    title = { Text(stringResource(R.string.more_content), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     icon = painterResource(R.drawable.cached),
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             enabled = isLoggedIn,
                             checked = useLoginForBrowse,
                             onCheckedChange = {
@@ -370,10 +371,10 @@ fun AccountSettings(
                     enabled = isLoggedIn
                 ),
                 Material3SettingsItem(
-                    title = { Text(stringResource(R.string.yt_sync)) },
+                    title = { Text(stringResource(R.string.yt_sync), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     icon = painterResource(R.drawable.cached),
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             enabled = isLoggedIn,
                             checked = ytmSync,
                             onCheckedChange = onYtmSyncChange,
@@ -400,7 +401,7 @@ fun AccountSettings(
             items = buildList {
                 add(
                     Material3SettingsItem(
-                        title = { Text(stringResource(R.string.integrations)) },
+                        title = { Text(stringResource(R.string.integrations), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         icon = painterResource(R.drawable.integration),
                         onClick = {
                             onClose()
@@ -410,7 +411,7 @@ fun AccountSettings(
                 )
                 add(
                     Material3SettingsItem(
-                        title = { Text(stringResource(R.string.settings)) },
+                        title = { Text(stringResource(R.string.settings), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         icon = painterResource(R.drawable.settings),
                         showBadge = BuildConfig.UPDATER_AVAILABLE &&
                             latestVersionName != BuildConfig.BASE_VERSION_NAME,
@@ -427,7 +428,7 @@ fun AccountSettings(
                     if (downloadUrl != null) {
                         add(
                             Material3SettingsItem(
-                                title = { Text(stringResource(R.string.new_version_available)) },
+                                title = { Text(stringResource(R.string.new_version_available), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 description = { Text(latestVersionName) },
                                 icon = painterResource(R.drawable.update),
                                 showBadge = true,

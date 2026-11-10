@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings.integrations
 
+import com.metrolist.music.ui.component.HuniSwitch
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,7 +29,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -303,7 +304,7 @@ fun LastFMSettings(
                         Text(
                             text = if (isLoggedIn) lastfmUsername else stringResource(R.string.not_logged_in),
                             modifier = Modifier.alpha(if (isLoggedIn) 1f else 0.5f),
-                        )
+                         maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     },
                     trailingContent = {
                         if (isLoggedIn) {
@@ -330,9 +331,9 @@ fun LastFMSettings(
             title = stringResource(R.string.options),
             items = listOf(
                 Material3SettingsItem(
-                    title = { Text(stringResource(R.string.enable_scrobbling)) },
+                    title = { Text(stringResource(R.string.enable_scrobbling), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = lastfmScrobbling,
                             onCheckedChange = onlastfmScrobblingChange,
                             enabled = isLoggedIn,
@@ -342,9 +343,9 @@ fun LastFMSettings(
                     icon = painterResource(R.drawable.queue_music)
                 ),
                 Material3SettingsItem(
-                    title = { Text(stringResource(R.string.lastfm_now_playing)) },
+                    title = { Text(stringResource(R.string.lastfm_now_playing), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = useNowPlaying,
                             onCheckedChange = onUseNowPlayingChange,
                             enabled = isLoggedIn && lastfmScrobbling,
@@ -354,10 +355,10 @@ fun LastFMSettings(
                     icon = painterResource(R.drawable.play)
                 ),
                 Material3SettingsItem(
-                    title = { Text(stringResource(R.string.last_fm_send_likes)) },
+                    title = { Text(stringResource(R.string.last_fm_send_likes), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { stringResource(R.string.last_fm_send_likes_description) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = useSendLikes,
                             onCheckedChange = onUseSendLikes,
                             enabled = isLoggedIn,
@@ -570,19 +571,19 @@ fun LastFMSettings(
             title = stringResource(R.string.scrobbling_configuration),
             items = listOf(
                 Material3SettingsItem(
-                    title = { Text(stringResource(R.string.scrobble_min_track_duration)) },
+                    title = { Text(stringResource(R.string.scrobble_min_track_duration), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(makeTimeString((minTrackDuration * 1000).toLong())) },
                     onClick = { showMinTrackDurationDialog = true },
                     icon = painterResource(R.drawable.timer)
                 ),
                 Material3SettingsItem(
-                    title = { Text(stringResource(R.string.scrobble_delay_percent)) },
+                    title = { Text(stringResource(R.string.scrobble_delay_percent), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.sensitivity_percentage, (scrobbleDelayPercent * 100).roundToInt())) },
                     onClick = { showScrobbleDelayPercentDialog = true },
                     icon = painterResource(R.drawable.timer)
                 ),
                 Material3SettingsItem(
-                    title = { Text(stringResource(R.string.scrobble_delay_minutes)) },
+                    title = { Text(stringResource(R.string.scrobble_delay_minutes), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(makeTimeString((scrobbleDelaySeconds * 1000).toLong())) },
                     onClick = { showScrobbleDelaySecondsDialog = true },
                     icon = painterResource(R.drawable.timer)
@@ -592,7 +593,9 @@ fun LastFMSettings(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.lastfm_integration)) },
+        title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.lastfm_integration))
+                        },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

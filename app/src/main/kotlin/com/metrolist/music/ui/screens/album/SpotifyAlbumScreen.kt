@@ -299,7 +299,9 @@ fun SpotifyAlbumScreen(
         }
 
         TopAppBar(
-            title = { Text(album?.name ?: stringResource(R.string.albums)) },
+            title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(album?.name ?: stringResource(R.string.albums))
+                        },
             navigationIcon = {
                 IconButton(
                     onClick = navController::navigateUp,

@@ -101,7 +101,9 @@ fun SpotifyLoginScreen(navController: NavController) {
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
-            title = { Text(stringResource(R.string.spotify_login)) },
+            title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.spotify_login))
+                        },
             navigationIcon = {
                 IconButton(
                     onClick = navController::navigateUp,

@@ -319,7 +319,9 @@ fun AccountScreen(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.account)) },
+        title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.account))
+                        },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

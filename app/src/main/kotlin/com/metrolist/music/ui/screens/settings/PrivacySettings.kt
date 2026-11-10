@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -18,7 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -166,9 +167,9 @@ fun PrivacySettings(
             items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.history),
-                    title = { Text(stringResource(R.string.pause_listen_history)) },
+                    title = { Text(stringResource(R.string.pause_listen_history), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = pauseListenHistory,
                             onCheckedChange = onPauseListenHistoryChange,
                             thumbContent = {
@@ -186,7 +187,7 @@ fun PrivacySettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.delete_history),
-                    title = { Text(stringResource(R.string.clear_listen_history)) },
+                    title = { Text(stringResource(R.string.clear_listen_history), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     onClick = { showClearListenHistoryDialog = true }
                 )
             )
@@ -199,9 +200,9 @@ fun PrivacySettings(
             items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.search_off),
-                    title = { Text(stringResource(R.string.pause_search_history)) },
+                    title = { Text(stringResource(R.string.pause_search_history), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = pauseSearchHistory,
                             onCheckedChange = onPauseSearchHistoryChange,
                             thumbContent = {
@@ -218,8 +219,8 @@ fun PrivacySettings(
                     onClick = { onPauseSearchHistoryChange(!pauseSearchHistory) }
                 ),
                 Material3SettingsItem(
-                    icon = painterResource(R.drawable.clear_all),
-                    title = { Text(stringResource(R.string.clear_search_history)) },
+                    icon = painterResource(R.drawable.delete_sweep),
+                    title = { Text(stringResource(R.string.clear_search_history), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     onClick = { showClearSearchHistoryDialog = true }
                 )
             )
@@ -232,10 +233,10 @@ fun PrivacySettings(
             items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.screenshot),
-                    title = { Text(stringResource(R.string.disable_screenshot)) },
+                    title = { Text(stringResource(R.string.disable_screenshot), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.disable_screenshot_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = disableScreenshot,
                             onCheckedChange = onDisableScreenshotChange,
                             thumbContent = {
@@ -251,12 +252,20 @@ fun PrivacySettings(
                     },
                     onClick = { onDisableScreenshotChange(!disableScreenshot) }
                 ),
+            )
+        )
+
+        Spacer(modifier = Modifier.height(27.dp))
+
+        Material3SettingsGroup(
+            title = stringResource(R.string.crash_reporting),
+            items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.bug_report),
-                    title = { Text(stringResource(R.string.crash_reporting)) },
+                    title = { Text(stringResource(R.string.ask_before_sending_crash_reports), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.crash_reporting_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = crashReportingEnabled,
                             onCheckedChange = onCrashReportingEnabledChange,
                             thumbContent = {
@@ -273,8 +282,9 @@ fun PrivacySettings(
                     onClick = { onCrashReportingEnabledChange(!crashReportingEnabled) }
                 ),
                 Material3SettingsItem(
-                    icon = painterResource(R.drawable.bug_report),
-                    title = { Text("Preview crash report") },
+                    icon = painterResource(R.drawable.visibility),
+                    title = { Text(stringResource(R.string.preview_crash_report), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
+                    description = { Text(stringResource(R.string.preview_crash_report_desc)) },
                     onClick = { showCrashPreview = true }
                 )
             )
@@ -283,7 +293,7 @@ fun PrivacySettings(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.privacy)) },
+        title = { com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.privacy)) },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

@@ -159,11 +159,8 @@ fun SpotifyFolderScreen(
 
         TopAppBar(
             title = {
-                Text(
-                    text = displayName,
-                    maxLines = 1,
-                )
-            },
+                            com.metrolist.music.ui.component.HuniScreenTitle(displayName)
+                        },
             navigationIcon = {
                 IconButton(
                     onClick = navController::navigateUp,

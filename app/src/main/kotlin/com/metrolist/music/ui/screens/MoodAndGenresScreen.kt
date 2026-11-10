@@ -104,7 +104,9 @@ fun MoodAndGenresScreen(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.mood_and_genres), maxLines = 1, softWrap = false) },
+        title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.mood_and_genres))
+                        },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

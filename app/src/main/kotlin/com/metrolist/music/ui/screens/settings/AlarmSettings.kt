@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
+
 import android.app.AlarmManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -28,7 +30,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -102,7 +103,7 @@ fun AlarmSettingsSection(showTitle: Boolean = true) {
             add(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.warning),
-                    title = { Text(stringResource(R.string.alarm_exact_permission_title)) },
+                    title = { Text(stringResource(R.string.alarm_exact_permission_title), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.alarm_exact_permission_desc)) },
                     onClick = {
                         try {
@@ -119,7 +120,7 @@ fun AlarmSettingsSection(showTitle: Boolean = true) {
             add(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.warning),
-                    title = { Text(stringResource(R.string.alarm_battery_optimization_title)) },
+                    title = { Text(stringResource(R.string.alarm_battery_optimization_title), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.alarm_battery_optimization_desc)) },
                     onClick = {
                         try {
@@ -180,7 +181,7 @@ fun AlarmSettingsSection(showTitle: Boolean = true) {
             add(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.add_circle),
-                    title = { Text(stringResource(R.string.alarm_add)) },
+                    title = { Text(stringResource(R.string.alarm_add), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     onClick = {
                         editorTarget = null
                         showEditor = true
@@ -192,7 +193,7 @@ fun AlarmSettingsSection(showTitle: Boolean = true) {
                 add(
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.bedtime),
-                        title = { Text(stringResource(R.string.alarm_empty)) }
+                        title = { Text(stringResource(R.string.alarm_empty), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) }
                     )
                 )
             } else {
@@ -229,7 +230,7 @@ fun AlarmSettingsSection(showTitle: Boolean = true) {
                                         } else {
                                             " (${stringResource(R.string.alarm_disabled)})"
                                         }
-                                )
+                                , maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                             },
                             description = { Text(description) },
                             trailingContent = {
@@ -315,7 +316,7 @@ private fun AlarmSwitch(
     onCheckedChange: (Boolean) -> Unit,
     enabled: Boolean = true
 ) {
-    Switch(
+    HuniSwitch(
         checked = checked,
         onCheckedChange = onCheckedChange,
         enabled = enabled,

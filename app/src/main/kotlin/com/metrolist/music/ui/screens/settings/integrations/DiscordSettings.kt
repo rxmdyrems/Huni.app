@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.settings.integrations
 
+import com.metrolist.music.ui.component.HuniSwitch
+
 import android.app.Activity
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
@@ -40,7 +42,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -495,9 +496,9 @@ fun DiscordSettings(
             items =
                 listOf(
                     Material3SettingsItem(
-                        title = { Text(stringResource(R.string.enable_discord_rpc)) },
+                        title = { Text(stringResource(R.string.enable_discord_rpc), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = discordRPC,
                                 onCheckedChange = onDiscordRPCChange,
                                 enabled = isLoggedIn,
@@ -516,10 +517,10 @@ fun DiscordSettings(
                         onClick = { if (isLoggedIn) onDiscordRPCChange(!discordRPC) },
                     ),
                     Material3SettingsItem(
-                        title = { Text(stringResource(R.string.discord_advanced_mode)) },
+                        title = { Text(stringResource(R.string.discord_advanced_mode), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = { Text(stringResource(R.string.discord_advanced_mode_description)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = advancedMode,
                                 onCheckedChange = {
                                     onAdvancedModeChange(it)
@@ -561,22 +562,22 @@ fun DiscordSettings(
                     items =
                         listOf(
                             Material3SettingsItem(
-                                title = { Text(stringResource(R.string.discord_activity_type)) },
+                                title = { Text(stringResource(R.string.discord_activity_type), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 description = { Text(activityTypeLabel) },
                                 onClick = { showActivityTypeDialog = true },
                             ),
                             Material3SettingsItem(
-                                title = { Text(stringResource(R.string.discord_activity_name)) },
+                                title = { Text(stringResource(R.string.discord_activity_name), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 description = { Text(activityName.ifEmpty { "(default)" }) },
                                 onClick = { showActivityNameDialog = true },
                             ),
                             Material3SettingsItem(
-                                title = { Text(stringResource(R.string.discord_state)) },
+                                title = { Text(stringResource(R.string.discord_state), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 description = { Text(stateTemplate) },
                                 onClick = { showStateDialog = true },
                             ),
                             Material3SettingsItem(
-                                title = { Text(stringResource(R.string.discord_details)) },
+                                title = { Text(stringResource(R.string.discord_details), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 description = { Text(detailsTemplate) },
                                 onClick = { showDetailsDialog = true },
                             ),
@@ -591,9 +592,9 @@ fun DiscordSettings(
                         buildList {
                             add(
                                 Material3SettingsItem(
-                                    title = { Text(stringResource(R.string.discord_enable_button_1)) },
+                                    title = { Text(stringResource(R.string.discord_enable_button_1), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                     trailingContent = {
-                                        Switch(
+                                        HuniSwitch(
                                             checked = btn1Enabled,
                                             onCheckedChange = {
                                                 onBtn1EnabledChange(it)
@@ -619,14 +620,14 @@ fun DiscordSettings(
                             if (btn1Enabled) {
                                 add(
                                     Material3SettingsItem(
-                                        title = { Text("${stringResource(R.string.discord_button_1)} — ${stringResource(R.string.discord_button_label)}") },
+                                        title = { Text("${stringResource(R.string.discord_button_1)} — ${stringResource(R.string.discord_button_label)}", maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                         description = { Text(btn1Label) },
                                         onClick = { showBtn1LabelDialog = true },
                                     ),
                                 )
                                 add(
                                     Material3SettingsItem(
-                                        title = { Text("${stringResource(R.string.discord_button_1)} — ${stringResource(R.string.discord_button_url)}") },
+                                        title = { Text("${stringResource(R.string.discord_button_1)} — ${stringResource(R.string.discord_button_url)}", maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                         description = { Text(btn1Url) },
                                         onClick = { showBtn1UrlDialog = true },
                                     ),
@@ -634,9 +635,9 @@ fun DiscordSettings(
                             }
                             add(
                                 Material3SettingsItem(
-                                    title = { Text(stringResource(R.string.discord_enable_button_2)) },
+                                    title = { Text(stringResource(R.string.discord_enable_button_2), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                     trailingContent = {
-                                        Switch(
+                                        HuniSwitch(
                                             checked = btn2Enabled,
                                             onCheckedChange = {
                                                 onBtn2EnabledChange(it)
@@ -662,14 +663,14 @@ fun DiscordSettings(
                             if (btn2Enabled) {
                                 add(
                                     Material3SettingsItem(
-                                        title = { Text("${stringResource(R.string.discord_button_2)} — ${stringResource(R.string.discord_button_label)}") },
+                                        title = { Text("${stringResource(R.string.discord_button_2)} — ${stringResource(R.string.discord_button_label)}", maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                         description = { Text(btn2Label) },
                                         onClick = { showBtn2LabelDialog = true },
                                     ),
                                 )
                                 add(
                                     Material3SettingsItem(
-                                        title = { Text("${stringResource(R.string.discord_button_2)} — ${stringResource(R.string.discord_button_url)}") },
+                                        title = { Text("${stringResource(R.string.discord_button_2)} — ${stringResource(R.string.discord_button_url)}", maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                         description = { Text(btn2Url) },
                                         onClick = { showBtn2UrlDialog = true },
                                     ),
@@ -685,7 +686,7 @@ fun DiscordSettings(
                     items =
                         listOf(
                             Material3SettingsItem(
-                                title = { Text(stringResource(R.string.discord_status)) },
+                                title = { Text(stringResource(R.string.discord_status), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 description = { Text(userStatusLabel) },
                                 onClick = { showUserStatusDialog = true },
                             ),
@@ -878,7 +879,9 @@ fun DiscordSettings(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.discord_integration)) },
+        title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.discord_integration))
+                        },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

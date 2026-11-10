@@ -142,7 +142,9 @@ fun ArtistAlbumsScreen(
         }
 
         TopAppBar(
-            title = { Text(artist?.artist?.name.orEmpty()) },
+            title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(artist?.artist?.name.orEmpty())
+                        },
             navigationIcon = {
                 IconButton(
                     onClick = navController::navigateUp,

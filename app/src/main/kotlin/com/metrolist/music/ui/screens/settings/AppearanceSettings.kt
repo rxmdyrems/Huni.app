@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
+
 import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,7 +32,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -900,11 +901,9 @@ fun AppearanceSettings(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp),
     ) {
-        Text(
+        com.metrolist.music.ui.component.HuniSectionHeader(
             text = "Theme",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
         )
         Row(
             modifier = Modifier
@@ -934,24 +933,23 @@ fun AppearanceSettings(
                 }
             }
         }
-        Text(
+        com.metrolist.music.ui.component.HuniSectionHeader(
             text = "Color",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(top = 20.dp, bottom = 10.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 10.dp),
         )
         HuniPalettes.chunked(5).forEach { rowPalettes ->
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 rowPalettes.forEach { palette ->
                     val selected = palette.id == selectedPalette.id
                     Column(
-                        modifier = Modifier.weight(1f).clickable { onSelectedPaletteChange(palette.id) },
+                        modifier = Modifier.weight(1f),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Box(
                             modifier = Modifier
                                 .size(48.dp)
                                 .clip(CircleShape)
+                                .clickable { onSelectedPaletteChange(palette.id) }
                                 .background(if (isDark) palette.accentDark else palette.accentLight)
                                 .border(if (selected) 3.dp else 0.dp, MaterialTheme.colorScheme.onSurface, CircleShape),
                             contentAlignment = Alignment.Center,
@@ -972,16 +970,16 @@ fun AppearanceSettings(
         }
         Spacer(Modifier.height(8.dp))
         Material3SettingsGroup(
-            title = stringResource(R.string.theme),
+            title = "Display",
             items =
                 buildList {
                     add(
                         Material3SettingsItem(
                             icon = painterResource(R.drawable.speed),
-                            title = { Text(stringResource(R.string.enable_high_refresh_rate)) },
-                            description = { Text(stringResource(R.string.enable_high_refresh_rate_desc)) },
+                            title = { Text(stringResource(R.string.high_refresh_rate), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
+                            description = { Text(stringResource(R.string.high_refresh_rate_desc)) },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = enableHighRefreshRate,
                                     onCheckedChange = onEnableHighRefreshRateChange,
                                     thumbContent = {
@@ -1002,10 +1000,10 @@ fun AppearanceSettings(
                     add(
                         Material3SettingsItem(
                             icon = painterResource(R.drawable.fullscreen),
-                            title = { Text(stringResource(R.string.enable_landscape_scaling)) },
+                            title = { Text(stringResource(R.string.enable_landscape_scaling), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             description = { Text(stringResource(R.string.enable_landscape_scaling_desc)) },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = enableLandscapeScaling,
                                     onCheckedChange = onEnableLandscapeScalingChange,
                                     thumbContent = {
@@ -1036,9 +1034,9 @@ fun AppearanceSettings(
                 listOf(
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.palette),
-                        title = { Text(stringResource(R.string.new_player_design)) },
+                        title = { Text(stringResource(R.string.new_player_design), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = useNewPlayerDesign,
                                 onCheckedChange = onUseNewPlayerDesignChange,
                                 thumbContent = {
@@ -1057,7 +1055,7 @@ fun AppearanceSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.gradient),
-                        title = { Text(stringResource(R.string.player_background_style)) },
+                        title = { Text(stringResource(R.string.player_background_style), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = {
                             Text(
                                 when (playerBackground) {
@@ -1071,10 +1069,10 @@ fun AppearanceSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.hide_image),
-                        title = { Text(stringResource(R.string.hide_player_thumbnail)) },
+                        title = { Text(stringResource(R.string.hide_player_thumbnail), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = { Text(stringResource(R.string.hide_player_thumbnail_desc)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = hidePlayerThumbnail,
                                 onCheckedChange = onHidePlayerThumbnailChange,
                                 thumbContent = {
@@ -1093,10 +1091,10 @@ fun AppearanceSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.crop),
-                        title = { Text(stringResource(R.string.crop_album_art)) },
+                        title = { Text(stringResource(R.string.crop_album_art), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = { Text(stringResource(R.string.crop_album_art_desc)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = cropAlbumArt,
                                 onCheckedChange = onCropAlbumArtChange,
                                 thumbContent = {
@@ -1115,7 +1113,7 @@ fun AppearanceSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.palette),
-                        title = { Text(stringResource(R.string.player_buttons_style)) },
+                        title = { Text(stringResource(R.string.player_buttons_style), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = {
                             Text(
                                 when (playerButtonsStyle) {
@@ -1129,7 +1127,7 @@ fun AppearanceSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.sliders),
-                        title = { Text(stringResource(R.string.player_slider_style)) },
+                        title = { Text(stringResource(R.string.player_slider_style), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = {
                             Text(
                                 when (sliderStyle) {
@@ -1157,9 +1155,9 @@ fun AppearanceSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.swipe),
-                        title = { Text(stringResource(R.string.enable_swipe_thumbnail)) },
+                        title = { Text(stringResource(R.string.enable_swipe_thumbnail), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = swipeThumbnail,
                                 onCheckedChange = onSwipeThumbnailChange,
                                 thumbContent = {
@@ -1181,7 +1179,7 @@ fun AppearanceSettings(
                         listOf(
                             Material3SettingsItem(
                                 icon = painterResource(R.drawable.tune),
-                                title = { Text(stringResource(R.string.swipe_sensitivity)) },
+                                title = { Text(stringResource(R.string.swipe_sensitivity), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 description = {
                                     Text(
                                         stringResource(
@@ -1274,11 +1272,11 @@ fun AppearanceSettings(
                     add(
                         Material3SettingsItem(
                             icon = painterResource(R.drawable.lyrics),
-                            title = { Text(stringResource(R.string.experimental_lyrics)) },
+                            title = { Text(stringResource(R.string.experimental_lyrics), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             description = { Text(stringResource(R.string.experimental_lyrics_desc)) },
                             showBadge = true,
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = experimentalLyrics,
                                     onCheckedChange = {
                                         if (!experimentalLyrics) {
@@ -1313,10 +1311,10 @@ fun AppearanceSettings(
                         add(
                             Material3SettingsItem(
                                 icon = painterResource(R.drawable.lyrics),
-                                title = { Text(stringResource(R.string.lyrics_glow_effect)) },
+                                title = { Text(stringResource(R.string.lyrics_glow_effect), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 description = { Text(stringResource(R.string.lyrics_glow_effect_desc)) },
                                 trailingContent = {
-                                    Switch(
+                                    HuniSwitch(
                                         checked = lyricsGlowEffect,
                                         onCheckedChange = onLyricsGlowEffectChange,
                                         thumbContent = {
@@ -1337,7 +1335,7 @@ fun AppearanceSettings(
                         add(
                             Material3SettingsItem(
                                 icon = painterResource(R.drawable.lyrics),
-                                title = { Text(stringResource(R.string.lyrics_animation_style_title)) },
+                                title = { Text(stringResource(R.string.lyrics_animation_style_title), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 description = {
                                     Text(
                                         when (lyricsAnimationStyle) {
@@ -1356,7 +1354,7 @@ fun AppearanceSettings(
                         add(
                             Material3SettingsItem(
                                 icon = painterResource(R.drawable.lyrics),
-                                title = { Text(stringResource(R.string.lyrics_text_size)) },
+                                title = { Text(stringResource(R.string.lyrics_text_size), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 description = { Text("${lyricsTextSize.roundToInt()} sp") },
                                 onClick = { showLyricsTextSizeDialog = true },
                             ),
@@ -1364,7 +1362,7 @@ fun AppearanceSettings(
                         add(
                             Material3SettingsItem(
                                 icon = painterResource(R.drawable.lyrics),
-                                title = { Text(stringResource(R.string.lyrics_line_spacing)) },
+                                title = { Text(stringResource(R.string.lyrics_line_spacing), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 description = { Text(String.format(Locale.US, "%.1f", lyricsLineSpacing)) },
                                 onClick = { showLyricsLineSpacingDialog = true },
                             ),
@@ -1374,7 +1372,7 @@ fun AppearanceSettings(
                     add(
                         Material3SettingsItem(
                             icon = painterResource(R.drawable.lyrics),
-                            title = { Text(stringResource(R.string.lyrics_text_position)) },
+                            title = { Text(stringResource(R.string.lyrics_text_position), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             description = {
                                 Text(
                                     when (lyricsPosition) {
@@ -1390,10 +1388,10 @@ fun AppearanceSettings(
                     add(
                         Material3SettingsItem(
                             icon = painterResource(R.drawable.lyrics),
-                            title = { Text(stringResource(R.string.respect_agent_positioning)) },
+                            title = { Text(stringResource(R.string.respect_agent_positioning), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             description = { Text(stringResource(R.string.respect_agent_positioning_desc)) },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = respectAgentPositioning,
                                     onCheckedChange = onRespectAgentPositioningChange,
                                     thumbContent = {
@@ -1414,9 +1412,9 @@ fun AppearanceSettings(
                     add(
                         Material3SettingsItem(
                             icon = painterResource(R.drawable.lyrics),
-                            title = { Text(stringResource(R.string.lyrics_click_change)) },
+                            title = { Text(stringResource(R.string.lyrics_click_change), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = lyricsClick,
                                     onCheckedChange = onLyricsClickChange,
                                     thumbContent = {
@@ -1437,9 +1435,9 @@ fun AppearanceSettings(
                     add(
                         Material3SettingsItem(
                             icon = painterResource(R.drawable.lyrics),
-                            title = { Text(stringResource(R.string.lyrics_auto_scroll)) },
+                            title = { Text(stringResource(R.string.lyrics_auto_scroll), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = lyricsScroll,
                                     onCheckedChange = onLyricsScrollChange,
                                     thumbContent = {
@@ -1460,10 +1458,10 @@ fun AppearanceSettings(
                     add(
                         Material3SettingsItem(
                             icon = painterResource(R.drawable.lyrics),
-                            title = { Text(stringResource(R.string.hide_status_bar_fullscreen)) },
+                            title = { Text(stringResource(R.string.hide_status_bar_fullscreen), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             description = { Text(stringResource(R.string.hide_status_bar_fullscreen_desc)) },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = hideStatusBarOnFullscreen,
                                     onCheckedChange = onHideStatusBarOnFullscreenChange,
                                     thumbContent = {
@@ -1492,7 +1490,7 @@ fun AppearanceSettings(
                 listOf(
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.nav_bar),
-                        title = { Text(stringResource(R.string.default_open_tab)) },
+                        title = { Text(stringResource(R.string.default_open_tab), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = {
                             Text(
                                 when (defaultOpenTab) {
@@ -1506,7 +1504,7 @@ fun AppearanceSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.tab),
-                        title = { Text(stringResource(R.string.default_lib_chips)) },
+                        title = { Text(stringResource(R.string.default_lib_chips), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = {
                             Text(
                                 when (defaultChip) {
@@ -1524,9 +1522,9 @@ fun AppearanceSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.swipe),
-                        title = { Text(stringResource(R.string.swipe_song_to_add)) },
+                        title = { Text(stringResource(R.string.swipe_song_to_add), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = swipeToSong,
                                 onCheckedChange = onSwipeToSongChange,
                                 thumbContent = {
@@ -1545,9 +1543,9 @@ fun AppearanceSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.swipe),
-                        title = { Text(stringResource(R.string.swipe_song_to_remove)) },
+                        title = { Text(stringResource(R.string.swipe_song_to_remove), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = swipeToRemoveSong,
                                 onCheckedChange = onSwipeToRemoveSongChange,
                                 thumbContent = {
@@ -1566,9 +1564,9 @@ fun AppearanceSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.nav_bar),
-                        title = { Text(stringResource(R.string.slim_navbar)) },
+                        title = { Text(stringResource(R.string.slim_navbar), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = slimNav,
                                 onCheckedChange = onSlimNavChange,
                                 thumbContent = {
@@ -1587,10 +1585,10 @@ fun AppearanceSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.group_outlined),
-                        title = { Text(stringResource(R.string.listen_together_in_top_bar)) },
+                        title = { Text(stringResource(R.string.listen_together_in_top_bar), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = { Text(stringResource(R.string.listen_together_in_top_bar_desc)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = listenTogetherInTopBar,
                                 onCheckedChange = onListenTogetherInTopBarChange,
                                 thumbContent = {
@@ -1609,7 +1607,7 @@ fun AppearanceSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.grid_view),
-                        title = { Text(stringResource(R.string.grid_cell_size)) },
+                        title = { Text(stringResource(R.string.grid_cell_size), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = {
                             Text(
                                 when (gridItemSize) {
@@ -1622,7 +1620,7 @@ fun AppearanceSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.grid_view),
-                        title = { Text(stringResource(R.string.display_density)) },
+                        title = { Text(stringResource(R.string.display_density), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = {
                             Text(DensityScale.fromValue(densityScale).label)
                         },
@@ -1639,9 +1637,9 @@ fun AppearanceSettings(
                 listOf(
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.favorite),
-                        title = { Text(stringResource(R.string.show_liked_playlist)) },
+                        title = { Text(stringResource(R.string.show_liked_playlist), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = showLikedPlaylist,
                                 onCheckedChange = onShowLikedPlaylistChange,
                                 thumbContent = {
@@ -1660,9 +1658,9 @@ fun AppearanceSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.offline),
-                        title = { Text(stringResource(R.string.show_downloaded_playlist)) },
+                        title = { Text(stringResource(R.string.show_downloaded_playlist), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = showDownloadedPlaylist,
                                 onCheckedChange = onShowDownloadedPlaylistChange,
                                 thumbContent = {
@@ -1681,9 +1679,9 @@ fun AppearanceSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.trending_up),
-                        title = { Text(stringResource(R.string.show_top_playlist)) },
+                        title = { Text(stringResource(R.string.show_top_playlist), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = showTopPlaylist,
                                 onCheckedChange = onShowTopPlaylistChange,
                                 thumbContent = {
@@ -1702,9 +1700,9 @@ fun AppearanceSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.cached),
-                        title = { Text(stringResource(R.string.show_cached_playlist)) },
+                        title = { Text(stringResource(R.string.show_cached_playlist), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = showCachedPlaylist,
                                 onCheckedChange = onShowCachedPlaylistChange,
                                 thumbContent = {
@@ -1723,9 +1721,9 @@ fun AppearanceSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.backup),
-                        title = { Text(stringResource(R.string.show_uploaded_playlist)) },
+                        title = { Text(stringResource(R.string.show_uploaded_playlist), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = showUploadedPlaylist,
                                 onCheckedChange = onShowUploadedPlaylistChange,
                                 thumbContent = {
@@ -1768,7 +1766,7 @@ fun AppearanceSettings(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.appearance)) },
+        title = { com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.appearance)) },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

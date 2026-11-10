@@ -179,7 +179,7 @@ fun BackupAndRestore(
             items =
                 listOf(
                     Material3SettingsItem(
-                        title = { Text(stringResource(R.string.action_backup)) },
+                        title = { Text(stringResource(R.string.action_backup), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         icon = painterResource(R.drawable.backup),
                         onClick = {
                             val formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
@@ -191,21 +191,21 @@ fun BackupAndRestore(
                         },
                     ),
                     Material3SettingsItem(
-                        title = { Text(stringResource(R.string.action_restore)) },
+                        title = { Text(stringResource(R.string.action_restore), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         icon = painterResource(R.drawable.restore),
                         onClick = {
                             restoreLauncher.launch(arrayOf("application/octet-stream"))
                         },
                     ),
                     Material3SettingsItem(
-                        title = { Text(stringResource(R.string.import_online)) },
+                        title = { Text(stringResource(R.string.import_online), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         icon = painterResource(R.drawable.playlist_add),
                         onClick = {
                             importM3uLauncherOnline.launch(arrayOf("audio/*"))
                         },
                     ),
                     Material3SettingsItem(
-                        title = { Text(stringResource(R.string.import_csv)) },
+                        title = { Text(stringResource(R.string.import_csv), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         icon = painterResource(R.drawable.playlist_add),
                         onClick = {
                             importPlaylistFromCsv.launch(
@@ -218,7 +218,9 @@ fun BackupAndRestore(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.backup_restore)) },
+        title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.backup_restore))
+                        },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

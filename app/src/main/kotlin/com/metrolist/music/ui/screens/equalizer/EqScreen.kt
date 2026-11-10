@@ -187,7 +187,9 @@ private fun EqScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.equalizer_header)) },
+                title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.equalizer_header))
+                        },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(

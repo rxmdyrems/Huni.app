@@ -80,7 +80,7 @@ fun SettingsScreen(
             items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.palette),
-                    title = { Text(stringResource(R.string.appearance)) },
+                    title = { Text(stringResource(R.string.appearance), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     onClick = { navController.navigate("settings/appearance") }
                 )
             )
@@ -94,17 +94,17 @@ fun SettingsScreen(
             items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.play),
-                    title = { Text(stringResource(R.string.player_and_audio)) },
+                    title = { Text(stringResource(R.string.player_and_audio), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     onClick = { navController.navigate("settings/player") }
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.language),
-                    title = { Text(stringResource(R.string.content)) },
+                    title = { Text(stringResource(R.string.content), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     onClick = { navController.navigate("settings/content") }
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.translate),
-                    title = { Text(stringResource(R.string.ai_lyrics_translation)) },
+                    title = { Text(stringResource(R.string.ai_lyrics_translation), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     onClick = { navController.navigate("settings/ai") }
                 )
             )
@@ -119,7 +119,7 @@ fun SettingsScreen(
                 items = listOf(
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.ic_android_auto),
-                        title = { Text(stringResource(R.string.android_auto)) },
+                        title = { Text(stringResource(R.string.android_auto), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         onClick = { navController.navigate("settings/android_auto") }
                     )
                 )
@@ -134,7 +134,7 @@ fun SettingsScreen(
             items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.security),
-                    title = { Text(stringResource(R.string.privacy)) },
+                    title = { Text(stringResource(R.string.privacy), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     onClick = { navController.navigate("settings/privacy") }
                 )
             )
@@ -148,12 +148,12 @@ fun SettingsScreen(
             items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.storage),
-                    title = { Text(stringResource(R.string.storage)) },
+                    title = { Text(stringResource(R.string.storage), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     onClick = { navController.navigate("settings/storage") }
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.restore),
-                    title = { Text(stringResource(R.string.backup_restore)) },
+                    title = { Text(stringResource(R.string.backup_restore), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     onClick = { navController.navigate("settings/backup_restore") }
                 )
             )
@@ -169,7 +169,7 @@ fun SettingsScreen(
                     add(
                         Material3SettingsItem(
                             icon = painterResource(R.drawable.link),
-                            title = { Text(stringResource(R.string.default_links)) },
+                            title = { Text(stringResource(R.string.default_links), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             onClick = {
                                 try {
                                     val intent = Intent(
@@ -213,7 +213,7 @@ fun SettingsScreen(
                     add(
                         Material3SettingsItem(
                             icon = painterResource(R.drawable.update),
-                            title = { Text(stringResource(R.string.updater)) },
+                            title = { Text(stringResource(R.string.updater), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             onClick = { navController.navigate("settings/updater") }
                         )
                     )
@@ -222,14 +222,14 @@ fun SettingsScreen(
                 add(
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.newspaper),
-                        title = { Text(stringResource(R.string.changelog)) },
+                        title = { Text(stringResource(R.string.changelog), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         onClick = { showChangelog.value = true }
                     )
                 )
                 add(
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.info),
-                        title = { Text(stringResource(R.string.about)) },
+                        title = { Text(stringResource(R.string.about), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         onClick = { navController.navigate("settings/about") }
                     )
                 )
@@ -244,7 +244,7 @@ fun SettingsScreen(
                                 title = { 
                                     Text(
                                         text = stringResource(R.string.new_version_available),
-                                    )
+                                     maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                                 },
                                 description = {
                                     Text(
@@ -270,7 +270,9 @@ fun SettingsScreen(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.settings), maxLines = 1, softWrap = false) },
+        title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.settings))
+                        },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,
