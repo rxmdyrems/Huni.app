@@ -1,19 +1,15 @@
 # Huni Changelog
 
-## 0.9.2 — Huni branding and visual polish
+Huni is an open-source Android music client focused on music discovery, playback, library management, lyrics, downloads, playlists, and a polished Material 3 experience.
 
-- Applied the Huni dark-green palette and shared rounded shape tokens to the Compose theme.
-- Refined filter chips, Speed Dial artwork tiles, settings groups, and the bottom navigation surface.
-- Redesigned the About screen with Huni identity, app version information, and Remy Camiguel as the displayed developer.
-- Used the supplied Huni graphic in the About profile/avatar slot and in the README.
-- Replaced About-page upstream/Discord links with the Huni.app repository and license file.
-- Made the in-app changelog Huni-authored and linked its release button to Huni.app.
-- Repointed the update feed to Huni.app and redesigned the home toolbar around the Huni logo.
-- Preserved existing playback, library, navigation, account, settings, and service behavior.
+## Current feature set
 
-This release retains upstream source notices and GPL-3.0 licensing. The in-app changelog is Huni-authored, and update checks now target the public Huni.app repository. No Huni release has been published yet, so update downloads will become available only after a compatible Huni release and APK assets are published. The pre-existing private `Huni` repository is a separate project. Credentials are kept out of the public source.
-
-
-### Distribution note
-
-The initial downloadable v0.9.2 build is a debug-signed pre-release built without the Huni-local service credential. Third-party dependencies may include their own client identifiers. Automated unit tests pass, but real streaming has not been tested on an Android device; PO-token-dependent playback may fail.
+- YouTube Music-based music discovery, search, albums, artists, playlists, charts, and recommendations.
+- Audio playback with queues, shuffle, repeat, background playback, media controls, lock-screen controls, and Android Auto/media-session integration.
+- Personal library management for liked songs, playlists, albums, artists, history, downloads, and offline access where supported.
+- Lyrics support, including synchronized lyrics providers and translation/transliteration helpers.
+- Artwork loading, image cropping, shimmer loading states, and dynamic artwork color extraction.
+- Configurable playback, audio, equalizer, download, notification, navigation, and privacy settings.
+- Home-screen widgets, quick settings integration, listening/Discord integrations, and optional Google Cast support.
+- Three Android build variants: FOSS, GMS with Cast support, and Izzy/F-Droid-compatible without Cast or the updater.
+- Light, dark, and system appearance modes with ten built-in Huni color palettes.
