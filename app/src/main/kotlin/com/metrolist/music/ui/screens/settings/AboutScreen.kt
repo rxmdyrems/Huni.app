@@ -66,7 +66,7 @@ fun AboutScreen(navController: NavController, scrollBehavior: TopAppBarScrollBeh
         Spacer(Modifier.windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Top)))
         Spacer(Modifier.height(20.dp))
         Surface(Modifier.size(100.dp), CircleShape, Color.Transparent, border = BorderStroke(2.dp, Color(0xFFFFB84D))) {
-            Image(painterResource(R.drawable.avatar_remy), "Remy Camiguel avatar", ContentScale.Crop, Modifier.padding(2.dp).clip(CircleShape))
+            Image(painter = painterResource(R.drawable.avatar_remy), contentDescription = "Remy Camiguel avatar", contentScale = ContentScale.Crop, modifier = Modifier.padding(2.dp).clip(CircleShape))
         }
         Spacer(Modifier.height(14.dp))
         Text("Remy Camiguel", style = MaterialTheme.typography.headlineMedium.copy(fontSize = 22.sp), color = MaterialTheme.colorScheme.onSurface)
