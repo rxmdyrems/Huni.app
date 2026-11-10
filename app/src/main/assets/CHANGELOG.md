@@ -1,5 +1,10 @@
 # Huni Changelog
 
+## v0.9.6 (2026-11-10)
+- Fixed a crash caused by switching launcher aliases from the Dynamic icon colors setting.
+- Configured themed monochrome icon resources for Android 13 and newer.
+- Removed the misleading in-app toggle; themed icons are controlled by the Android launcher.
+
 ## v0.9.5 (2026-11-10)
 - Replaced the launcher artwork with a transparent glass Huni icon.
 - Added adaptive monochrome icon support so Android can apply dynamic theme colors.

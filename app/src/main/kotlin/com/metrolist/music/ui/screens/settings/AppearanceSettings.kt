@@ -48,7 +48,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -138,16 +137,6 @@ fun AppearanceSettings(
             DynamicThemeKey,
             defaultValue = true,
         )
-    val (enableDynamicIcon, onEnableDynamicIconPrefChange) =
-        rememberPreference(
-            EnableDynamicIconKey,
-            defaultValue = true,
-        )
-    // Android launchers apply the adaptive icon's monochrome layer themselves.
-    // Do not toggle launcher aliases here: disabling the active alias can close the task.
-    val onEnableDynamicIconChange: (Boolean) -> Unit = { newValue ->
-        onEnableDynamicIconPrefChange(newValue)
-    }
     val (enableHighRefreshRate, onEnableHighRefreshRateChange) =
         rememberPreference(
             EnableHighRefreshRateKey,
@@ -1032,108 +1021,6 @@ fun AppearanceSettings(
                                 )
                             },
                             onClick = { onEnableLandscapeScalingChange(!enableLandscapeScaling) },
-                        ),
-                    )
-                    add(
-                        Material3SettingsItem(
-                            icon = painterResource(R.drawable.palette),
-                            title = { Text(stringResource(R.string.enable_dynamic_icon)) },
-                            description = { Text(stringResource(R.string.enable_dynamic_icon_desc)) },
-                            trailingContent = {
-                                Switch(
-                                    checked = enableDynamicIcon,
-                                    onCheckedChange = onEnableDynamicIconChange,
-                                    thumbContent = {
-                                        Icon(
-                                            painter =
-                                                painterResource(
-                                                    id = if (enableDynamicIcon) R.drawable.check else R.drawable.close,
-                                                ),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(SwitchDefaults.IconSize),
-                                        )
-                                    },
-                                )
-                            },
-                            onClick = { onEnableDynamicIconChange(!enableDynamicIcon) },
-                        ),
-                    )
-
-                },
-        )
-
-        Spacer(modifier = Modifier.height(27.dp))
-
-        val (pureBlackMiniPlayer, onPureBlackMiniPlayerChange) =
-            rememberPreference(
-                PureBlackMiniPlayerKey,
-                defaultValue = false,
-            )
-
-        Material3SettingsGroup(
-            title = stringResource(id = R.string.mini_player),
-            items =
-                buildList {
-                    add(
-                        Material3SettingsItem(
-                            icon = painterResource(R.drawable.nav_bar),
-                            title = { Text(stringResource(R.string.new_mini_player_design)) },
-                            trailingContent = {
-                                Switch(
-                                    checked = useNewMiniPlayerDesign,
-                                    onCheckedChange = onUseNewMiniPlayerDesignChange,
-                                    thumbContent = {
-                                        Icon(
-                                            painter =
-                                                painterResource(
-                                                    id = if (useNewMiniPlayerDesign) R.drawable.check else R.drawable.close,
-                                                ),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(SwitchDefaults.IconSize),
-                                        )
-                                    },
-                                )
-                            },
-                            onClick = { onUseNewMiniPlayerDesignChange(!useNewMiniPlayerDesign) },
-                        ),
-                    )
-                    add(
-                        Material3SettingsItem(
-                            icon = painterResource(R.drawable.gradient),
-                            title = {
-                                Text(
-                                    text = stringResource(R.string.mini_player_background_style),
-                                    color =
-                                        if (!useNewMiniPlayerDesign) {
-                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                        } else {
-                                            MaterialTheme.colorScheme.onSurface
-                                        },
-                                )
-                            },
-                            description = {
-                                Text(
-                                    text =
-                                        if (!useNewMiniPlayerDesign) {
-                                            stringResource(R.string.mini_player_background_not_available)
-                                        } else {
-                                            when (miniPlayerBackground) {
-                                                MiniPlayerBackgroundStyle.DEFAULT -> stringResource(R.string.follow_theme)
-                                                MiniPlayerBackgroundStyle.TRANSPARENT -> stringResource(R.string.transparent)
-                                                MiniPlayerBackgroundStyle.BLUR -> stringResource(R.string.player_background_blur)
-                                                MiniPlayerBackgroundStyle.GRADIENT -> stringResource(R.string.gradient)
-                                                MiniPlayerBackgroundStyle.PURE_BLACK -> stringResource(R.string.pure_black)
-                                            }
-                                        },
-                                    color =
-                                        if (!useNewMiniPlayerDesign) {
-                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                        } else {
-                                            MaterialTheme.colorScheme.onSurfaceVariant
-                                        },
-                                )
-                            },
-                            onClick = { if (useNewMiniPlayerDesign) showMiniPlayerBackgroundDialog = true },
                         ),
                     )
                 },
