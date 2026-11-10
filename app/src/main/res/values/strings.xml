@@ -268,7 +268,7 @@
     <string name="action_login">Log in</string>
     <string name="login">Login</string>
     <string name="login_optional_sign_in_note">Optional. Huni works without signing in.</string>
-    <string name="login_page_load_error">Couldn&apos;t load the page</string>
+    <string name="login_page_load_error">Couldn\'t load the page</string>
     <string name="not_logged_in">Not logged in</string>
     <string name="login_failed">Login failed</string>
 
