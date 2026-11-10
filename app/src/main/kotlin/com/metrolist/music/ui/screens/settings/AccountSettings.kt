@@ -256,6 +256,11 @@ fun AccountSettings(
                     cookieValue.isNotEmpty() && "SAPISID" in parseCookieString(cookieValue)
                 },
                 extraContent = {
+                    Text(
+                        text = stringResource(R.string.login_optional_sign_in_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                     Spacer(Modifier.height(8.dp))
                     InfoLabel(text = stringResource(R.string.token_adv_login_description))
                 }

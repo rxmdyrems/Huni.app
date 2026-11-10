@@ -287,6 +287,7 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coil.network.okhttp)
     implementation(libs.browser)
+    implementation(libs.webkit)
 
     implementation(libs.ucrop)
 

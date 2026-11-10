@@ -15,10 +15,12 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +28,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -38,10 +41,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +56,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -59,6 +66,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
+import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebViewFeature
 import coil3.compose.AsyncImage
 import com.metrolist.innertube.YouTube
 import com.metrolist.innertube.models.YouTubeAccount
@@ -115,6 +124,11 @@ fun LoginScreen(
     var accounts by remember { mutableStateOf<List<YouTubeAccount>>(emptyList()) }
     var selectedAccount by remember { mutableStateOf<YouTubeAccount?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isPageLoading by remember { mutableStateOf(true) }
+    var pageLoadFailed by remember { mutableStateOf(false) }
+    val loginUrl = if (isSwitchingChannel) "https://music.youtube.com" else "https://accounts.google.com/ServiceLogin?continue=https%3A%2F%2Fmusic.youtube.com"
+    val backgroundColor = MaterialTheme.colorScheme.background
+    val isDarkTheme = backgroundColor.luminance() < 0.5f
 
     suspend fun extractAuthData(webView: WebView?): AuthData? {
         val view = webView ?: return null
@@ -296,18 +310,72 @@ fun LoginScreen(
         }
     }
 
-    Box(
+    Column(
         modifier =
             Modifier
-                .windowInsetsPadding(LocalPlayerAwareWindowInsets.current)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .background(backgroundColor)
+                .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Bottom)),
     ) {
-        AndroidView(
-            modifier = Modifier.fillMaxSize(),
-            factory = { webViewContext ->
-                WebView(webViewContext).apply {
+        TopAppBar(
+            title = { com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.login)) },
+            navigationIcon = {
+                IconButton(
+                    onClick = {
+                        val webView = webViewRef
+                        if (webView?.canGoBack() == true) webView.goBack() else navController.navigateUp()
+                    },
+                    onLongClick = navController::backToMain,
+                ) {
+                    Icon(
+                        painterResource(R.drawable.arrow_back),
+                        contentDescription = null,
+                    )
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor),
+        )
+        if (isPageLoading) {
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth().height(2.dp),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = backgroundColor,
+            )
+        }
+        Text(
+            text = stringResource(R.string.login_optional_sign_in_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        )
+        Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+            AndroidView(
+                modifier = Modifier.fillMaxSize(),
+                factory = { webViewContext ->
+                    WebView(webViewContext).apply {
+                        setBackgroundColor(backgroundColor.toArgb())
                     webViewClient =
                         object : WebViewClient() {
+                            override fun onPageStarted(
+                                view: WebView,
+                                url: String?,
+                                favicon: android.graphics.Bitmap?,
+                            ) {
+                                isPageLoading = true
+                                pageLoadFailed = false
+                            }
+
+                            override fun onReceivedError(
+                                view: WebView,
+                                request: WebResourceRequest,
+                                error: android.webkit.WebResourceError,
+                            ) {
+                                if (request.isForMainFrame) {
+                                    isPageLoading = false
+                                    pageLoadFailed = true
+                                }
+                            }
+
                             override fun shouldOverrideUrlLoading(
                                 view: WebView,
                                 request: WebResourceRequest,
@@ -332,6 +400,8 @@ fun LoginScreen(
                                 view: WebView,
                                 url: String?,
                             ) {
+                                isPageLoading = false
+                                pageLoadFailed = false
                                 val pageUri = url?.let(Uri::parse)
                                 if (pageUri?.scheme == "https" && pageUri.host == "music.youtube.com") {
                                     handleAuthenticatedPage()
@@ -344,45 +414,48 @@ fun LoginScreen(
                         setSupportZoom(true)
                         builtInZoomControls = true
                         displayZoomControls = false
+                        if (isDarkTheme && WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+                            WebSettingsCompat.setAlgorithmicDarkeningAllowed(this, true)
+                        }
                     }
                     addJavascriptInterface(jsInterface, "Android")
                     webViewRef = this
                     if (isSwitchingChannel) {
                         restoreYouTubeCookies(YouTube.cookie)
                     }
-                    loadUrl(
-                        if (isSwitchingChannel) {
-                            "https://music.youtube.com"
-                        } else {
-                            "https://accounts.google.com/ServiceLogin?continue=https%3A%2F%2Fmusic.youtube.com"
-                        },
-                    )
+                    loadUrl(loginUrl)
                 }
             },
-        )
+                update = { webView -> webView.setBackgroundColor(backgroundColor.toArgb()) },
+            )
 
-        if (loginStage == LoginStage.CheckingAccounts || loginStage == LoginStage.Completing) {
-            CircularProgressIndicator(Modifier.align(Alignment.Center))
-        }
-
-        TopAppBar(
-            title = {
-                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(
-                        if (isSwitchingChannel) R.string.switch_youtube_channel else R.string.login,
-                    ))
-                        },
-            navigationIcon = {
-                IconButton(
-                    onClick = navController::navigateUp,
-                    onLongClick = navController::backToMain,
+            if (pageLoadFailed) {
+                Box(
+                    modifier = Modifier.fillMaxSize().background(backgroundColor),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Icon(
-                        painterResource(R.drawable.arrow_back),
-                        contentDescription = null,
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = stringResource(R.string.login_page_load_error),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        Button(
+                            onClick = {
+                                pageLoadFailed = false
+                                isPageLoading = true
+                                webViewRef?.reload()
+                            },
+                        ) {
+                            Text(stringResource(R.string.retry))
+                        }
+                    }
                 }
-            },
-        )
+            } else if (loginStage == LoginStage.CheckingAccounts || loginStage == LoginStage.Completing) {
+                CircularProgressIndicator(Modifier.align(Alignment.Center))
+            }
+        }
     }
 
     if (loginStage == LoginStage.SelectingAccount) {

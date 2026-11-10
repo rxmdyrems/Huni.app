@@ -1,6 +1,7 @@
 [versions]
 androidGradlePlugin = "9.3.1"
 browser = "1.10.0"
+webkit = "1.14.0"
 robolectric = "4.16.1"
 androidxTestCore = "1.7.0"
 json = "20260522"
@@ -42,6 +43,7 @@ coroutines-guava = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-guava", 
 gradle = { module = "com.android.tools.build:gradle", version.ref = "androidGradlePlugin" }
 activity = { module = "androidx.activity:activity-compose", version.ref = "activity" }
 browser = { module = "androidx.browser:browser", version.ref = "browser" }
+webkit = { module = "androidx.webkit:webkit", version.ref = "webkit" }
 hilt-navigation = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigation" }
 datastore = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 
