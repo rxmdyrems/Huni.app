@@ -446,6 +446,7 @@ private fun NewMiniPlayer(
                     castHandler = castHandler,
                     playerConnection = playerConnection,
                     mediaMetadata = mediaMetadata,
+                    outlineColor = outlineColor,
                     listenTogetherManager = listenTogetherManager,
                     coverIsLight = coverIsLight,
                 )
@@ -513,6 +514,7 @@ private fun NewMiniPlayerPlayButton(
     castHandler: CastConnectionHandler?,
     playerConnection: PlayerConnection,
     mediaMetadata: MediaMetadata?,
+    outlineColor: Color,
     listenTogetherManager: ListenTogetherManager?,
     coverIsLight: Boolean,
 ) {
