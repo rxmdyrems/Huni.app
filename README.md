@@ -2,7 +2,7 @@
   <img src="app/src/main/res/drawable-nodpi/huni_avatar.png" alt="Huni logo" width="180" />
   <h1>Huni</h1>
   <p>A focused, personal music listening experience for Android.</p>
-  <a href="https://github.com/rxmdyrems/Huni.app/releases/download/v0.9.7/Huni.apk"><strong>Download Huni 0.9.7 APK</strong></a><br />
+  <a href="https://github.com/rxmdyrems/Huni.app/releases/download/v0.9.7/Huni-0.9.7.apk"><strong>Download Huni 0.9.7 APK</strong></a><br />
   <sub>Signed release build · see the release notes for changes</sub><br />
   <a href="https://github.com/rxmdyrems/Huni.app">Source code</a> · <a href="https://github.com/rxmdyrems/Huni.app/releases">Huni releases</a>
 </div>
