@@ -1,5 +1,9 @@
 # Huni Changelog
 
+## v0.9.5 (2026-11-10)
+- Replaced the launcher artwork with a transparent glass Huni icon.
+- Added adaptive monochrome icon support so Android can apply dynamic theme colors.
+
 ## Unreleased
 - Added the local crash-report flow with a redacted preview and user-controlled GitHub, email, copy, or dismiss actions.
 - Added an offline in-app Changelog screen backed by this file.
