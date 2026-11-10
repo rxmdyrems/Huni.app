@@ -5,7 +5,7 @@
   <p>A focused, personal music experience for Android—built for discovery, playback, and an uncluttered library.</p>
 
   <p>
-    <a href="https://github.com/rxmdyrems/Huni.app/releases/download/v0.9.8/Huni-0.9.8.apk"><strong>⬇ Download the latest Huni APK</strong></a>
+    <a href="https://github.com/rxmdyrems/Huni.app/releases/download/v0.9.9/Huni-0.9.9.apk"><strong>⬇ Download the latest Huni APK</strong></a>
     &nbsp;·&nbsp;
     <a href="https://github.com/rxmdyrems/Huni.app/releases">Release notes</a>
     &nbsp;·&nbsp;
@@ -26,7 +26,7 @@ Huni keeps the focus on the music. Browse discoveries, search quickly, play with
 - **Discover and play** — Move from search and recommendations to playback with a focused, responsive UI.
 - **Your library, your way** — Manage playlists, listening history, downloads, and offline caching.
 - **Make it yours** — Customize themes, playback controls, lyrics, and the Home layout.
-- **Match your palette** — Optionally match the launcher icon to the selected color palette.
+- **Match your palette** — Optionally put the original Huni bird on a launcher background matching the selected color palette.
 - **A better glance** — Enjoy a polished header, mini-player, artwork surfaces, stats, and Android Auto support.
 - **Private by default** — Crash reports stay local until you explicitly choose to copy, email, or share them.
 
@@ -34,7 +34,7 @@ Huni keeps the focus on the music. Browse discoveries, search quickly, play with
 
 Get the current signed FOSS Universal APK:
 
-<a href="https://github.com/rxmdyrems/Huni.app/releases/download/v0.9.8/Huni-0.9.8.apk"><img src="https://img.shields.io/badge/Download-current%20Huni%20APK-157630?style=for-the-badge&logo=android&logoColor=white" alt="Download current Huni APK" /></a>
+<a href="https://github.com/rxmdyrems/Huni.app/releases/download/v0.9.9/Huni-0.9.9.apk"><img src="https://img.shields.io/badge/Download-current%20Huni%20APK-157630?style=for-the-badge&logo=android&logoColor=white" alt="Download current Huni APK" /></a>
 
 Visit the [Huni releases page](https://github.com/rxmdyrems/Huni.app/releases) for version history, release notes, and SHA-256 checksums. On Android, download the APK, open it, and allow installation from your browser or file manager if Android asks.
 

@@ -42,8 +42,8 @@ android {
         buildConfigField("String", "SERVICE_TOKEN", "\"${serviceCredential.replace("\\", "\\\\").replace("\"", "\\\"")}\"")
         minSdk = 26
         targetSdk = 36
-        versionCode = 34
-        versionName = "0.9.8"
+        versionCode = 35
+        versionName = "0.9.9"
         val baseVersionName = requireNotNull(versionName)
         buildConfigField("String", "BASE_VERSION_NAME", "\"$baseVersionName\"")
         buildCommit?.let { versionName = "$baseVersionName+$it" }

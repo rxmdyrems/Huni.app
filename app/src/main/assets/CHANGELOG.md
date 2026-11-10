@@ -1,6 +1,12 @@
 # Huni Changelog
 ## Unreleased
 
+## v0.9.9 (2026-11-11)
+### Changed
+- Fixed the shared switch's doubled off-state outline, leaving one 2dp track on card and surface backgrounds.
+- Framed Login with the shared top bar, themed WebView background, loading progress, dark-mode support, and an offline Retry state; added the optional sign-in note to token login.
+- Updated palette-matched launcher icons to use contrast-safe palette-colored backgrounds behind the original untinted Huni bird, retaining its monochrome layer.
+
 ## v0.9.8 (2026-11-11)
 ### Added
 - Added an optional launcher icon that matches the selected color palette, with adaptive and monochrome variants.
