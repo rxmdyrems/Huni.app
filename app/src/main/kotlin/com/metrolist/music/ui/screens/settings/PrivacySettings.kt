@@ -40,6 +40,8 @@ import com.metrolist.music.constants.DisableScreenshotKey
 import com.metrolist.music.constants.PauseListenHistoryKey
 import com.metrolist.music.constants.PauseSearchHistoryKey
 import com.metrolist.music.ui.component.DefaultDialog
+import com.metrolist.music.ui.screens.CrashReportDialog
+import com.metrolist.music.utils.CrashReporter
 import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.component.Material3SettingsGroup
 import com.metrolist.music.ui.component.Material3SettingsItem
@@ -69,6 +71,8 @@ fun PrivacySettings(
         defaultValue = true
     )
 
+    var showCrashPreview by remember { mutableStateOf(false) }
+    if (showCrashPreview) CrashReportDialog(CrashReporter.fakeReport()) { showCrashPreview = false }
     var showClearListenHistoryDialog by remember {
         mutableStateOf(false)
     }
@@ -267,6 +271,11 @@ fun PrivacySettings(
                         )
                     },
                     onClick = { onCrashReportingEnabledChange(!crashReportingEnabled) }
+                ),
+                Material3SettingsItem(
+                    icon = painterResource(R.drawable.bug_report),
+                    title = { Text("Preview crash report") },
+                    onClick = { showCrashPreview = true }
                 )
             )
         )

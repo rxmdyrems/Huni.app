@@ -65,15 +65,6 @@ android {
         buildConfigField("String", "ARCHITECTURE", "\"universal\"")
         buildConfigField("Long", "DISCORD_APP_ID", "1447278780795064401L")
 
-        // Crash reporting target: GitHub repo (owner/name) where Issues are created,
-        // and a fine-grained PAT with issues:write scoped to that repo only.
-        // Both must be present at build time for reporting to be active at runtime.
-        val crashRepo = localProperties.getProperty("CRASH_REPORT_REPO")
-            ?: System.getenv("CRASH_REPORT_REPO") ?: "rxmdyrems/Huni.app"
-        val crashToken = localProperties.getProperty("CRASH_REPORT_TOKEN")
-            ?: System.getenv("CRASH_REPORT_TOKEN") ?: ""
-        buildConfigField("String", "CRASH_REPORT_REPO", "\"$crashRepo\"")
-        buildConfigField("String", "CRASH_REPORT_TOKEN", "\"$crashToken\"")
     }
 
     flavorDimensions += listOf("variant")

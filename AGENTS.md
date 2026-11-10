@@ -34,7 +34,7 @@ A GitHub Actions workflow (`.github/workflows/spotify-hash-check.yml`) runs dail
 3. Compares them with `docs/spotify-gql-hashes.json`
 4. If any hash has rotated: updates the JSON (moving the old hash to `previous_hash`), commits, and deploys to GitHub Pages
 
-The live JSON is served at: `https://francescograzioso.github.io/Meld/spotify-gql-hashes.json`
+The live JSON is served at: `https://rxmdyrems.github.io/Huni.app/spotify-gql-hashes.json`
 
 ### JSON structure
 
@@ -86,7 +86,7 @@ If you add a new GQL operation to `Spotify.kt`, you **must** also add a correspo
 
 ## Private notes submodule
 
-The `notes/` directory is a git submodule pointing to a private repository (`FrancescoGrazioso/meld-notes`). It contains:
+The `notes/` directory is a git submodule pointing to a private repository (`rxmdyrems/huni-notes`). It contains:
 
 - `ROADMAP_NOTES.md` — internal development roadmap and planning notes
 - `SPOTIFY_GQL_REFERENCE.md` — full reference for all known Spotify GQL endpoints

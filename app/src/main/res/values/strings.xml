@@ -379,6 +379,6 @@
     <string name="pre_cache_off">Off</string>
     <string name="pre_cache_count">%d tracks</string>
     <string name="spotify_folder_empty">This folder is empty.</string>
-    <string name="crash_reporting">Send crash reports</string>
-    <string name="crash_reporting_desc">Automatically send anonymous crash and exception details (device model, Android version, app version, stack trace) to help diagnose issues. No account, playlist, or personal data is included.</string>
+    <string name="crash_reporting">Crash reports</string>
+    <string name="crash_reporting_desc">Ask before sharing a redacted crash report. The app never sends it automatically.</string>
 </resources>

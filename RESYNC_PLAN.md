@@ -1,4 +1,4 @@
-# Meld ← Metrolist resync plan (v13.1.1 → v13.7.0)
+# Huni ← Metrolist resync plan (v13.1.1 → v13.7.0)
 
 Branch: `chore/metrolist-resync-v13.7.0` (from `main` @ `8e23bc3d5`)
 
@@ -9,14 +9,14 @@ Branch: `chore/metrolist-resync-v13.7.0` (from `main` @ `8e23bc3d5`)
 `git merge-base main upstream/main` returns **nothing**. The two repositories share no
 common ancestor, which is why every sync attempt looked like a full-tree rewrite.
 
-The cause is not Meld: **MetrolistGroup/Metrolist rewrote its git history** between
+The cause is not Huni: **MetrolistGroup/Metrolist rewrote its git history** between
 `v13.6.0` (2026-06-21) and `v13.6.1` (2026-07-17). The current `upstream/main` has only
 384 commits, all dated 2026-06-24 or later, with two synthetic roots.
 
 The old history is *not* lost — it is still reachable locally through the release tags
 that were fetched with `git fetch upstream --tags`:
 
-| Tag | Date | Shares ancestry with Meld `main`? |
+| Tag | Date | Shares ancestry with Huni `main`? |
 |---|---|---|
 | `v13.1.1` … `v13.6.0` | 2026-02-19 → 2026-06-21 | **yes**, merge-base = `2d4b922ae` |
 | `v13.6.1` … `v13.7.0` | 2026-07-17 → 2026-09-07 | no (rewritten history) |
@@ -32,18 +32,18 @@ So the real topology is a single chain with one cut, which we can stitch back to
 
 ```
 2d4b922ae  (fork point — Metrolist, 2026-02-27)
-   ├── main .............................................. Meld
+   ├── main .............................................. Huni
    └── v13.2.0 → … → v13.6.0 ──[stitch]── 17c6e658b → … → upstream/main (v13.7.0)
 ```
 
-## 2. Where Meld actually forked
+## 2. Where Huni actually forked
 
 `2d4b922ae` (*fix(lyrics): remove parentheses and brackets…*, 2026-02-27) is the newest
-commit in Meld's history whose tree contains **zero** Spotify/Qobuz/Meld files. Git
+commit in Huni's history whose tree contains **zero** Spotify/Qobuz/Huni files. Git
 independently confirms it: it is the merge-base between `main` and every old Metrolist
 release tag.
 
-Meld then re-synced once more, in release **v0.6.5** (`fc4146253`, 2026-04-15), which
+Huni then re-synced once more, in release **v0.6.5** (`fc4146253`, 2026-04-15), which
 squashed upstream into a single commit. Measuring tree distance shows exactly how far
 that sync went:
 
@@ -55,18 +55,18 @@ that sync went:
 | v13.6.0 | 570 files, 39210 (+) |
 | v13.7.0 | 720 files, 55938 (+) |
 
-**Meld's content baseline is Metrolist v13.4.0 (2026-04-01).** Everything from v13.4.1
+**Huni's content baseline is Metrolist v13.4.0 (2026-04-01).** Everything from v13.4.1
 onward is genuinely missing.
 
 ## 3. File-level divergence (base `2d4b922ae` → `main` vs → `upstream/main`)
 
 | | files |
 |---|---|
-| Meld-only new files (Spotify/Qobuz/branding/CI) | 125 |
+| Huni-only new files (Spotify/Qobuz/branding/CI) | 125 |
 | Both sides added the same path | 52 |
 | Both sides modified — real conflict surface | 241 |
-| Meld modified, upstream **deleted** | 22 |
-| Meld modified only | 23 |
+| Huni modified, upstream **deleted** | 22 |
+| Huni modified only | 23 |
 | Upstream modified only (take theirs) | 93 |
 | Upstream-only new files (take theirs) | 129 |
 
@@ -88,11 +88,11 @@ smaller: v13.4.0 → 101, v13.5.0 → 182, v13.6.0 → 189.
    Zemer lyrics provider, adaptive icons moved to `mipmap-anydpi-v26`, ~40 new unit tests.
 6. Gradle wrapper 9.4.1 → 9.7.0.
 
-## 5. Classification of Meld's commits since the fork
+## 5. Classification of Huni's commits since the fork
 
 278 commits (107 human + 171 automated `chore(spotify): update GQL hashes`).
 
-### A — Meld identity & features → **keep, port forward**
+### A — Huni identity & features → **keep, port forward**
 
 * **Spotify** (the bulk, ~40 commits): cookie + TOTP auth, GraphQL client with rotating
   hashes, `SpotifyHashProvider`/`SpotifyHashSync` + the daily hash-check workflow,
@@ -104,7 +104,7 @@ smaller: v13.4.0 → 101, v13.5.0 → 182, v13.6.0 → 189.
 * **Local files** playback + device scan (`LocalFilesScreen/ViewModel`, `song.localPath`).
 * **New Releases** (`NewReleaseItem`), **Recently Played** home section.
 * **SponsorBlock**, **Musixmatch lyrics**, **Mistral/OpenRouter** AI services.
-* **Branding**: `applicationId = com.meld.app`, `app_name = Meld`, full mipmap icon set
+* **Branding**: `applicationId = com.meld.app`, `app_name = Huni`, full mipmap icon set
   (foreground/background/monochrome, 5 densities), README, fastlane.
 * **Infra**: `spotify-hash-check.yml`, `pr_title_prefix.yml`, `docs/spotify-gql-hashes.json`,
   Docker dev env, `notes` private submodule, `CrashReporter`, `AnrWatchdog`, unit tests.
@@ -126,7 +126,7 @@ smaller: v13.4.0 → 101, v13.5.0 → 182, v13.6.0 → 189.
 ### C — Divergences superseded by upstream → **drop, adopt upstream**
 
 * The entire **403 / cipher / player-config stack**: `Fix403.kt`, `utils/cipher/*`,
-  `utils/sabr/*`, Meld's `YTPlayerUtils`, `assets/player_configs.json`,
+  `utils/sabr/*`, Huni's `YTPlayerUtils`, `assets/player_configs.json`,
   `assets/player_dates.json`. Upstream solves the same problem with `innertubex`.
   **Two generic defects from `df125d002` must be re-verified against the new code**, since
   they are independent of client selection:
@@ -137,14 +137,14 @@ smaller: v13.4.0 → 101, v13.5.0 → 182, v13.6.0 → 189.
 * `:betterlyrics`, `:kizzy`, `:kugou`, `:lastfm`, `:lrclib`, `:shazamkit`, `:simpmusic`
   modules → folded into `:app`.
 * `metroproto` submodule → upstream's vendored proto.
-* Meld's `MetrolistWidgetManager` perf rework and DiscordRPC/kizzy tweaks → upstream
+* Huni's `MetrolistWidgetManager` perf rework and DiscordRPC/kizzy tweaks → upstream
   rewrote both areas.
 
 ## 6. Database — the highest-risk item
 
 Schemas forked at v36. Current shapes:
 
-| | Meld v39 | Upstream v38 |
+| | Huni v39 | Upstream v38 |
 |---|---|---|
 | `song` | `+ localPath`, `+ isrc` | — |
 | `artist` | `+ spotifyId` | `+ cachedPageJson` |
@@ -152,12 +152,12 @@ Schemas forked at v36. Current shapes:
 | extra tables | `spotify_match`, `qobuz_match` | — |
 
 `34.json` … `38.json` differ between the two trees, so upstream's exported schema chain
-**cannot** be adopted wholesale: every existing Meld install is on Meld's v39 lineage and
+**cannot** be adopted wholesale: every existing Huni install is on Huni's v39 lineage and
 would fail to migrate.
 
-**Decision: Meld's schema lineage stays canonical.** Port upstream's *columns* forward as
+**Decision: Huni's schema lineage stays canonical.** Port upstream's *columns* forward as
 a new **version 40** (`artist.cachedPageJson`, `speed_dial_item.subtitleIds/albumId/albumName`),
-keep Meld's `1.json…39.json` untouched, add `40.json`, and cover it with a migration test.
+keep Huni's `1.json…39.json` untouched, add `40.json`, and cover it with a migration test.
 
 ## 7. Result
 
@@ -190,10 +190,10 @@ Branch `chore/metrolist-resync-v13.7.0`:
 
 ```
 fix(branding): restore discord_information_warning
-fix(branding): re-assert Meld naming across the merged string resources
+fix(branding): re-assert Huni naming across the merged string resources
 fix: restore the helpers the merged test suite needs, unbreak gms + tests
-fix: port Meld's code onto the upstream v13.7.0 APIs
-merge: Metrolist v13.7.0 into Meld
+fix: port Huni's code onto the upstream v13.7.0 APIs
+merge: Metrolist v13.7.0 into Huni
 merge: record Metrolist v13.4.0 as merged, refresh translations
 docs: add Metrolist resync plan
 ```
@@ -203,20 +203,20 @@ docs: add Metrolist resync plan
 * **Phase 0** — branch, green baseline build, `git rerere`, build the stitched upstream
   chain with `git commit-tree` (tree of v13.6.1/13.6.2/13.6.3/v13.7.0, each parented on the
   previous) so the rewritten history gets a real merge-base.
-* **Phase 1** — merge `v13.4.0` (confirms Meld's existing baseline), then `v13.5.0`,
+* **Phase 1** — merge `v13.4.0` (confirms Huni's existing baseline), then `v13.5.0`,
   then `v13.6.0`. Compile after each.
 * **Phase 2** — merge the stitched chain: 13.6.1 → 13.6.2 → 13.6.3 → 13.7.0.
 * **Phase 3** — structural reconciliation: fold `:spotify` into `app/`, drop `:paxsenix`
   and the other dead modules, adopt `innertubex`, re-wire `QobuzAudioProvider` onto
   `InnerTubeXPlayer`, re-verify the two defects from §5C.
 * **Phase 4** — database: version 40 + migration test.
-* **Phase 5** — identity: `com.meld.app`, `Meld` name, Meld icons, README/fastlane,
+* **Phase 5** — identity: `com.meld.app`, `Huni` name, Huni icons, README/fastlane,
   version 0.9.0, merged workflows (keep `spotify-hash-check`, `pr_title_prefix`).
 * **Phase 6** — verify: `assembleFossDebug` + `Gms` + `Izzy`, unit tests, lint, smoke test.
 
 ## 8. Decisions taken during the merge
 
-Adopted from upstream (Meld's version dropped as superseded):
+Adopted from upstream (Huni's version dropped as superseded):
 
 | Area | Decision |
 |---|---|
@@ -230,14 +230,14 @@ Adopted from upstream (Meld's version dropped as superseded):
 | Equalizer, ListenTogether, PoToken, search screens, AppearanceSettings, ComposeToImage | upstream |
 | Room | upstream's `BackupBeforeMigrationFactory` + non-destructive fallback |
 
-Kept from Meld:
+Kept from Huni:
 
 * Everything Spotify and Qobuz, plus local files, New Releases, Recently Played,
   SponsorBlock, Musixmatch, crash reporting, the GQL hash workflow.
-* `applicationId com.meld.app`, `app_name Meld`, Meld icons, Meld release/issue URLs.
+* `applicationId com.meld.app`, `app_name Huni`, Huni icons, Huni release/issue URLs.
 * Draft releases in `release.yml`, and the PR workflow's unit-test + lint gate.
 * `ui/component/Preference.kt` — upstream replaced these primitives with
-  `Material3SettingsGroup`, but Meld's own settings screens still use them.
+  `Material3SettingsGroup`, but Huni's own settings screens still use them.
 * Room schema lineage (see §6); database version is now **40**.
 
 ## 9. Follow-ups
@@ -248,40 +248,40 @@ Done during the resync:
   facade forwards it and `YouTube.searchSummary(query, incognito = true)` works again —
   Spotify→YouTube matching still does not pollute the user's YouTube search history.
 * **Updater**: upstream prefers a `Metrolist-KMP` release over its own and shows
-  `kmp_upgrade_warning`. Meld has no KMP build and must not point users at another app, so
+  `kmp_upgrade_warning`. Huni has no KMP build and must not point users at another app, so
   that path is removed (`getLatestKmpRelease`, `parseKmpRelease`, and the `kmpUpdate` branch).
-* **Schema 40** exported and verified: Meld's `spotify_match`/`qobuz_match`,
+* **Schema 40** exported and verified: Huni's `spotify_match`/`qobuz_match`,
   `song.localPath`/`isrc`, `artist.spotifyId`, plus upstream's `artist.cachedPageJson` and
   `speed_dial_item.subtitleIds`/`albumId`/`albumName`.
-* **Widget rendering**: Meld's CONFLATED-channel renderer dropped in favour of upstream's
+* **Widget rendering**: Huni's CONFLATED-channel renderer dropped in favour of upstream's
   `pendingWidgetUpdate` loop — same fix for the same main-thread flooding problem.
-* **Lyrics shaping**: Meld's `requiresShapedRendering` fallback dropped; upstream's animation
+* **Lyrics shaping**: Huni's `requiresShapedRendering` fallback dropped; upstream's animation
   walks grapheme clusters, which fixes the same Devanagari/Bengali issue (#141) properly.
 
 Still open:
 
-1. **Android Auto.** The merge kept Meld's Spotify sections in
+1. **Android Auto.** The merge kept Huni's Spotify sections in
    `MediaLibrarySessionCallback` and dropped upstream's YouTube-playlist browsing; worth
    having both.
-2. **Settings look.** Meld's Spotify/Qobuz/SponsorBlock screens still use the old
+2. **Settings look.** Huni's Spotify/Qobuz/SponsorBlock screens still use the old
    `Preference.kt` primitives and will look different from upstream's redesigned settings.
-3. **Discord login route.** `settings/discord/login` was removed with Meld's screen; check
+3. **Discord login route.** `settings/discord/login` was removed with Huni's screen; check
    nothing still navigates to it now that upstream uses `DiscordOAuthActivity`.
 4. **`scripts/diagnose-yt-403.ps1`** still probes the IOS/ANDROID_VR/VISIONOS cascade and
    references `YTPlayerUtils`. Harmless (it is not compiled) but it now describes a stack
    that no longer exists — rewrite it against InnerTubeX or drop it.
-5. **Playback in the field.** The two generic defects behind Meld's 403 work — a cached URL
+5. **Playback in the field.** The two generic defects behind Huni's 403 work — a cached URL
    going out without a Range header, and the resolver throwing a non-`IOException` so media3
    reclassified every failure as "Unknown error" — are both structurally addressed by
    upstream's `StreamUrlCache` (bounded ranges, per-stream headers) and its typed
    `PlaybackException` mapping. Worth confirming on real content, especially
-   age-restricted tracks, since that is where Meld's chain differed most.
+   age-restricted tracks, since that is where Huni's chain differed most.
 
 ## 10. Rules held throughout
 
-1. Naming, icons and application id stay **Meld**; the Kotlin package stays
+1. Naming, icons and application id stay **Huni**; the Kotlin package stays
    `com.metrolist.music` (renaming it would break every merge from here on).
 2. No Spotify or Qobuz capability is dropped.
-3. Where upstream and Meld solve the same problem, upstream wins — unless Meld's version
+3. Where upstream and Huni solve the same problem, upstream wins — unless Huni's version
    fixes something upstream still gets wrong, in which case the fix is re-applied on top of
    upstream's code, not instead of it.

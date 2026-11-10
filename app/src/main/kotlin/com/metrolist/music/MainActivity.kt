@@ -194,6 +194,7 @@ import com.metrolist.music.ui.component.shimmer.ShimmerTheme
 import com.metrolist.music.ui.menu.YouTubeSongMenu
 import com.metrolist.music.ui.player.BottomSheetPlayer
 import com.metrolist.music.ui.screens.Screens
+import com.metrolist.music.ui.screens.CrashReportDialog
 import com.metrolist.music.ui.screens.navigationBuilder
 import com.metrolist.music.ui.screens.settings.ChangelogScreen
 import com.metrolist.music.ui.screens.settings.DarkMode
@@ -208,6 +209,7 @@ import com.metrolist.music.utils.ReleaseInfo
 import com.metrolist.music.utils.SearchRoutes
 import com.metrolist.music.utils.SyncUtils
 import com.metrolist.music.utils.ArtistNameAliases
+import com.metrolist.music.utils.CrashReporter
 import com.metrolist.music.utils.Updater
 import com.metrolist.music.utils.dataStore
 import com.metrolist.music.utils.safeDataStoreEdit
@@ -496,8 +498,10 @@ class MainActivity : FragmentActivity() {
         initialThemeMode = initialSettings[DarkModeKey]?.toEnum(DarkMode.ON) ?: DarkMode.ON
         initialPaletteId = initialSettings[ThemePaletteKey] ?: DefaultPalette.id
 
+        val pendingCrashReport = CrashReporter.readPending(this)
         setContent {
             MetrolistApp(
+                pendingCrashReport = pendingCrashReport,
                 latestVersionName = latestVersionName,
                 onLatestVersionNameChange = { latestVersionName = it },
                 playerConnection = playerConnectionSnapshot,
@@ -514,6 +518,7 @@ class MainActivity : FragmentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun MetrolistApp(
+        pendingCrashReport: String?,
         latestVersionName: String,
         onLatestVersionNameChange: (String) -> Unit,
         playerConnection: PlayerConnection?,
@@ -525,6 +530,7 @@ class MainActivity : FragmentActivity() {
     ) {
         val checkForUpdates by rememberPreference(CheckForUpdatesKey, defaultValue = true)
         var availableUpdate by remember { mutableStateOf<AvailableUpdate?>(null) }
+        var showCrashReport by remember { mutableStateOf(pendingCrashReport != null) }
 
         if (BuildConfig.UPDATER_AVAILABLE) {
             LaunchedEffect(checkForUpdates) {
@@ -1021,6 +1027,9 @@ class MainActivity : FragmentActivity() {
                     LocalChangelogState provides showChangelog,
                     LocalArtistNameAliases provides artistNameAliases,
                 ) {
+                    if (showCrashReport && pendingCrashReport != null) {
+                        CrashReportDialog(pendingCrashReport) { showCrashReport = false }
+                    }
                     if (showChangelog.value) {
                         ChangelogScreen(onDismiss = { showChangelog.value = false })
                     }

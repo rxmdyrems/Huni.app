@@ -1,5 +1,5 @@
-# Meld Dev Guide
-This file outlines the process of setting up a local dev environment for Meld.
+# Huni Dev Guide
+This file outlines the process of setting up a local dev environment for Huni.
 
 ## Prerequisites
 
@@ -11,8 +11,8 @@ This file outlines the process of setting up a local dev environment for Meld.
 This has been tested on Linux, but should work on other platforms with some adjustments.
 
 ```bash
-git clone https://github.com/FrancescoGrazioso/Meld
-cd Meld
+git clone https://github.com/rxmdyrems/Huni.app
+cd Huni
 git submodule update --init --recursive
 cd ..
 [ ! -f "app/persistent-debug.keystore" ] && keytool -genkeypair -v -keystore app/persistent-debug.keystore -storepass android -keypass android -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" || echo "Keystore already exists."
