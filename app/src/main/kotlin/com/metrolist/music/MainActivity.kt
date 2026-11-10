@@ -164,7 +164,7 @@ import com.metrolist.music.constants.PreferredLyricsProvider
 import com.metrolist.music.constants.PreferredLyricsProviderKey
 import com.metrolist.music.constants.PureBlackKey
 import com.metrolist.music.constants.SYSTEM_DEFAULT
-import com.metrolist.music.constants.SelectedThemeColorKey
+import com.metrolist.music.constants.ThemePaletteKey
 import com.metrolist.music.constants.SimpMusicMigrationDoneKey
 import com.metrolist.music.constants.SlimNavBarHeight
 import com.metrolist.music.constants.SlimNavBarKey
@@ -198,11 +198,10 @@ import com.metrolist.music.ui.screens.navigationBuilder
 import com.metrolist.music.ui.screens.settings.ChangelogScreen
 import com.metrolist.music.ui.screens.settings.DarkMode
 import com.metrolist.music.ui.screens.settings.NavigationTab
-import com.metrolist.music.ui.theme.ColorSaver
-import com.metrolist.music.ui.theme.DefaultThemeColor
+import com.metrolist.music.ui.theme.DefaultPalette
+import com.metrolist.music.ui.theme.HuniPalettes
 import com.metrolist.music.ui.theme.MetrolistTheme
 import com.metrolist.music.ui.theme.bbhBartle
-import com.metrolist.music.ui.theme.extractThemeColor
 import com.metrolist.music.ui.utils.appBarScrollBehavior
 import com.metrolist.music.ui.utils.resetHeightOffset
 import com.metrolist.music.utils.ReleaseInfo
@@ -289,6 +288,8 @@ class MainActivity : FragmentActivity() {
 
     // This is the snapshot we pass to Compose - changes here trigger recomposition
     private var playerConnectionSnapshot by mutableStateOf<PlayerConnection?>(null)
+    private var initialThemeMode: DarkMode = DarkMode.ON
+    private var initialPaletteId: String = DefaultPalette.id
 
     private var isServiceBound = false
 
@@ -490,6 +491,10 @@ class MainActivity : FragmentActivity() {
             }
         }
 
+        val initialSettings = runBlocking(Dispatchers.IO) { dataStore.data.first() }
+        initialThemeMode = initialSettings[DarkModeKey]?.toEnum(DarkMode.ON) ?: DarkMode.ON
+        initialPaletteId = initialSettings[ThemePaletteKey] ?: DefaultPalette.id
+
         setContent {
             MetrolistApp(
                 latestVersionName = latestVersionName,
@@ -498,6 +503,8 @@ class MainActivity : FragmentActivity() {
                 database = database,
                 downloadUtil = downloadUtil,
                 syncUtils = syncUtils,
+                initialDarkMode = initialThemeMode,
+                initialPaletteId = initialPaletteId,
             )
         }
     }
@@ -512,6 +519,8 @@ class MainActivity : FragmentActivity() {
         database: MusicDatabase,
         downloadUtil: DownloadUtil,
         syncUtils: SyncUtils,
+        initialDarkMode: DarkMode,
+        initialPaletteId: String,
     ) {
         val checkForUpdates by rememberPreference(CheckForUpdatesKey, defaultValue = true)
         var availableUpdate by remember { mutableStateOf<AvailableUpdate?>(null) }
@@ -586,7 +595,7 @@ class MainActivity : FragmentActivity() {
             }
         }
 
-        val enableDynamicTheme by rememberPreference(DynamicThemeKey, defaultValue = true)
+        val enableDynamicTheme by rememberPreference(DynamicThemeKey, defaultValue = false)
         val enableHighRefreshRate by rememberPreference(EnableHighRefreshRateKey, defaultValue = true)
 
         LaunchedEffect(enableHighRefreshRate) {
@@ -617,9 +626,15 @@ class MainActivity : FragmentActivity() {
             }
         }
 
-        val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
+        val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = initialDarkMode)
         val isSystemInDarkTheme = isSystemInDarkTheme()
-        val useDarkTheme = true
+        val useDarkTheme = remember(darkTheme, isSystemInDarkTheme) {
+            when (darkTheme) {
+                DarkMode.AUTO -> isSystemInDarkTheme
+                DarkMode.ON -> true
+                DarkMode.OFF -> false
+            }
+        }
 
         LaunchedEffect(useDarkTheme) {
             setSystemBarAppearance(useDarkTheme)
@@ -633,73 +648,15 @@ class MainActivity : FragmentActivity() {
                 pureBlackEnabled && useDarkTheme
             }
 
-        val (selectedThemeColorInt) = rememberPreference(SelectedThemeColorKey, defaultValue = DefaultThemeColor.toArgb())
-        val selectedThemeColor = Color(selectedThemeColorInt)
-
+        val selectedPaletteId by rememberPreference(ThemePaletteKey, defaultValue = initialPaletteId)
+        val selectedPalette = HuniPalettes.find { it.id == selectedPaletteId } ?: DefaultPalette
+        val selectedThemeColor = if (useDarkTheme) selectedPalette.accentDark else selectedPalette.accentLight
         val showChangelog = rememberSaveable { mutableStateOf(false) }
-
-        var themeColor by rememberSaveable(stateSaver = ColorSaver) {
-            mutableStateOf(selectedThemeColor)
-        }
-
-        val themeColorCache = remember { mutableMapOf<String, Color>() }
-
-        LaunchedEffect(selectedThemeColor) {
-            if (!enableDynamicTheme) {
-                themeColor = selectedThemeColor
-            }
-        }
-
-        LaunchedEffect(playerConnection, enableDynamicTheme, selectedThemeColor) {
-            val playerConnection = playerConnection
-            if (!enableDynamicTheme || playerConnection == null) {
-                themeColor = selectedThemeColor
-                return@LaunchedEffect
-            }
-
-            playerConnection.service.currentMediaMetadata
-                .distinctUntilChanged { old, new -> old?.id == new?.id }
-                .collectLatest { song ->
-                    if (song?.thumbnailUrl != null) {
-                        val cached = themeColorCache[song.thumbnailUrl]
-                        if (cached != null) {
-                            withFrameNanos { }
-                            themeColor = cached
-                            return@collectLatest
-                        }
-                        withContext(Dispatchers.IO) {
-                            try {
-                                val result =
-                                    imageLoader.execute(
-                                        ImageRequest
-                                            .Builder(this@MainActivity)
-                                            .data(song.thumbnailUrl)
-                                            .allowHardware(false)
-                                            .memoryCachePolicy(CachePolicy.ENABLED)
-                                            .diskCachePolicy(CachePolicy.ENABLED)
-                                            .networkCachePolicy(CachePolicy.ENABLED)
-                                            .crossfade(false)
-                                            .build(),
-                                    )
-                                val extractedColor = result.image?.toBitmap()?.extractThemeColor() ?: selectedThemeColor
-                                themeColorCache[song.thumbnailUrl] = extractedColor
-                                withFrameNanos { }
-                                themeColor = extractedColor
-                            } catch (e: Exception) {
-                                withFrameNanos { }
-                                themeColor = selectedThemeColor
-                            }
-                        }
-                    } else {
-                        themeColor = selectedThemeColor
-                    }
-                }
-        }
-
         MetrolistTheme(
-            darkTheme = true,
+            darkTheme = useDarkTheme,
             pureBlack = pureBlack,
-            themeColor = themeColor,
+            themeColor = selectedThemeColor,
+            palette = selectedPalette,
         ) {
             val currentDensity = LocalDensity.current
             val windowInfo = LocalWindowInfo.current

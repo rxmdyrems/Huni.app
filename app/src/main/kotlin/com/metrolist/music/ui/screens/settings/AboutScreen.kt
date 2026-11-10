@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,6 +39,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -65,15 +67,21 @@ fun AboutScreen(navController: NavController, scrollBehavior: TopAppBarScrollBeh
     ) {
         Spacer(Modifier.windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Top)))
         Spacer(Modifier.height(20.dp))
-        Surface(Modifier.size(100.dp), CircleShape, Color.Transparent, border = BorderStroke(2.dp, Color(0xFFFFB84D))) {
+        Surface(Modifier.size(100.dp), CircleShape, Color.Transparent, border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)) {
             Image(painter = painterResource(R.drawable.avatar_remy), contentDescription = "Remy Camiguel avatar", contentScale = ContentScale.Crop, modifier = Modifier.padding(2.dp).clip(CircleShape))
         }
         Spacer(Modifier.height(14.dp))
-        Text("Remy Camiguel", style = MaterialTheme.typography.headlineMedium.copy(fontSize = 22.sp), color = MaterialTheme.colorScheme.onSurface)
-        Text("Developer of Huni", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        BoxWithConstraints {
+            val identitySize = if (maxWidth < 260.dp) 16.sp else 22.sp
+            Text("Remy Camiguel", style = MaterialTheme.typography.headlineMedium.copy(fontSize = identitySize), color = MaterialTheme.colorScheme.onSurface, maxLines = 1, softWrap = false, overflow = TextOverflow.Clip)
+        }
+        Text("Developer of Huni", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, softWrap = false, overflow = TextOverflow.Clip)
         Spacer(Modifier.height(12.dp))
         Surface(shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
-            Text("${BuildConfig.VERSION_NAME} · Universal", Modifier.padding(horizontal = 14.dp, vertical = 7.dp), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
+            BoxWithConstraints {
+                val chipSize = if (maxWidth < 180.dp) 12.sp else 13.sp
+                Text("${BuildConfig.VERSION_NAME} · Universal", Modifier.padding(horizontal = 14.dp, vertical = 7.dp), style = MaterialTheme.typography.labelMedium.copy(fontSize = chipSize), color = MaterialTheme.colorScheme.onSurface, maxLines = 1, softWrap = false, overflow = TextOverflow.Clip)
+            }
         }
         Spacer(Modifier.height(28.dp)); SectionLabel("Huni links"); Spacer(Modifier.height(10.dp))
         Surface(Modifier.fillMaxWidth(), RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface) {

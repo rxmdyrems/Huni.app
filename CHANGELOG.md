@@ -1,4 +1,6 @@
 # Huni Changelog
+## 0.9.4 — Color themes and appearance modes
+- Color themes, light/dark/system mode, About name fix.
 ## 0.9.3 — Amber night redesign
 - Replaced the green theme with a fixed dark plum palette and amber accent.
 - Completed the Home, Search, mini-player, navigation, and Account/Stats UI refresh.
