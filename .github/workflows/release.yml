@@ -135,14 +135,20 @@ jobs:
           CRASH_REPORT_REPO: ${{ vars.CRASH_REPORT_REPO || 'rxmdyrems/Huni.app' }}
 
       - name: Sign APK
-        uses: ilharp/sign-android-release@v2.0.0
-        with:
-          releaseDir: app/build/outputs/apk/${{ matrix.variant }}/release/
-          signingKey: ${{ secrets.KEYSTORE_BASE64 }}
-          keyAlias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
-          buildToolsVersion: 35.0.0
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          set -eu
+          KEYSTORE_FILE="$RUNNER_TEMP/huni-release.keystore"
+          trap 'rm -f "$KEYSTORE_FILE"' EXIT
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_FILE"
+          UNSIGNED_APK=$(find "app/build/outputs/apk/${{ matrix.variant }}/release" -maxdepth 1 -type f -name '*unsigned*.apk' -print -quit)
+          test -n "$UNSIGNED_APK"
+          SIGNED_APK="${UNSIGNED_APK%-unsigned.apk}-signed.apk"
+          apksigner sign --ks "$KEYSTORE_FILE" --ks-pass "pass:$KEYSTORE_PASSWORD" --ks-key-alias "$KEY_ALIAS" --key-pass "pass:$KEY_PASSWORD" --out "$SIGNED_APK" "$UNSIGNED_APK"
 
       - name: Move and rename signed APKs
         run: |
