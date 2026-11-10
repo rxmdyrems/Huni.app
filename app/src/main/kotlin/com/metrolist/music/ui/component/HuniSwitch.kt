@@ -31,6 +31,7 @@ fun HuniSwitch(
     Switch(
         checked = checked,
         onCheckedChange = onCheckedChange,
+        enabled = enabled,
         modifier = modifier.drawWithContent {
             drawContent()
             if (!checked) {
