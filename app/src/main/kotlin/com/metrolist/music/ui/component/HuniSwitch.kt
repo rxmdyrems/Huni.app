@@ -12,8 +12,8 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Stroke
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.metrolist.music.R
@@ -52,7 +52,6 @@ fun HuniSwitch(
                 tint = if (checked) colors.primary else colors.onSurfaceVariant,
             )
         },
-        thumbContent = thumbContent,
         colors = SwitchDefaults.colors(
             checkedThumbColor = colors.onPrimary,
             checkedTrackColor = colors.primary,
