@@ -121,7 +121,6 @@ import com.metrolist.music.ui.theme.DefaultPalette
 import com.metrolist.music.ui.theme.HuniPalettes
 import com.metrolist.music.ui.theme.PlayerSliderColors
 import com.metrolist.music.ui.utils.backToMain
-import com.metrolist.music.utils.IconUtils
 import com.metrolist.music.utils.rememberEnumPreference
 import com.metrolist.music.utils.rememberPreference
 import kotlinx.coroutines.launch
@@ -144,10 +143,10 @@ fun AppearanceSettings(
             EnableDynamicIconKey,
             defaultValue = true,
         )
-    val iconContext = LocalContext.current
+    // Android launchers apply the adaptive icon's monochrome layer themselves.
+    // Do not toggle launcher aliases here: disabling the active alias can close the task.
     val onEnableDynamicIconChange: (Boolean) -> Unit = { newValue ->
         onEnableDynamicIconPrefChange(newValue)
-        IconUtils.setIcon(iconContext, newValue)
     }
     val (enableHighRefreshRate, onEnableHighRefreshRateChange) =
         rememberPreference(
