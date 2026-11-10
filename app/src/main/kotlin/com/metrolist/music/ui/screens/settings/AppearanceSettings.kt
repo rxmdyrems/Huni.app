@@ -160,7 +160,7 @@ fun AppearanceSettings(
     val (matchAppIconToColor, onMatchAppIconToColorChange) =
         rememberPreference(MatchAppIconToColorKey, defaultValue = false)
     val context = LocalContext.current
-    val iconPaletteId = if (matchAppIconToColor) selectedPalette.id else DefaultPalette.id
+    val iconPaletteId = if (matchAppIconToColor) selectedPalette.id else IconUtils.DEFAULT_ICON_ID
     val latestIconPaletteId by rememberUpdatedState(iconPaletteId)
 
     LaunchedEffect(iconPaletteId) {

@@ -5,10 +5,12 @@ import android.content.Context
 import android.content.pm.PackageManager
 
 object IconUtils {
-    private const val DEFAULT_PALETTE = "amber"
+    const val DEFAULT_ICON_ID = "default"
+
+    private const val DEFAULT_ALIAS = "com.metrolist.music.MainActivityAlias"
 
     private val paletteAliases = linkedMapOf(
-        "amber" to "com.metrolist.music.MainActivityAlias",
+        "amber" to "com.metrolist.music.MainActivityPaletteAmber",
         "violet" to "com.metrolist.music.MainActivityViolet",
         "green" to "com.metrolist.music.MainActivityGreen",
         "maroon" to "com.metrolist.music.MainActivityMaroon",
@@ -20,12 +22,19 @@ object IconUtils {
         "slate" to "com.metrolist.music.MainActivitySlate",
     )
 
-    /** Enable the alias matching [paletteId], disabling every other launcher alias. */
+    private val allAliases = listOf(DEFAULT_ALIAS) + paletteAliases.values
+
+    /** Enable one palette alias, or restore the original transparent icon for [DEFAULT_ICON_ID]. */
     fun setIcon(context: Context, paletteId: String) {
-        val targetClass = paletteAliases[paletteId] ?: paletteAliases.getValue(DEFAULT_PALETTE)
+        val targetClass =
+            if (paletteId == DEFAULT_ICON_ID) {
+                DEFAULT_ALIAS
+            } else {
+                paletteAliases[paletteId] ?: DEFAULT_ALIAS
+            }
         val packageManager = context.packageManager
 
-        paletteAliases.values
+        allAliases
             .filterNot { it == targetClass }
             .forEach { aliasClass ->
                 packageManager.setComponentEnabledSetting(

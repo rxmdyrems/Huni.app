@@ -173,10 +173,25 @@
                 android:resource="@xml/shortcuts" />
         </activity>
 
-        <!-- Amber keeps the original component name so existing pinned icons keep working. -->
+        <!-- Keep this stable alias as the original transparent icon when color matching is off. -->
         <activity-alias
             android:name=".MainActivityAlias"
             android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Amber palette-match icon; distinct from the stable original/default alias above. -->
+        <activity-alias
+            android:name=".MainActivityPaletteAmber"
+            android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_amber"
             android:label="@string/app_name"
