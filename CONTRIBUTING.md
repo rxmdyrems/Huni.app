@@ -18,7 +18,7 @@ For optional local values, copy `local.properties.sample` to `local.properties`.
 
 New screens must use the shared `HuniSectionHeader` and `HuniScreenTitle` composables for section headings and top-app-bar titles so wrapping, sizing, and ellipsis stay consistent. Settings screens should use the shared `Material3SettingsGroup` and `HuniSwitch` components.
 
-Palette launcher assets are generated with `python3 scripts/generate_launcher_icons.py` (requires Pillow) from `scripts/assets/huni_bird_transparent.png`. When adding a palette, update `HuniPalettes` in `Theme.kt`, the launcher alias and mapping in `AndroidManifest.xml` and `IconUtils.kt`, and the matching background/accent entry in the generator, then regenerate the assets. Keep the Amber alias component name stable for existing installs; only Amber is enabled by default.
+Palette launcher assets are generated with `python3 scripts/generate_launcher_icons.py` (requires Pillow) from `scripts/assets/huni_bird_transparent.png`. The outputs include adaptive icons, Android 13+ monochrome layers, and density-aware legacy fallbacks. When adding a palette, update `HuniPalettes` in `Theme.kt`, the launcher alias and mapping in `AndroidManifest.xml` and `IconUtils.kt`, and the matching background/accent entry in the generator, then regenerate the assets. Keep the Amber alias component name stable for existing installs, and verify that only the selected alias is enabled.
 
 ## Checks
 
