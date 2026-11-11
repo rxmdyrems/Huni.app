@@ -873,7 +873,7 @@
     <string name="credits_instagram">Instagram</string>
     <string name="credits_website">網站</string>
     <string name="discord_activity_name_description">自訂活動名稱（留空則使用預設值）</string>
-    <string name="discord_competing_metrolist">參與Meld評選</string>
+    <string name="discord_competing_metrolist">參與Huni評選</string>
     <string name="discord_watching_metrolist">觀看 Huni</string>
     <string name="discord_playing_metrolist">播放 Huni</string>
     <string name="discord_button_text_variables">變數：{歌曲名稱}、{藝人名稱}、{專輯名稱}</string>

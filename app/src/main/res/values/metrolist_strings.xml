@@ -790,7 +790,7 @@
 
     <string name="discord_connect_description">Sign in with Discord to share what you\'re listening to</string>
     
-  param($mm) $mm.Groups[1].Value + ($mm.Groups[2].Value -creplace 'Metrolist','Meld') + $mm.Groups[3].Value
+  param($mm) $mm.Groups[1].Value + ($mm.Groups[2].Value -creplace 'Metrolist','Huni') + $mm.Groups[3].Value
 
     <string name="discord_status_connected">Connected</string>
     <string name="discord_status_authorizing">Authorizing…</string>
@@ -1192,7 +1192,7 @@
     <string name="discord_button_url_description">Destination link opened when someone clicks the button. Must start with http:// or https://. Supports {song_name}, {artist_name}, {album_name}.</string>
     <string name="credits_developer">Remy Camiguel</string>
     <string name="credits_original_project">Original Project</string>
-    <string name="credits_based_on_metrolist">Huni is based on Meld, an open-source YouTube Music client.</string>
+    <string name="credits_based_on_metrolist">Huni is based on Metrolist, an open-source YouTube Music client.</string>
     <string name="filter_local_files">Local files</string>
     <string name="local_files">Local files</string>
     <string name="scan_local_files">Scan for local files</string>

@@ -333,7 +333,7 @@
     <string name="enable_scrobbling">스크로블링 활성화</string>
     <string name="lastfm_now_playing">현재 재생 정보 전송</string>
     <string name="last_fm_send_likes">\'좋아요\' 및 \'싫어요\' 동기화</string>
-    <string name="last_fm_send_likes_description">Meld에서 곡에 좋아요 또는 싫어요를 표시하면 Last.fm에도 동일하게 반영합니다</string>
+    <string name="last_fm_send_likes_description">Huni에서 곡에 좋아요 또는 싫어요를 표시하면 Last.fm에도 동일하게 반영합니다</string>
     <string name="scrobbling_configuration">스크로블링 설정</string>
     <string name="scrobble_min_track_duration">지정된 시간(초) 이상 재생 시 스크로블링</string>
     <string name="scrobble_delay_percent">스크로블링 전송 기준(%)</string>
@@ -443,7 +443,7 @@
     <string name="clear_recognition_history_confirm">검색 기록을 모두 삭제하시겠습니까?</string>
     <string name="delete_from_history">기록에서 삭제</string>
     <string name="re_listen">다시 검색</string>
-    <string name="play_on_app">Meld로 재생</string>
+    <string name="play_on_app">Huni로 재생</string>
     <string name="qs_tile_music_recognizer">노래 검색</string>
     <string name="recognition_notification_channel_name">노래 검색</string>
     <string name="recognition_notification_channel_desc">빠른 설정창에서 곡을 검색하는 동안 알림을 표시합니다</string>
@@ -451,7 +451,7 @@
     <string name="recognition_notification_processing">분석 중…</string>
     <string name="recognition_notification_no_match">일치하는 곡을 찾을 수 없습니다</string>
     <string name="recognition_notification_failed">검색 실패</string>
-    <string name="listen_on_metrolist">Meld로 재생</string>
+    <string name="listen_on_metrolist">Huni로 재생</string>
     <string name="speed_dial">빠른 실행</string>
     <string name="pin_to_speed_dial">빠른 실행에 고정</string>
     <string name="unpin_from_speed_dial">빠른 실행에서 고정 해제</string>
