@@ -638,7 +638,7 @@ private fun applyLoginLayoutFix(bl: String, view: WebView?) {
                     ' minH=' + s.minHeight + ' maxH=' + s.maxHeight + ' flex=' + s.flex +
                     ' basis=' + s.flexBasis + ' align=' + s.alignSelf + ' box=' + s.boxSizing;
             }
-            var id = 'meld-login-layout-fix';
+            var id = 'huni-login-layout-fix';
             if (!document.getElementById(id)) {
               var st = document.createElement('style');
               st.id = id;

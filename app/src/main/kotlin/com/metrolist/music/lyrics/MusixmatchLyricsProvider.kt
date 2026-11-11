@@ -154,7 +154,7 @@ object MusixmatchLyricsProvider : LyricsProvider {
 
         // The matcher answers 200 with *some* track even when it understood nothing, so confirm it
         // found the song we asked for before trusting its lyrics. Without this a bad match shows
-        // another artist's words over the current track, which reads as a bug in Meld, not upstream.
+        // another artist's words over the current track, which reads as a bug in Huni, not upstream.
         val matched = body.macroBody("matcher.track.get")?.get("track")?.jsonObject
         if (matched != null) {
             val matchedTitle = matched["track_name"]?.jsonPrimitive?.contentOrNull.orEmpty()

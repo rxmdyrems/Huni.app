@@ -1,4 +1,5 @@
 package com.metrolist.lastfm
+import com.metrolist.music.BuildConfig
 
 import com.metrolist.lastfm.models.Authentication
 import com.metrolist.lastfm.models.LastFmError
@@ -56,7 +57,7 @@ object LastFM {
         format: String = "json"
     ) {
         contentType(ContentType.Application.FormUrlEncoded)
-        userAgent("Meld (https://github.com/FrancescoGrazioso/Meld)")
+        userAgent("Huni/${BuildConfig.VERSION_NAME} (https://github.com/rxmdyrems/Huni.app)")
         val paramsForSig = mutableMapOf(
             "method" to method,
             "api_key" to apiKey

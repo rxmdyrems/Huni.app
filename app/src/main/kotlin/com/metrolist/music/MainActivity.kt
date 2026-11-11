@@ -547,8 +547,8 @@ class MainActivity : FragmentActivity() {
                                 }
                             }
                     // Upstream offers its Metrolist-KMP rewrite here in preference to its own
-                    // release. Meld has no KMP build and must not point users at another app,
-                    // so only Meld's own releases are offered. The isKmp plumbing below is left
+                    // release. Huni has no KMP build and must not point users at another app,
+                    // so only Huni's own releases are offered. The isKmp plumbing below is left
                     // in place to keep future upstream merges small.
                     val update = standaloneUpdate
                     availableUpdate = update?.takeUnless {

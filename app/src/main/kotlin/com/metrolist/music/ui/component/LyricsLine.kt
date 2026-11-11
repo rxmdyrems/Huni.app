@@ -509,7 +509,7 @@ private fun WordLevelLyrics(
         }
         
         val isRtlText = remember(mainText) { mainText.containsRtl() }
-        // Meld used to force the layoutResult path for Bengali/Devanagari/etc. here, because
+        // Huni used to force the layoutResult path for Bengali/Devanagari/etc. here, because
         // per-character drawing split combining marks off their base consonant (issue #141).
         // The animation now walks grapheme clusters rather than chars, so those scripts render
         // correctly on the normal path and only RTL still needs the fallback.

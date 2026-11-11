@@ -86,6 +86,11 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
+                    android:scheme="huni"
+                    android:host="spotify"
+                    android:pathPrefix="/callback" />
+                <!-- Compatibility alias: a provider registration for the legacy callback cannot be verified here. -->
+                <data
                     android:scheme="meld"
                     android:host="spotify"
                     android:pathPrefix="/callback" />

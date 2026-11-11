@@ -172,7 +172,7 @@ val DiscordUsernameKey = stringPreferencesKey("discordUsername")
 val DiscordNameKey = stringPreferencesKey("discordName")
 val DiscordAvatarKey = stringPreferencesKey("discordAvatar")
 val DiscordStatusKey = stringPreferencesKey("discordStatus")
-// Meld's own discordButton*Text/Visible keys were dropped with its Discord settings screen;
+// Huni's own discordButton*Text/Visible keys were dropped with its Discord settings screen;
 // upstream's Label/Enabled/Url keys below are the ones the new Discord stack reads.
 val DiscordAdvancedModeKey = booleanPreferencesKey("discordAdvancedMode")
 val DiscordActivityTypeKey = stringPreferencesKey("discordActivityType")
