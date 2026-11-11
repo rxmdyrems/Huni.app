@@ -1,5 +1,7 @@
 # Huni Changelog
 ## Unreleased
+### Changed
+- Removed leftover upstream project naming from user-visible text and internal identifiers.
 
 ## v0.9.9 (2026-11-11)
 ### Changed

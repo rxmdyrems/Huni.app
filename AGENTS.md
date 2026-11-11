@@ -140,11 +140,11 @@ This repository is a fork of Metrolist that can fall hundreds of commits behind 
 
 3. **Save a physical backup of all modified files:**
    ```bash
-   mkdir -p /tmp/my-meld-backup
+   mkdir -p /tmp/my-huni-backup
    while read file; do
      if [ -f "$file" ]; then
-       mkdir -p "/tmp/my-meld-backup/$(dirname "$file")"
-       cp "$file" "/tmp/my-meld-backup/$file"
+       mkdir -p "/tmp/my-huni-backup/$(dirname "$file")"
+       cp "$file" "/tmp/my-huni-backup/$file"
      fi
    done < my_modified_files.txt
    ```
@@ -235,7 +235,7 @@ After each resolution:
 
 ```bash
 # Verify custom modifications are still intact
-diff /tmp/my-meld-backup/<file> <file>
+diff /tmp/my-huni-backup/<file> <file>
 # Differences should be ONLY upstream additions, NEVER removals of custom code
 
 git add <file>
@@ -247,9 +247,9 @@ git cherry-pick --continue
 ```bash
 # Verify all custom modifications are still present
 while read file; do
-  if [ -f "$file" ] && [ -f "/tmp/my-meld-backup/$file" ]; then
+  if [ -f "$file" ] && [ -f "/tmp/my-huni-backup/$file" ]; then
     echo "=== Checking: $file ==="
-    diff "/tmp/my-meld-backup/$file" "$file"
+    diff "/tmp/my-huni-backup/$file" "$file"
   fi
 done < my_modified_files.txt
 
