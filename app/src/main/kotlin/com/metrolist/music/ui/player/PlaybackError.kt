@@ -304,4 +304,3 @@ private fun buildPlaybackErrorReport(
             append(error.stackTraceToString())
         }
     }
-}
