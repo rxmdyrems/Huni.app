@@ -4,6 +4,9 @@
 
 ## Unreleased
 
+### 🔄 Changed
+- Fixed the CI debug build keystore.
+
 ---
 
 ## v0.9.10 (2026-11-12)
