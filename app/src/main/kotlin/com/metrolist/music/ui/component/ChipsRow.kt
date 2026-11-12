@@ -80,7 +80,7 @@ fun <E> ChipsRow(
                     containerColor = containerColor,
                     labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     selectedContainerColor = MaterialTheme.colorScheme.primary,
-                    selectedLabelColor = Color(0xFF090D0C),
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
                 ),
                 onClick = { onValueUpdate(value) },
                 shape = RoundedCornerShape(50),

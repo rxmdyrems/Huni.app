@@ -171,7 +171,9 @@ fun SpotifyPreloadScreen(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.spotify_preload_songs)) },
+        title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.spotify_preload_songs))
+                        },
         navigationIcon = {
             IconButton(
                 onClick = {

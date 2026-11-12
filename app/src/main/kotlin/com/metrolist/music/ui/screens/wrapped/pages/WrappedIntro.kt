@@ -51,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.metrolist.music.R
 import com.metrolist.music.ui.screens.wrapped.components.AutoResizingText
-import com.metrolist.music.ui.theme.bbhBartle
 import kotlinx.coroutines.delay
 
 private const val FADE_IN_DURATION = 1000
@@ -110,7 +109,6 @@ fun WrappedIntro(onNext: () -> Unit) {
                 AutoResizingText(
                     text = stringResource(id = R.string.wrapped_year),
                     style = TextStyle.Default.copy(
-                        fontFamily = bbhBartle,
                         fontSize = 800.sp, // Increased size
                         color = Color.White,
                         drawStyle = Stroke(width = 2f)
@@ -149,7 +147,6 @@ fun WrappedIntro(onNext: () -> Unit) {
             ) {
                 Box {
                     val baseStyle = TextStyle(
-                        fontFamily = bbhBartle,
                         textAlign = TextAlign.Center,
                         letterSpacing = 2.sp,
                         fontSize = 50.sp

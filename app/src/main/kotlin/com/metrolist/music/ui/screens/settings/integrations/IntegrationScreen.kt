@@ -65,7 +65,9 @@ fun IntegrationScreen(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.integrations)) },
+        title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.integrations))
+                        },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

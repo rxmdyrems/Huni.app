@@ -8,6 +8,9 @@ package com.metrolist.music.ui.player
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.net.Uri
+import android.provider.OpenableColumns
+import android.webkit.MimeTypeMap
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,6 +48,7 @@ import com.metrolist.music.LocalPlayerConnection
 import com.metrolist.music.R
 import com.metrolist.music.models.MediaMetadata
 import java.time.Instant
+import java.util.Locale
 
 @Composable
 fun PlaybackError(
@@ -56,6 +60,9 @@ fun PlaybackError(
     val playerConnection = LocalPlayerConnection.current ?: return
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val streamClient by playerConnection.currentStreamClient.collectAsState()
+    val currentUri = playerConnection.service.player.currentMediaItem?.localConfiguration?.uri
+    val reportTime = remember(error) { Instant.now() }
+    val localFileDetails = remember(currentUri) { localFileReportDetails(currentUri, context) }
     val isOnline by playerConnection.service.connectivityObserver.networkStatus.collectAsState()
     val causes = remember(error) { error.causeChain() }
     val rawErrorMessages =
@@ -82,13 +89,20 @@ fun PlaybackError(
             isJobCancelled -> stringResource(R.string.error_job_cancelled)
             else -> null
         }
+    val isUnsupportedLocalFormat =
+        mediaMetadata?.id?.startsWith("local:") == true &&
+            error.errorCode == PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED
     val errorMessage =
-        playbackErrorMessages(
-            isOnline = isOnline,
-            offlineMessage = stringResource(R.string.error_offline_playback),
-            guidance = guidance,
-            rawErrorMessages = rawErrorMessages,
-        ).joinToString("\n").ifBlank { stringResource(R.string.error_unknown) }
+        if (isUnsupportedLocalFormat) {
+            "This file format isn't supported"
+        } else {
+            playbackErrorMessages(
+                isOnline = isOnline,
+                offlineMessage = stringResource(R.string.error_offline_playback),
+                guidance = guidance,
+                rawErrorMessages = rawErrorMessages,
+            ).joinToString("\n").ifBlank { stringResource(R.string.error_unknown) }
+        }
     val causeSummary =
         remember(causes) {
             causes
@@ -99,8 +113,8 @@ fun PlaybackError(
         }
     val errorCodeName = remember(error) { error.errorCodeName.removePrefix("ERROR_CODE_") }
     val errorReport =
-        remember(error, mediaMetadata, streamClient) {
-            buildPlaybackErrorReport(error, mediaMetadata, streamClient)
+        remember(error, mediaMetadata, streamClient, reportTime, localFileDetails) {
+            buildPlaybackErrorReport(error, mediaMetadata, streamClient, reportTime, localFileDetails)
         }
 
     Column(
@@ -222,15 +236,40 @@ internal fun playbackErrorMessages(
 ): List<String> =
     if (isOnline) (listOfNotNull(guidance) + rawErrorMessages).distinct() else listOf(offlineMessage)
 
+private data class LocalFileReportDetails(val extension: String?, val mimeType: String?)
+
+private fun localFileReportDetails(uri: Uri?, context: Context): LocalFileReportDetails {
+    if (uri == null) return LocalFileReportDetails(null, null)
+    val displayName = if (uri.scheme == "content") {
+        runCatching {
+            context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+                ?.use { cursor ->
+                    if (cursor.moveToFirst()) cursor.getString(0) else null
+                }
+        }.getOrNull()
+    } else {
+        uri.lastPathSegment
+    }
+    val extension = displayName?.substringAfterLast('.', "")
+        ?.takeIf { it.isNotBlank() && it.matches(Regex("[A-Za-z0-9]{1,10}")) }
+        ?.lowercase(Locale.ROOT)
+    val mimeType = runCatching { context.contentResolver.getType(uri) }.getOrNull()
+        ?: extension?.let { MimeTypeMap.getSingleton().getMimeTypeFromExtension(it) }
+    return LocalFileReportDetails(extension, mimeType)
+}
+
 private fun buildPlaybackErrorReport(
     error: PlaybackException,
     mediaMetadata: MediaMetadata?,
     streamClient: String?,
+    reportTime: Instant,
+    localFileDetails: LocalFileReportDetails,
 ): String =
     buildString {
-        appendLine("Metrolist Playback Error Report")
-        appendLine("================================")
-        appendLine("Time: ${Instant.ofEpochMilli(error.timestampMs)}")
+        val isLocal = mediaMetadata?.id?.startsWith("local:") == true
+        appendLine("Huni Playback Error Report")
+        appendLine("==========================")
+        appendLine("Time: $reportTime")
         appendLine("App version: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
         appendLine("Architecture: ${BuildConfig.ARCHITECTURE}")
         appendLine("Android: ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
@@ -241,17 +280,27 @@ private fun buildPlaybackErrorReport(
         appendLine("Title: ${mediaMetadata?.title ?: "Unknown"}")
         appendLine("Artists: ${mediaMetadata?.artists?.joinToString(", ") { it.name } ?: "Unknown"}")
         appendLine("ID: ${mediaMetadata?.id ?: "Unknown"}")
-        appendLine("Link: ${mediaMetadata?.id?.let { "https://music.youtube.com/watch?v=$it" } ?: "Unknown"}")
-        appendLine("Stream client: ${streamClient ?: "Not resolved"}")
+        if (isLocal) {
+            appendLine("Source: local file")
+            localFileDetails.extension?.let { appendLine("File extension: .$it") }
+            localFileDetails.mimeType?.let { appendLine("MIME type: $it") }
+        } else {
+            appendLine("Link: ${mediaMetadata?.id?.let { "https://music.youtube.com/watch?v=$it" } ?: "Unknown"}")
+            appendLine("Stream client: ${streamClient ?: "Not resolved"}")
+        }
         appendLine()
         appendLine("Error")
         appendLine("-----")
         appendLine("Code: ${error.errorCodeName.removePrefix("ERROR_CODE_")} (${error.errorCode})")
-        error.causeChain().forEachIndexed { index, cause ->
-            appendLine("[$index] ${cause.javaClass.name}: ${cause.message ?: "(no message)"}")
+        if (isLocal) {
+            appendLine("Additional local-file details omitted to protect file privacy.")
+        } else {
+            error.causeChain().forEachIndexed { index, cause ->
+                appendLine("[$index] ${cause.javaClass.name}: ${cause.message ?: "(no message)"}")
+            }
+            appendLine()
+            appendLine("Stack trace")
+            appendLine("-----------")
+            append(error.stackTraceToString())
         }
-        appendLine()
-        appendLine("Stack trace")
-        appendLine("-----------")
-        append(error.stackTraceToString())
     }

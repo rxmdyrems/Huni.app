@@ -17,6 +17,7 @@ val EnableHighRefreshRateKey = booleanPreferencesKey("enableHighRefreshRate")
 val EnableLandscapeScalingKey = booleanPreferencesKey("enableLandscapeScaling")
 val DynamicThemeKey = booleanPreferencesKey("dynamicTheme")
 val SelectedThemeColorKey = intPreferencesKey("selectedThemeColor")
+val ThemePaletteKey = stringPreferencesKey("themePalette")
 val DarkModeKey = stringPreferencesKey("darkMode")
 val PureBlackKey = booleanPreferencesKey("pureBlack")
 val PureBlackMiniPlayerKey = booleanPreferencesKey("pureBlackMiniPlayer")
@@ -163,7 +164,7 @@ val PauseSearchHistoryKey = booleanPreferencesKey("pauseSearchHistory")
 val DisableScreenshotKey = booleanPreferencesKey("disableScreenshot")
 val CrashReportingEnabledKey = booleanPreferencesKey("crashReportingEnabled")
 
-val EnableDynamicIconKey = booleanPreferencesKey("enableDynamicIcon")
+val MatchAppIconToColorKey = booleanPreferencesKey("matchAppIconToColor")
 
 val EnableDiscordRPCKey = booleanPreferencesKey("discordRPCEnable")
 val DiscordInfoDismissedKey = booleanPreferencesKey("discordInfoDismissed")
@@ -171,7 +172,7 @@ val DiscordUsernameKey = stringPreferencesKey("discordUsername")
 val DiscordNameKey = stringPreferencesKey("discordName")
 val DiscordAvatarKey = stringPreferencesKey("discordAvatar")
 val DiscordStatusKey = stringPreferencesKey("discordStatus")
-// Meld's own discordButton*Text/Visible keys were dropped with its Discord settings screen;
+// Huni's own discordButton*Text/Visible keys were dropped with its Discord settings screen;
 // upstream's Label/Enabled/Url keys below are the ones the new Discord stack reads.
 val DiscordAdvancedModeKey = booleanPreferencesKey("discordAdvancedMode")
 val DiscordActivityTypeKey = stringPreferencesKey("discordActivityType")

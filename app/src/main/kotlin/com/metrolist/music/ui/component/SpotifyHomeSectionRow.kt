@@ -137,7 +137,7 @@ fun SpotifyArtistSectionRow(
     modifier: Modifier = Modifier,
 ) {
     LazyRow(
-        contentPadding = PaddingValues(horizontal = 12.dp),
+        contentPadding = PaddingValues(horizontal = 10.dp),
         modifier = modifier,
     ) {
         items(
@@ -191,7 +191,7 @@ fun SpotifyAlbumSectionRow(
     modifier: Modifier = Modifier,
 ) {
     LazyRow(
-        contentPadding = PaddingValues(horizontal = 12.dp),
+        contentPadding = PaddingValues(horizontal = 0.dp),
         modifier = modifier,
     ) {
         items(
@@ -228,7 +228,7 @@ fun SpotifyPlaylistSectionRow(
     modifier: Modifier = Modifier,
 ) {
     LazyRow(
-        contentPadding = PaddingValues(horizontal = 12.dp),
+        contentPadding = PaddingValues(horizontal = 0.dp),
         modifier = modifier,
     ) {
         items(

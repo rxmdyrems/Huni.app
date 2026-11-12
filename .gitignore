@@ -107,7 +107,7 @@ app/src/main/java/com/metrolist/music/listentogether/proto/*
 .build-fftw
 app/src/main/cpp/coverart/
 
-# Internal development notes (moved to notes/ submodule)
+# Internal development notes
 .spotify_gql_endpoints.json
 
 # Agents dir

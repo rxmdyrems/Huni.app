@@ -497,7 +497,7 @@ fun AiSettings(navController: NavController) {
                 listOf(
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.explore_outlined),
-                        title = { Text(stringResource(R.string.ai_provider)) },
+                        title = { Text(stringResource(R.string.ai_provider), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = { Text(aiProvider) },
                         onClick = { showProviderDialog = true },
                         trailingContent = {
@@ -513,7 +513,7 @@ fun AiSettings(navController: NavController) {
                     if (aiProvider == "Custom") {
                         Material3SettingsItem(
                             icon = painterResource(R.drawable.link),
-                            title = { Text(stringResource(R.string.ai_base_url)) },
+                            title = { Text(stringResource(R.string.ai_base_url), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             description = { Text(openRouterBaseUrl.ifBlank { stringResource(R.string.not_set) }) },
                             onClick = { showBaseUrlDialog = true },
                         )
@@ -533,7 +533,7 @@ fun AiSettings(navController: NavController) {
                         add(
                             Material3SettingsItem(
                                 icon = painterResource(R.drawable.key),
-                                title = { Text("DeepL ${stringResource(R.string.ai_api_key)}") },
+                                title = { Text("DeepL ${stringResource(R.string.ai_api_key)}", maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 description = {
                                     Text(
                                         if (deeplApiKey.isNotEmpty()) {
@@ -549,7 +549,7 @@ fun AiSettings(navController: NavController) {
                         add(
                             Material3SettingsItem(
                                 icon = painterResource(R.drawable.tune),
-                                title = { Text(stringResource(R.string.ai_deepl_formality)) },
+                                title = { Text(stringResource(R.string.ai_deepl_formality), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 description = {
                                     Text(
                                         when (deeplFormality) {
@@ -567,7 +567,7 @@ fun AiSettings(navController: NavController) {
                         add(
                             Material3SettingsItem(
                                 icon = painterResource(R.drawable.key),
-                                title = { Text(stringResource(R.string.ai_api_key)) },
+                                title = { Text(stringResource(R.string.ai_api_key), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 description = {
                                     Text(
                                         if (openRouterApiKey.isNotEmpty()) {
@@ -583,7 +583,7 @@ fun AiSettings(navController: NavController) {
                         add(
                             Material3SettingsItem(
                                 icon = painterResource(R.drawable.discover_tune),
-                                title = { Text(stringResource(R.string.ai_model)) },
+                                title = { Text(stringResource(R.string.ai_model), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 description = { Text(openRouterModel.ifBlank { stringResource(R.string.not_set) }) },
                                 onClick = { showModelDialog = true },
                             ),
@@ -602,7 +602,7 @@ fun AiSettings(navController: NavController) {
                         add(
                             Material3SettingsItem(
                                 icon = painterResource(R.drawable.translate),
-                                title = { Text(stringResource(R.string.ai_translation_mode)) },
+                                title = { Text(stringResource(R.string.ai_translation_mode), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 description = {
                                     Text(
                                         when (translateMode) {
@@ -627,7 +627,7 @@ fun AiSettings(navController: NavController) {
                         add(
                             Material3SettingsItem(
                                 icon = painterResource(R.drawable.edit),
-                                title = { Text(stringResource(R.string.ai_system_prompt)) },
+                                title = { Text(stringResource(R.string.ai_system_prompt), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 description = {
                                     Text(
                                         if (aiSystemPrompt.isNotBlank()) {
@@ -646,7 +646,7 @@ fun AiSettings(navController: NavController) {
                     add(
                         Material3SettingsItem(
                             icon = painterResource(R.drawable.language),
-                            title = { Text(stringResource(R.string.ai_target_language)) },
+                            title = { Text(stringResource(R.string.ai_target_language), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             description = { Text(LanguageCodeToName[translateLanguage] ?: translateLanguage) },
                             onClick = { showLanguageDialog = true },
                         ),
@@ -658,7 +658,9 @@ fun AiSettings(navController: NavController) {
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.ai_lyrics_translation)) },
+        title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.ai_lyrics_translation))
+                        },
         navigationIcon = {
             IconButton(onClick = { navController.navigateUp() }) {
                 Icon(

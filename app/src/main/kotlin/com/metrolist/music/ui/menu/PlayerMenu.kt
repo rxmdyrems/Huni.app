@@ -1559,7 +1559,7 @@ fun ListenTogetherDialog(
                             ) {
                                 Text(
                                     text = room.roomCode,
-                                    style = MaterialTheme.typography.headlineLarge,
+                                    style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = 6.sp,
@@ -1684,7 +1684,7 @@ fun ListenTogetherDialog(
                                             ) {
                                                 Text(
                                                     text = user.username.take(1).uppercase(),
-                                                    style = MaterialTheme.typography.titleLarge,
+                                                    style = MaterialTheme.typography.titleMedium,
                                                     fontWeight = FontWeight.Bold,
                                                     color =
                                                         if (user.isHost) {

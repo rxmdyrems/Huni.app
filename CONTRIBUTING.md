@@ -1,262 +1,42 @@
-# Contributing to Meld
+# Contributing to Huni
 
-Meld is an Android/Kotlin music client based on Jetpack Compose and Material 3. This guide describes the recommended local setup and validation flow for contributors.
+Huni is an open-source Android music app using Kotlin, Jetpack Compose, Material 3, Gradle, and GPL-3.0. The default branch is `main`.
 
-## 1. Requirements
+## Set up
 
-Recommended:
-
-- Git
-- Docker and Docker Compose
-
-Optional local setup, if you do not use Docker:
-
-- JDK 21
-- Android Studio with Android SDK Platform 36
-- Android SDK Build-Tools 36.0.0
-- Android SDK Platform-Tools
-- Android SDK Command-line Tools
-- `protoc` 3.21 or newer, with `protoc` 34.0 matching CI
-
-The Gradle wrapper is committed, so installing Gradle globally is not required.
-
-## 2. Branch Workflow
-
-Start from an up-to-date `main` branch:
+Use JDK 21 and Android SDK platform 37. The app targets SDK 36. The only Gradle modules are `app` and `innertube`.
 
 ```bash
-git checkout main
-git pull --ff-only origin main
+git clone https://github.com/rxmdyrems/Huni.app
+cd Huni.app
+./gradlew assembleFossDebug --console=plain
 ```
 
-Create a dedicated branch:
+The normal local build is the `foss` flavor. `gms` adds Google Cast support and `izzy` disables the updater. The default application ID is `com.remycamiguel.huni`; debug builds add the `.debug` suffix unless `METROLIST_APPLICATION_ID` is set. The debug APK is at `app/build/outputs/apk/foss/debug/app-foss-debug.apk`.
+
+For optional local values, copy `local.properties.sample` to `local.properties`. Never commit it or any credentials. Source strings are in `app/src/main/res/values/metrolist_strings.xml`; do not rename the file.
+
+New screens must use the shared `HuniSectionHeader` and `HuniScreenTitle` composables for section headings and top-app-bar titles so wrapping, sizing, and ellipsis stay consistent. Settings screens should use the shared `Material3SettingsGroup` and `HuniSwitch` components.
+
+Palette launcher assets are generated with `python3 scripts/generate_launcher_icons.py` (requires Pillow) from `scripts/assets/huni_bird_transparent.png`. The outputs use a solid palette-colored background and the original untinted, transparent bird foreground inside the 66% safe zone, plus adaptive icons, Android 13+ monochrome layers, and density-aware legacy fallbacks. The generator checks WCAG contrast against the bird's dominant color and darkens a palette background in 10% steps until it reaches 3:1. When adding a palette, update `HuniPalettes` in `Theme.kt`, the launcher alias and mapping in `AndroidManifest.xml` and `IconUtils.kt`, and the palette background entry in the generator, then regenerate the assets. Keep the stable Amber default alias unchanged, add a separate palette Amber alias if needed, and verify that only one launcher alias is enabled.
+
+## Checks
 
 ```bash
-git checkout -b feat/short-description
+./gradlew --console=plain :app:testFossDebugUnitTest :innertube:test
+./gradlew --console=plain assembleFossDebug :app:lintFossDebug
 ```
 
-Branch prefixes:
+Contributors do not bump `versionName` or `versionCode`. The maintainer handles versions and releases. Contributors build unsigned or debug APKs locally. Signed releases are made only by the maintainer through GitHub Actions using `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD`. Never add their values to the repository.
 
-- `fix/` for bug fixes
-- `feat/` for new features
-- `ref/` for refactoring
-- `docs/` for documentation
-- `chore/` for maintenance work
+## Branches and commits
 
-Commit messages should follow:
+Start from `main` and use `fix/`, `feat/`, `ref/`, `docs/`, or `chore/` prefixes. Use short commits in the form `type(scope): description`.
 
-```text
-type(scope): short description
-```
+## Reporting crashes and bugs
 
-Examples:
+Huni never uploads crash data automatically. After a crash, the next launch shows a redacted preview and lets you open a prefilled issue, email it, copy it, or dismiss it. Crash reports can be turned off in Settings > Privacy. Report other bugs in [GitHub Issues](https://github.com/rxmdyrems/Huni.app/issues) with steps to reproduce, app version, device, Android version, and relevant logs without personal data.
 
-```text
-feat(player): add queue shuffle action
-fix(spotify): handle empty playlist images
-chore(build): update docker dev environment
-```
+## Pull requests
 
-## 3. Docker Development Environment
-
-Build the development image:
-
-```bash
-docker compose build dev
-```
-
-Open a shell in the container:
-
-```bash
-docker compose run --rm dev bash
-```
-
-The container includes:
-
-- JDK 21
-- Android SDK Platform 36
-- Android Build-Tools 36.0.0
-- Android Platform-Tools
-- `protoc` 34.0
-- Git and basic shell tools
-
-Gradle and Android user caches are stored in Docker volumes so repeated builds do not download everything again.
-
-## 4. Initial Project Setup
-
-Initialize the public protobuf submodule:
-
-```bash
-git submodule update --init metroproto
-```
-
-Generate protobuf sources:
-
-```bash
-cd app
-bash generate_proto.sh
-cd ..
-```
-
-The private notes submodule is optional and requires repository access:
-
-```text
-notes/
-```
-
-Do not recreate the private notes contents if the submodule is empty.
-
-## 5. Optional Debug Keystore
-
-Debug builds can use the default Android debug keystore. If you need a stable project-local debug keystore, generate one with:
-
-```bash
-keytool -genkeypair -v \
-  -keystore app/persistent-debug.keystore \
-  -storepass android \
-  -keypass android \
-  -alias androiddebugkey \
-  -keyalg RSA \
-  -keysize 2048 \
-  -validity 10000 \
-  -dname "CN=Android Debug,O=Android,C=US"
-```
-
-This file is ignored by Git.
-
-## 6. Optional Local Secrets
-
-Most development builds work without secrets. Some integrations may be disabled or incomplete unless credentials are provided.
-
-To configure local secrets, copy the sample file and fill in only the values you need:
-
-```bash
-cp local.properties.sample local.properties
-```
-
-`local.properties` is ignored by Git. You can also export these values as environment variables instead:
-
-```properties
-LASTFM_API_KEY=...
-LASTFM_SECRET=...
-CRASH_REPORT_REPO=francescograzioso/Meld
-CRASH_REPORT_TOKEN=...
-```
-
-Release signing secrets are maintained by the project maintainers and are not needed for normal contribution work.
-
-## 7. Build Variants
-
-Main app variants:
-
-- `foss`: default contribution target, no Google Play Services cast support
-- `gms`: includes Google Cast support
-- `izzy`: store-oriented variant with updater disabled
-
-Use `fossDebug` for normal development unless your change specifically targets Google Cast or IzzyOnDroid behavior.
-
-## 8. Validation Commands
-
-Run the same fast checks used by pull request CI:
-
-```bash
-./gradlew --console=plain \
-  :app:testFossDebugUnitTest \
-  :spotify:test \
-  :betterlyrics:test \
-  --warning-mode summary
-```
-
-Build and lint the default debug APK:
-
-```bash
-./gradlew --console=plain \
-  assembleFossDebug \
-  :app:lintFossDebug \
-  --warning-mode summary
-```
-
-The debug APK is generated at:
-
-```text
-app/build/outputs/apk/foss/debug/app-foss-debug.apk
-```
-
-With Docker, prefix the Gradle command:
-
-```bash
-docker compose run --rm dev ./gradlew --console=plain assembleFossDebug
-```
-
-To only build the APK needed for manual testing, run:
-
-```bash
-docker compose run --rm dev ./gradlew --console=plain :app:assembleFossDebug --warning-mode summary
-```
-
-## 9. APK Types
-
-For day-to-day testing, use the debug APK:
-
-```bash
-docker compose run --rm dev ./gradlew --console=plain :app:assembleFossDebug --warning-mode summary
-```
-
-The debug APK is signed with a local Android debug keystore, has `BuildConfig.DEBUG = true`, and is meant for fast install/test cycles. In this project it uses the debug application id suffix, so it can usually be installed next to a release build.
-
-To generate a release APK without maintainer signing keys, run:
-
-```bash
-docker compose run --rm dev ./gradlew --console=plain :app:assembleFossRelease --warning-mode summary
-```
-
-The unsigned release APK is generated at:
-
-```text
-app/build/outputs/apk/foss/release/app-foss-release-unsigned.apk
-```
-
-This APK is minified and optimized like a release build, but it is not installable as-is on a normal Android device until it is signed. Official signed release APKs are produced by maintainers through the release workflow.
-
-## 10. Codebase Notes
-
-Main modules:
-
-- `app`: Android application, Compose UI, playback, database, settings
-- `innertube`: YouTube Music / InnerTube integration
-- `spotify`: Spotify integration and mapping logic
-- `lastfm`: Last.fm integration
-- `betterlyrics`, `lrclib`, `kugou`, `shazamkit`, `paxsenix`, `kizzy`: supporting service integrations
-
-Strings:
-
-- Edit `app/src/main/res/values/metrolist_strings.xml` for source strings.
-- Do not edit `app/src/main/res/values/strings.xml` for app text.
-- Do not edit translated `metrolist_strings.xml` files directly unless the task is explicitly about translations.
-
-Versioning:
-
-- Do not bump `versionCode` or `versionName` during normal contribution work.
-
-Spotify GraphQL hashes:
-
-- If a new Spotify GraphQL operation is added in `spotify/src/main/kotlin`, add it to `docs/spotify-gql-hashes.json` so the scheduled hash checker tracks it.
-
-## 11. Manual Testing
-
-After a successful build, install the APK on a device or emulator:
-
-```bash
-adb install -r app/build/outputs/apk/foss/debug/app-foss-debug.apk
-```
-
-For playback-related work, test at least:
-
-- App launch
-- Search
-- Starting playback
-- Pause/resume
-- Background playback
-- Notification controls
-
-For battery-sensitive playback behavior, test on a physical device when possible.
+Keep changes focused and explain how you tested them. Do not change playback, data, network, or signing behavior unless required. Keep upstream license notices, copyright headers, `NOTICE`, and the About screen's “Built on” credits intact.

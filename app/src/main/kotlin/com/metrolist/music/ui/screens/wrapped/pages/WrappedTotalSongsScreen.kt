@@ -36,8 +36,6 @@ import androidx.compose.ui.unit.sp
 import com.metrolist.music.R
 import com.metrolist.music.ui.screens.wrapped.components.AnimatedBackground
 import com.metrolist.music.ui.screens.wrapped.components.ShapeType
-import com.metrolist.music.ui.theme.bbh_bartle
-
 @Composable
 fun WrappedTotalSongsScreen(
     uniqueSongCount: Int,
@@ -69,7 +67,7 @@ fun WrappedTotalSongsScreen(
                 val density = LocalDensity.current
                 val baseStyle = MaterialTheme.typography.displayLarge.copy(
                     color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center,
-                    fontFamily = bbh_bartle, drawStyle = Stroke(with(density) { 2.dp.toPx() })
+                    drawStyle = Stroke(with(density) { 2.dp.toPx() })
                 )
                 val textStyle = remember(uniqueSongCount, maxWidth) {
                     val finalText = uniqueSongCount.toString()

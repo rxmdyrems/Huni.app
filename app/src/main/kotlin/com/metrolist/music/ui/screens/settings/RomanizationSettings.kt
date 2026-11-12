@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -15,7 +17,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TriStateCheckbox
@@ -105,9 +106,9 @@ fun RomanizationSettings(
             title = stringResource(R.string.options),
             items = listOf(
                 Material3SettingsItem(
-                    title = { Text(stringResource(R.string.lyrics_romanize_as_main)) },
+                    title = { Text(stringResource(R.string.lyrics_romanize_as_main), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = lyricsRomanizeAsMain,
                             onCheckedChange = onLyricsRomanizeAsMainChange,
                         )
@@ -115,9 +116,9 @@ fun RomanizationSettings(
                     icon = painterResource(R.drawable.queue_music)
                 ),
                 Material3SettingsItem(
-                    title = { Text(stringResource(R.string.line_by_line_option_title)) },
+                    title = { Text(stringResource(R.string.line_by_line_option_title), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = lyricsRomanizeCyrillicByLine,
                             onCheckedChange = onLyricsRomanizeCyrillicByLineChange,
                         )
@@ -130,7 +131,7 @@ fun RomanizationSettings(
         Spacer(modifier = Modifier.height(8.dp))
 
         checkboxesList += Material3SettingsItem(
-            title = { Text("Play all") },
+            title = { Text("Play all", maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
             trailingContent = {
                 TriStateCheckbox(
                     state = parentState,
@@ -148,7 +149,7 @@ fun RomanizationSettings(
 
         states.forEachIndexed { index, (language, checked) ->
             checkboxesList += Material3SettingsItem(
-                title = { Text(language) },
+                title = { Text(language, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                 trailingContent = {
                     Checkbox(
                         checked = checked,
@@ -169,7 +170,9 @@ fun RomanizationSettings(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.lyrics_romanize_title)) },
+        title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.lyrics_romanize_title))
+                        },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

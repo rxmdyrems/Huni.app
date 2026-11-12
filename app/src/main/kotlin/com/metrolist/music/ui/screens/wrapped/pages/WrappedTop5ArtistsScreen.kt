@@ -42,7 +42,6 @@ import com.metrolist.music.R
 import com.metrolist.music.db.entities.Artist
 import com.metrolist.music.ui.screens.wrapped.components.AnimatedBackground
 import com.metrolist.music.ui.screens.wrapped.components.ShapeType
-import com.metrolist.music.ui.theme.bbh_bartle
 import kotlinx.coroutines.delay
 
 @Composable
@@ -92,7 +91,6 @@ fun WrappedTop5ArtistsScreen(topArtists: List<Artist>, isVisible: Boolean) {
                         ) {
                             Text(
                                 text = "${index + 1}",
-                                fontFamily = bbh_bartle,
                                 fontSize = 36.sp,
                                 color = Color.White.copy(alpha = 0.8f),
                                 modifier = Modifier.width(40.dp)

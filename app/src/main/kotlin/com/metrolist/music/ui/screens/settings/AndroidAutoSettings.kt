@@ -5,8 +5,12 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,7 +28,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -41,6 +44,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.metrolist.music.LocalDatabase
 import com.metrolist.music.LocalPlayerAwareWindowInsets
@@ -185,23 +189,34 @@ fun AndroidAutoSettings(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)
     ) {
-        // Visible sections
-        Material3SettingsGroup(
-            title = stringResource(R.string.android_auto_visible_sections),
-            items = listOf(
-                Material3SettingsItem(
-                    title = {},
-                    description = { Text(stringResource(R.string.android_auto_reorder_hint)) },
-                    onClick = null
-                )
-            )
+        com.metrolist.music.ui.component.HuniSectionHeader(
+            text = stringResource(R.string.android_auto_visible_sections),
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
         )
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.info),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp),
+            )
+            Text(
+                text = stringResource(R.string.android_auto_reorder_hint),
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
 
         LazyColumn(
             state = lazyListState,
             modifier = Modifier
                 .fillMaxWidth()
                 .height((visibleSections.size * 80).dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             userScrollEnabled = false,
         ) {
             items(visibleSections, key = { (section, _) -> section.id }) { (section, enabled) ->
@@ -220,23 +235,28 @@ fun AndroidAutoSettings(
                                         AndroidAutoSection.SPOTIFY_PLAYLISTS -> R.drawable.spotify
                                     }
                                 ),
-                                title = { Text(section.label()) },
+                                title = { Text(section.label(), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 trailingContent = {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.drag_handle),
-                                            contentDescription = null,
+                                        Box(
                                             modifier = Modifier
-                                                .size(24.dp)
+                                                .size(48.dp)
                                                 .longPressDraggableHandle(
                                             onDragStarted = {
                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                             }
                                         ),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                                Spacer(Modifier.width(12.dp))
-                                Switch(
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.drag_indicator),
+                                                contentDescription = "Reorder",
+                                                modifier = Modifier.size(24.dp),
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            )
+                                        }
+                                        Spacer(Modifier.width(8.dp))
+                                        HuniSwitch(
                                     checked = enabled,
                                     onCheckedChange = { newValue ->
                                         sections = sections.map { (s, e) ->
@@ -319,7 +339,7 @@ fun AndroidAutoSettings(
             items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.playlist_add),
-                    title = { Text(stringResource(R.string.android_auto_target_playlist)) },
+                    title = { Text(stringResource(R.string.android_auto_target_playlist), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(playlistLabels(targetPlaylist)) },
                     onClick = { showTargetPlaylistDialog = true }
                 )
@@ -334,10 +354,10 @@ fun AndroidAutoSettings(
             items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.queue_music),
-                    title = { Text(stringResource(R.string.android_auto_youtube_playlists)) },
+                    title = { Text(stringResource(R.string.android_auto_youtube_playlists), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.android_auto_youtube_playlists_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = youtubePlaylistsEnabled,
                             onCheckedChange = onYoutubePlaylistsChange,
                             thumbContent = {
@@ -364,7 +384,7 @@ fun AndroidAutoSettings(
             items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.manage_search),
-                    title = { Text(stringResource(R.string.android_auto_search_local_songs_limit)) },
+                    title = { Text(stringResource(R.string.android_auto_search_local_songs_limit), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = {
                         val limitValues =
                             remember { listOf(10, 25, 50, 75, 100, 150, 200, -1) }
@@ -398,7 +418,7 @@ fun AndroidAutoSettings(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.android_auto)) },
+        title = { com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.android_auto)) },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

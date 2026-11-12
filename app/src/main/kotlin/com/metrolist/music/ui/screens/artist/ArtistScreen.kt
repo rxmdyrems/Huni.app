@@ -190,7 +190,7 @@ fun ArtistScreen(
     }
 
     LaunchedEffect(libraryArtist, artistPage) {
-        // Always the local page for local artists. Artists Meld only knows through Spotify have no
+        // Always the local page for local artists. Artists Huni only knows through Spotify have no
         // YouTube page to fall back to, so they keep the remote page instead of rendering empty.
         val isYouTube = libraryArtist?.artist?.isYouTubeArtist == true
         val isLocal = libraryArtist?.artist?.isLocal == true

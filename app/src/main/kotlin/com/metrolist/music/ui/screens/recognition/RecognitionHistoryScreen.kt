@@ -149,7 +149,9 @@ fun RecognitionHistoryScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.recognition_history)) },
+                title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.recognition_history))
+                        },
                 navigationIcon = {
                     IconButton(
                         onClick = { navController.navigateUp() },

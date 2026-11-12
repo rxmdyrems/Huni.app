@@ -1,0 +1,25 @@
+name: Crash report
+description: Report a crash from Huni
+title: "Crash: "
+labels: ["crash"]
+body:
+  - type: textarea
+    id: what-were-you-doing
+    attributes:
+      label: What were you doing?
+      description: Tell us what happened immediately before the crash.
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: Pasted crash report
+      description: Paste the report shown by Huni. Remove anything personal.
+    validations:
+      required: true
+  - type: input
+    id: app-version
+    attributes:
+      label: App version
+    validations:
+      required: true

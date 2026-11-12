@@ -1218,7 +1218,7 @@ class SyncUtils @Inject constructor(
      *  3. In a single Room transaction:
      *     a. Insert/update each resolved track with `liked = true`.
      *     b. Unlike local songs whose mapped `spotifyId` is no longer present
-     *        in the remote set. To avoid wiping unmapped likes (Meld-only or
+     *        in the remote set. To avoid wiping unmapped likes (Huni-only or
      *        not-yet-resolved tracks), the unlike branch only fires for songs
      *        with an existing [SpotifyMatchEntity] for their YouTube id.
      */
@@ -2058,7 +2058,7 @@ class SyncUtils @Inject constructor(
      * already carries its browseId. [onCreated] reports whether the remote half succeeded, so
      * the caller can tell the user the playlist stayed local.
      *
-     * Ported from upstream v13.7.0 onto Meld's sync scope; Meld has no runQueuedPlaylistEdit.
+     * Ported from upstream v13.7.0 onto Huni's sync scope; Huni has no runQueuedPlaylistEdit.
      */
     fun createPlaylist(
         playlist: PlaylistEntity,
@@ -2154,7 +2154,7 @@ class SyncUtils @Inject constructor(
     }
 }
 
-// Ported from upstream v13.7.0 (Meld keeps its own SyncUtils body). Pure helpers, covered by
+// Ported from upstream v13.7.0 (Huni keeps its own SyncUtils body). Pure helpers, covered by
 // PlaylistSyncTest.
 
 internal fun hasCompleteLikedSongsResponse(

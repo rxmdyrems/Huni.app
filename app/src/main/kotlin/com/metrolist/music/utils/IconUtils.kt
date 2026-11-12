@@ -5,20 +5,49 @@ import android.content.Context
 import android.content.pm.PackageManager
 
 object IconUtils {
-    fun setIcon(context: Context, enabled: Boolean) {
-        val pm = context.packageManager
-        val dynamic = ComponentName(context, "com.metrolist.music.MainActivityAlias")
-        val static = ComponentName(context, "com.metrolist.music.MainActivityStatic")
+    const val DEFAULT_ICON_ID = "default"
 
-        pm.setComponentEnabledSetting(
-            dynamic,
-            if (enabled) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-            PackageManager.DONT_KILL_APP
-        )
-        pm.setComponentEnabledSetting(
-            static,
-            if (enabled) PackageManager.COMPONENT_ENABLED_STATE_DISABLED else PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-            PackageManager.DONT_KILL_APP
+    private const val DEFAULT_ALIAS = "com.metrolist.music.MainActivityAlias"
+
+    private val paletteAliases = linkedMapOf(
+        "amber" to "com.metrolist.music.MainActivityPaletteAmber",
+        "violet" to "com.metrolist.music.MainActivityViolet",
+        "green" to "com.metrolist.music.MainActivityGreen",
+        "maroon" to "com.metrolist.music.MainActivityMaroon",
+        "ocean" to "com.metrolist.music.MainActivityOcean",
+        "teal" to "com.metrolist.music.MainActivityTeal",
+        "rose" to "com.metrolist.music.MainActivityRose",
+        "orange" to "com.metrolist.music.MainActivityOrange",
+        "indigo" to "com.metrolist.music.MainActivityIndigo",
+        "slate" to "com.metrolist.music.MainActivitySlate",
+    )
+
+    private val allAliases = listOf(DEFAULT_ALIAS) + paletteAliases.values
+
+    /** Enable one palette alias, or restore the original transparent icon for [DEFAULT_ICON_ID]. */
+    fun setIcon(context: Context, paletteId: String) {
+        val targetClass =
+            if (paletteId == DEFAULT_ICON_ID) {
+                DEFAULT_ALIAS
+            } else {
+                paletteAliases[paletteId] ?: DEFAULT_ALIAS
+            }
+        val packageManager = context.packageManager
+
+        allAliases
+            .filterNot { it == targetClass }
+            .forEach { aliasClass ->
+                packageManager.setComponentEnabledSetting(
+                    ComponentName(context, aliasClass),
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP,
+                )
+            }
+
+        packageManager.setComponentEnabledSetting(
+            ComponentName(context, targetClass),
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+            PackageManager.DONT_KILL_APP,
         )
     }
 }

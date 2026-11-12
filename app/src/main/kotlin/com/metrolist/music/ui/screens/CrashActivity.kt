@@ -118,12 +118,9 @@ fun CrashScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
-                    Text(
-                        text = stringResource(R.string.crash_title),
-                        style = MaterialTheme.typography.headlineSmall
-                    ) 
-                },
+                title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.crash_title))
+                        },
                 actions = {
                     IconButton(onClick = onClose) {
                         Icon(

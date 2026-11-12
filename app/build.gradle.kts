@@ -42,8 +42,8 @@ android {
         buildConfigField("String", "SERVICE_TOKEN", "\"${serviceCredential.replace("\\", "\\\\").replace("\"", "\\\"")}\"")
         minSdk = 26
         targetSdk = 36
-        versionCode = 28
-        versionName = "0.9.2"
+        versionCode = 36
+        versionName = "0.9.10"
         val baseVersionName = requireNotNull(versionName)
         buildConfigField("String", "BASE_VERSION_NAME", "\"$baseVersionName\"")
         buildCommit?.let { versionName = "$baseVersionName+$it" }
@@ -65,15 +65,6 @@ android {
         buildConfigField("String", "ARCHITECTURE", "\"universal\"")
         buildConfigField("Long", "DISCORD_APP_ID", "1447278780795064401L")
 
-        // Crash reporting target: GitHub repo (owner/name) where Issues are created,
-        // and a fine-grained PAT with issues:write scoped to that repo only.
-        // Both must be present at build time for reporting to be active at runtime.
-        val crashRepo = localProperties.getProperty("CRASH_REPORT_REPO")
-            ?: System.getenv("CRASH_REPORT_REPO") ?: "francescograzioso/Meld"
-        val crashToken = localProperties.getProperty("CRASH_REPORT_TOKEN")
-            ?: System.getenv("CRASH_REPORT_TOKEN") ?: ""
-        buildConfigField("String", "CRASH_REPORT_REPO", "\"$crashRepo\"")
-        buildConfigField("String", "CRASH_REPORT_TOKEN", "\"$crashToken\"")
     }
 
     flavorDimensions += listOf("variant")
@@ -296,6 +287,7 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coil.network.okhttp)
     implementation(libs.browser)
+    implementation(libs.webkit)
 
     implementation(libs.ucrop)
 

@@ -363,17 +363,17 @@
 
     <!-- Material 3 Settings Sections -->
     <string name="settings_section_ui">Interface</string>
-    <string name="settings_section_privacy">Privacy &amp; Security</string>
-    <string name="settings_section_player_content">Player &amp; Content</string>
-    <string name="settings_section_storage">Storage &amp; Data</string>
-    <string name="settings_section_system">System &amp; About</string>
+    <string name="settings_section_privacy">Privacy &amp; security</string>
+    <string name="settings_section_player_content">Player &amp; content</string>
+    <string name="settings_section_storage">Storage &amp; data</string>
+    <string name="settings_section_system">System &amp; about</string>
 
     <!-- Updater -->
     <string name="updater">Updater</string>
     <string name="check_for_updates">Automatically check for updates</string>
     <string name="update_notifications">Enable update notifications</string>
     <string name="update_available_title">New update available</string>
-    <string name="update_available_message">Meld %s is ready to download.</string>
+    <string name="update_available_message">Huni %s is ready to download.</string>
     <string name="update_action">Update</string>
     <string name="update_channel_name">App updates</string>
     <string name="update_channel_desc">Notifications about new app versions</string>
@@ -411,7 +411,7 @@
     <string name="enable_scrobbling">Enable scrobbling</string>
     <string name="lastfm_now_playing">Send Now Playing status</string>
     <string name="last_fm_send_likes">Sync Loved and Unloved</string>
-    <string name="last_fm_send_likes_description">Love or unlove songs in Last.fm when you like or unlike them in Meld</string>
+    <string name="last_fm_send_likes_description">Love or unlove songs in Last.fm when you like or unlike them in Huni</string>
     <string name="logging_in">Logging in…</string>
 
     <string name="scrobbling_configuration">Scrobbling configuration</string>
@@ -466,10 +466,10 @@
     <string name="wrapped_total_artists_subtitle">unique artists!</string>
     <string name="wrapped_total_songs_title">You\'ve listened to</string>
     <string name="wrapped_total_songs_subtitle">unique songs!</string>
-    <string name="wrapped_intro_title">MELD</string>
+    <string name="wrapped_intro_title">Huni</string>
     <string name="wrapped_intro_subtitle">it\'s time to see what you\'ve been listening to all this year…</string>
     <string name="wrapped_intro_button">let\'s go!</string>
-    <string name="wrapped_logo_content_description">Meld Logo</string>
+    <string name="wrapped_logo_content_description">Huni Logo</string>
     <string name="wrapped_year">2025</string>
     <string name="wrapped_ready_title">YOUR WRAPPED IS READY!</string>
     <string name="wrapped_ready_subtitle">Time to see what you loved all this year…</string>
@@ -542,13 +542,13 @@
     <!-- Widget strings -->
     <string name="album_art">Album art</string>
     <string name="no_song_playing">No song playing</string>
-    <string name="tap_to_open">Tap to open Meld</string>
+    <string name="tap_to_open">Tap to open Huni</string>
     <string name="previous">Previous</string>
     <string name="play_pause">Play/Pause</string>
     <string name="next">Next</string>
     <string name="like">Like</string>
     <string name="not_playing">No song playing</string>
-    <string name="tap_to_play">Tap to open Meld</string>
+    <string name="tap_to_play">Tap to open Huni</string>
     <string name="widget_description">Music player widget with playback controls</string>
     <string name="turntable_widget_description">Circular music widget with play and like controls</string>
     <string name="widget_music_player">Music Player</string>
@@ -711,7 +711,7 @@
     <string name="crash_description">An unexpected error occurred. Please share the crash report to help us fix the issue</string>
     <string name="crash_share_logs">Share logs</string>
     <string name="crash_share_title">Share crash report</string>
-    <string name="crash_report_subject">Meld crash report</string>
+    <string name="crash_report_subject">Huni crash report</string>
     <string name="crash_close">Close</string>
     <string name="crash_no_log">No crash log available</string>
 
@@ -747,6 +747,8 @@
     <string name="play_all">Play all</string>
     <string name="enable_high_refresh_rate">Enable high refresh rate</string>
     <string name="enable_high_refresh_rate_desc">Forces the display to run at its highest supported refresh rate (e.g. 120Hz)</string>
+    <string name="high_refresh_rate">High refresh rate</string>
+    <string name="high_refresh_rate_desc">Use the highest supported refresh rate</string>
     <string name="enable_landscape_scaling">Landscape Scaling</string>
     <string name="enable_landscape_scaling_desc">Scale UI in landscape mode for larger screens</string>
 
@@ -763,7 +765,7 @@
     <string name="clear_recognition_history_confirm">Are you sure you want to clear all recognition history?</string>
     <string name="delete_from_history">Delete from history</string>
     <string name="re_listen">Re-listen</string>
-    <string name="play_on_app">Play on Meld</string>
+    <string name="play_on_app">Play on Huni</string>
     <string name="qs_tile_music_recognizer">Recognize music</string>
     <string name="recognition_notification_channel_name">Music recognition</string>
     <string name="recognition_notification_channel_desc">Shows a notification while identifying a song from quick settings</string>
@@ -771,7 +773,7 @@
     <string name="recognition_notification_processing">Identifying…</string>
     <string name="recognition_notification_no_match">No match found</string>
     <string name="recognition_notification_failed">Recognition failed</string>
-    <string name="listen_on_metrolist">Listen on Meld</string>
+    <string name="listen_on_metrolist">Listen on Huni</string>
 
     <!-- CSV Import Strings -->
     <string name="map_csv_columns">Map CSV columns</string>
@@ -788,7 +790,7 @@
 
     <string name="discord_connect_description">Sign in with Discord to share what you\'re listening to</string>
     
-  param($mm) $mm.Groups[1].Value + ($mm.Groups[2].Value -creplace 'Metrolist','Meld') + $mm.Groups[3].Value
+  param($mm) $mm.Groups[1].Value + ($mm.Groups[2].Value -creplace 'Metrolist','Huni') + $mm.Groups[3].Value
 
     <string name="discord_status_connected">Connected</string>
     <string name="discord_status_authorizing">Authorizing…</string>
@@ -858,7 +860,7 @@
     <string name="credits_view_repo">View repository</string>
     <string name="buy_mo_a_coffee">Buy me a coffee!</string>
     <string name="community_and_info">Community &amp; Info</string>
-    <string name="metrolist">MELD</string>
+    <string name="metrolist">Huni</string>
     <string name="wanna_play_favorite_song">Want to play their favorite song?</string>
     <string name="yeah">Yeah!</string>
     <string name="stands_with_palestine">This project stands with Palestine 🇵🇸</string>
@@ -922,7 +924,7 @@
     <!-- Android Auto settings -->
     <string name="android_auto">Android Auto</string>
     <string name="android_auto_visible_sections">Visible sections</string>
-    <string name="android_auto_reorder_hint">Tap a section to enable or disable it.\nLong-press the drag handle to reorder. The first section will be shown by default</string>
+    <string name="android_auto_reorder_hint">Tap to turn a section on or off. Hold the handle to reorder. The first section shows by default.</string>
     <string name="android_auto_youtube_playlists">Show YouTube suggested playlists</string>
     <string name="android_auto_youtube_playlists_desc">Show YouTube Music recommended playlists in the playlists section while browsing with Android Auto</string>
     <string name="android_auto_target_playlist">Quick-add destination</string>
@@ -974,8 +976,9 @@
     <string name="not_applicable">N/A</string>
 
     <!-- Stream sources -->
-    <string name="enable_dynamic_icon">Dynamic icon colors</string>
-    <string name="enable_dynamic_icon_desc">Use dynamic theme colors for the app icon. When disabled, the icon uses solid colors.</string>
+    <string name="enable_dynamic_icon">Match app icon to color</string>
+    <string name="enable_dynamic_icon_desc">Changes the launcher icon. Some launchers remove pinned shortcuts.</string>
+    <string name="themed_icons_note">Themed icons (Android 13+) are controlled by your launcher.</string>
     <string name="stream_sources">Stream sources</string>
     <string name="stream_source_order">Stream order</string>
     <string name="stream_source_web_clients">Web clients</string>
@@ -1023,16 +1026,16 @@
         <item quantity="one">%d profile</item>
         <item quantity="other">%d profiles</item>
     </plurals>
-    <string name="listening_to_metrolist">Listening to Meld</string>
+    <string name="listening_to_metrolist">Listening to Huni</string>
     <string name="copy_all_lyrics">Copy all lyrics</string>
     <string name="ai_error_unexpected">Unexpected translation result</string>
     <string name="ai_system_prompt_desc">Custom instructions sent to the AI model. Leave empty to use the default prompt</string>
     <string name="ai_system_prompt_placeholder">Use {lineCount} as a placeholder for the number of lines to translate</string>
     <string name="login_successful">Login successful!</string>
     <string name="discord_button_text_variables">Variables: {song_name}, {artist_name}, {album_name}</string>
-    <string name="discord_playing_metrolist">Playing Meld</string>
-    <string name="discord_watching_metrolist">Watching Meld</string>
-    <string name="discord_competing_metrolist">Competing in Meld</string>
+    <string name="discord_playing_metrolist">Playing Huni</string>
+    <string name="discord_watching_metrolist">Watching Huni</string>
+    <string name="discord_competing_metrolist">Competing in Huni</string>
     <string name="discord_activity_name_description">Custom name for the activity. Leave empty to use the default</string>
     <string name="credits_website">Website</string>
     <string name="credits_instagram">Instagram</string>
@@ -1169,12 +1172,12 @@
     <string name="added_to_play_next">Added to play next</string>
     <string name="added_to_queue">Added to the queue</string>
 
-    <string name="wrapped_end_thanks">Thanks for listening with Meld!</string>
+    <string name="wrapped_end_thanks">Thanks for listening with Huni!</string>
     <string name="wrapped_end_create_playlist">Create Your Wrapped Playlist</string>
     <string name="wrapped_end_creating_playlist">Creating...</string>
     <string name="wrapped_end_playlist_saved">Playlist Saved</string>
     <string name="listen_on_youtube_music">Listen on YouTube Music</string>
-    <string name="visit_metrolist">Visit Meld</string>
+    <string name="visit_metrolist">Visit Huni</string>
     <string name="error_restricted_not_logged_in">Some tracks may not play due to age or country restrictions. Try logging into YouTube in Settings to resolve this issue.</string>
     <string name="error_restricted_logged_in">This track is restricted (age or country) and cannot be played at this time.</string>
     <string name="subscribed_to_channel">Subscribed to channel</string>
@@ -1185,11 +1188,11 @@
     <string name="discord_button_1_url">Button 1 URL</string>
     <string name="discord_button_1_url_default">Default: current song on YouTube Music</string>
     <string name="discord_button_2_url">Button 2 URL</string>
-    <string name="discord_button_2_url_default">Default: Meld on GitHub</string>
+    <string name="discord_button_2_url_default">Default: Huni on GitHub</string>
     <string name="discord_button_url_description">Destination link opened when someone clicks the button. Must start with http:// or https://. Supports {song_name}, {artist_name}, {album_name}.</string>
     <string name="credits_developer">Remy Camiguel</string>
     <string name="credits_original_project">Original Project</string>
-    <string name="credits_based_on_metrolist">Huni is based on Meld, an open-source YouTube Music client.</string>
+    <string name="credits_based_on_metrolist">Huni is based on Metrolist, an open-source YouTube Music client.</string>
     <string name="filter_local_files">Local files</string>
     <string name="local_files">Local files</string>
     <string name="scan_local_files">Scan for local files</string>
@@ -1202,5 +1205,5 @@
         <item quantity="one">%d file</item>
         <item quantity="other">%d files</item>
     </plurals>
-    <string name="discord_information_warning">Meld uses Discord\'s public OAuth2 and Gateway APIs to share what you\'re listening to. Authorization happens through a local browser session that closes itself after capturing the code — nothing is sent to third-party servers. Your token is stored on this device in encrypted preferences and is never shared. Meld connects directly to wss://gateway.discord.gg to publish your activity, and only requests the minimum scope required (sdk.social_layer_presence).</string>
+    <string name="discord_information_warning">Huni uses Discord\'s public OAuth2 and Gateway APIs to share what you\'re listening to. Authorization happens through a local browser session that closes itself after capturing the code — nothing is sent to third-party servers. Your token is stored on this device in encrypted preferences and is never shared. Huni connects directly to wss://gateway.discord.gg to publish your activity, and only requests the minimum scope required (sdk.social_layer_presence).</string>
 </resources>

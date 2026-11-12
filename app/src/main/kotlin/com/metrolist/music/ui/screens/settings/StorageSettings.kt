@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
+
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -312,14 +313,14 @@ fun StorageSettings(
                 listOf(
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.storage),
-                        title = { Text(stringResource(R.string.downloaded_songs)) },
+                        title = { Text(stringResource(R.string.downloaded_songs), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = {
                             Text(text = Formatter.formatShortFileSize(context, downloadCacheSize))
                         },
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.clear_all),
-                        title = { Text(stringResource(R.string.clear_all_downloads)) },
+                        title = { Text(stringResource(R.string.clear_all_downloads), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         onClick = {
                             clearDownloads = true
                         },
@@ -332,10 +333,10 @@ fun StorageSettings(
             items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.cached),
-                    title = { Text(stringResource(R.string.enable_song_cache)) },
+                    title = { Text(stringResource(R.string.enable_song_cache), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     description = { Text(stringResource(R.string.enable_song_cache_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = enableSongCache,
                             onCheckedChange = onEnableSongCacheChange,
                             thumbContent = {
@@ -353,7 +354,7 @@ fun StorageSettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.cached),
-                    title = { Text(stringResource(R.string.max_song_cache_size)) },
+                    title = { Text(stringResource(R.string.max_song_cache_size), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     enabled = enableSongCache,
                     description = {
                         val songCacheValues =
@@ -413,7 +414,7 @@ fun StorageSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.clear_all),
-                        title = { Text(stringResource(R.string.clear_song_cache)) },
+                        title = { Text(stringResource(R.string.clear_song_cache), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         onClick = {
                             clearCacheDialog = true
                         },
@@ -426,7 +427,7 @@ fun StorageSettings(
             items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.offline),
-                    title = { Text(stringResource(R.string.pre_cache_tracks)) },
+                    title = { Text(stringResource(R.string.pre_cache_tracks), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     enabled = enableSongCache,
                     description = {
                         val preCacheValues = remember { listOf(0, 3, 5, 10, 20) }
@@ -456,11 +457,11 @@ fun StorageSettings(
                 ),
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.wifi_proxy),
-                    title = { Text(stringResource(R.string.pre_cache_only_wifi)) },
+                    title = { Text(stringResource(R.string.pre_cache_only_wifi), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     enabled = enableSongCache && preCacheTracks > 0,
                     description = { Text(stringResource(R.string.pre_cache_only_wifi_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = preCacheOnlyWifi,
                             onCheckedChange = onPreCacheOnlyWifiChange,
                             enabled = enableSongCache && preCacheTracks > 0,
@@ -486,7 +487,7 @@ fun StorageSettings(
                 listOf(
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.manage_search),
-                        title = { Text(stringResource(R.string.max_image_cache_size)) },
+                        title = { Text(stringResource(R.string.max_image_cache_size), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         description = {
                             val imageCacheValues =
                                 remember { listOf(0, 128, 256, 512, 1024, 2048, 4096, 8192) }
@@ -535,7 +536,7 @@ fun StorageSettings(
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.clear_all),
-                        title = { Text(stringResource(R.string.clear_image_cache)) },
+                        title = { Text(stringResource(R.string.clear_image_cache), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         onClick = {
                             clearImageCacheDialog = true
                         },
@@ -545,7 +546,9 @@ fun StorageSettings(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.storage)) },
+        title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.storage))
+                        },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

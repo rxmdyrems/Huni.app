@@ -117,7 +117,7 @@ class MusicDatabase(
         SortedSongAlbumMap::class,
         PlaylistSongMapPreview::class,
     ],
-    // Meld's schema lineage is canonical: every existing install is on Meld's 39, whose
+    // Huni's schema lineage is canonical: every existing install is on Huni's 39, whose
     // 34..39 exports differ from upstream's. Upstream's own additions (artist.cachedPageJson
     // and the three speed_dial_item columns) therefore land here as 40 rather than by
     // adopting upstream's 37/38.
@@ -159,7 +159,7 @@ class MusicDatabase(
         AutoMigration(from = 34, to = 35),
         // No Migration35To36 spec on purpose: v0.6.7 (891c1b559) restored the original 36.json
         // after it had been edited retroactively, and 36->37 is what adds isCached,
-        // playbackPosition and uploadEntityId in Meld's lineage.
+        // playbackPosition and uploadEntityId in Huni's lineage.
         AutoMigration(from = 35, to = 36),
         AutoMigration(from = 36, to = 37),
         AutoMigration(from = 37, to = 38),

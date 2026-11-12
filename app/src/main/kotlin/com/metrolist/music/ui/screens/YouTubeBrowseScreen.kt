@@ -197,7 +197,9 @@ fun YouTubeBrowseScreen(
     }
 
     TopAppBar(
-        title = { Text(browseResult?.title.orEmpty()) },
+        title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(browseResult?.title.orEmpty())
+                        },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

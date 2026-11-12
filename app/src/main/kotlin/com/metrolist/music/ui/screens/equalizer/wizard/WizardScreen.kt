@@ -66,13 +66,11 @@ private fun WizardScreenContent(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = when (state.currentStep) {
+                            com.metrolist.music.ui.component.HuniScreenTitle(when (state.currentStep) {
                             WizardStep.MODEL_SELECTION -> stringResource(R.string.wizard_select_model)
                             WizardStep.VARIANT_SELECTION -> stringResource(R.string.wizard_select_profiles)
-                        }
-                    )
-                },
+                        })
+                        },
                 navigationIcon = {
                     IconButton(onClick = if (state.canGoBack) onBackClicked else onNavigateBack) {
                         Icon(painterResource(R.drawable.arrow_back), contentDescription = null)

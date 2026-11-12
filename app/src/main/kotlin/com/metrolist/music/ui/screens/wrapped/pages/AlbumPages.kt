@@ -51,7 +51,6 @@ import com.metrolist.music.R
 import com.metrolist.music.db.entities.Album
 import com.metrolist.music.ui.screens.wrapped.components.AnimatedBackground
 import com.metrolist.music.ui.screens.wrapped.components.ShapeType
-import com.metrolist.music.ui.theme.bbh_bartle
 import kotlinx.coroutines.delay
 
 @Composable
@@ -102,7 +101,6 @@ fun WrappedTotalAlbumsScreen(uniqueAlbumCount: Int, isVisible: Boolean) {
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    fontFamily = bbh_bartle,
                     drawStyle = Stroke(with(density) { 2.dp.toPx() })
                 )
 
@@ -170,7 +168,6 @@ fun WrappedTopAlbumScreen(topAlbum: Album?, isVisible: Boolean) {
                 Text(
                     text = stringResource(R.string.wrapped_top_album_title),
                     style = TextStyle(
-                        fontFamily = bbh_bartle,
                         fontSize = 40.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -248,7 +245,6 @@ fun WrappedTop5AlbumsScreen(topAlbums: List<Album>, isVisible: Boolean) {
                 Text(
                     text = stringResource(R.string.wrapped_top_5_albums_title),
                     style = TextStyle(
-                        fontFamily = bbh_bartle,
                         fontSize = 48.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -272,7 +268,6 @@ fun WrappedTop5AlbumsScreen(topAlbums: List<Album>, isVisible: Boolean) {
                         ) {
                             Text(
                                 text = "${index + 1}",
-                                fontFamily = bbh_bartle,
                                 fontSize = 36.sp,
                                 color = Color.White.copy(alpha = 0.8f),
                                 modifier = Modifier.width(40.dp)

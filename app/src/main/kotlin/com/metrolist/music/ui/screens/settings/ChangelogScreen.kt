@@ -1,92 +1,113 @@
 package com.metrolist.music.ui.screens.settings
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.metrolist.music.BuildConfig
 import com.metrolist.music.R
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+data class ChangelogEntry(val version: String, val date: String, val groups: List<Pair<String?, List<String>>>)
+
+private fun parseChangelog(markdown: String): List<ChangelogEntry> {
+    val entries = mutableListOf<ChangelogEntry>()
+    var current: ChangelogEntry? = null
+    var group: String? = null
+    val groups = mutableListOf<Pair<String?, MutableList<String>>>()
+    fun finish() { current?.let { entries += it.copy(groups = groups.map { (name, items) -> name to items.toList() }) } }
+    markdown.lineSequence().forEach { line ->
+        val heading = Regex("^##\\s+v?([^\\s(]+)(?:\\s*\\(([^)]+)\\))?").find(line)
+        if (heading != null) {
+            finish(); groups.clear(); group = null
+            current = ChangelogEntry(heading.groupValues[1], heading.groupValues.getOrNull(2).orEmpty(), emptyList())
+        } else if (current != null && line.trim().startsWith("### ")) {
+            group = line.trim().removePrefix("### ").trim()
+            groups.add(group to mutableListOf<String>())
+        } else if (current != null && line.trim().startsWith("- ")) {
+            if (groups.isEmpty()) groups += null to mutableListOf()
+            groups.last().second += line.trim().removePrefix("- ").trim()
+        }
+    }
+    finish()
+    return entries
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChangelogScreen(onDismiss: () -> Unit) {
+    val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
-    val huniReleasesUrl = "https://github.com/rxmdyrems/Huni.app/releases"
-    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
-
+    val entries = remember {
+        runCatching { context.assets.open("CHANGELOG.md").bufferedReader().use { parseChangelog(it.readText()) } }.getOrDefault(emptyList())
+    }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = MaterialTheme.colorScheme.background,
         dragHandle = { BottomSheetDefaults.DragHandle() },
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(bottom = 92.dp),
             ) {
-                item {
-                    Text(
-                        text = "Huni updates",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                        textAlign = TextAlign.Center,
-                    )
-                }
-                item {
-                    Surface(
+                item { Text("Changelog", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 4.dp)) }
+                items(entries) { entry ->
+                    Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(22.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainer,
-                        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
                     ) {
-                        Column(
-                            modifier = Modifier.padding(20.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Surface(shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)) {
-                                Text("Huni 0.9.2", modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+                        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text("v${entry.version}", fontFamily = FontFamily.Default, fontSize = 16.sp)
+                                if (entry.version == BuildConfig.BASE_VERSION_NAME) AssistChip(onClick = {}, label = { Text("Installed") })
                             }
-                            Text("A more personal Huni", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                            Text("This update brings Huni's own identity and a calmer, greener listening experience.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                            HuniChange("A refreshed dark-green theme with softer surfaces and consistent rounded shapes.")
-                            HuniChange("A cleaner home experience with refined filters, artwork cards, and navigation.")
-                            HuniChange("A redesigned About page with Huni branding and the developer profile.")
-                            HuniChange("Existing playback, library, account, and settings features are preserved.")
+                            if (entry.date.isNotBlank()) Text(entry.date, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            entry.groups.forEach { (name, bullets) ->
+                                if (!name.isNullOrBlank()) Text(name, style = MaterialTheme.typography.titleSmall)
+                                bullets.forEach { Text("• $it", fontSize = 16.sp) }
+                            }
                         }
                     }
                 }
-                item {
-                    Text("More Huni release notes will appear here as Huni versions are published.", modifier = Modifier.fillMaxWidth(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
-                }
+                item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
             }
             ExtendedFloatingActionButton(
-                onClick = { uriHandler.openUri(huniReleasesUrl) },
-                icon = { Icon(painterResource(R.drawable.github), contentDescription = null, modifier = Modifier.size(22.dp)) },
-                text = { Text("Huni on GitHub") },
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                onClick = { uriHandler.openUri("https://github.com/rxmdyrems/Huni.app/releases") },
+                icon = { androidx.compose.material3.Icon(painterResource(R.drawable.github), null, Modifier.size(22.dp)) },
+                text = { Text("View all releases on GitHub") },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
             )
         }
-    }
-}
-
-@Composable
-private fun HuniChange(text: String) {
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
-        Text("•", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
     }
 }

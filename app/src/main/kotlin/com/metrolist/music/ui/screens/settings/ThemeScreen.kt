@@ -169,7 +169,9 @@ fun ThemeScreen(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.theme_colors)) },
+        title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.theme_colors))
+                        },
         navigationIcon = {
             IconButton(onClick = { navController.navigateUp() }) {
                 Icon(

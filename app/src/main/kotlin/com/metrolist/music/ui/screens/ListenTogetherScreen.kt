@@ -418,7 +418,9 @@ fun ListenTogetherScreen(
 
     if (shouldShowTopBar) {
         TopAppBar(
-            title = { Text(stringResource(R.string.together)) },
+            title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.together))
+                        },
             navigationIcon = {
                 IconButton(
                     onClick = navController::navigateUp,
@@ -824,7 +826,7 @@ private fun UserAvatar(
                 ) {
                     Text(
                         text = user.username.take(1).uppercase(),
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color =
                             when {

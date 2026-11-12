@@ -1,9 +1,6 @@
-/**
- * Metrolist Project (C) 2026
- * Licensed under GPL-3.0 | See git history for contributors
- */
-
 package com.metrolist.music.ui.screens.settings
+
+import com.metrolist.music.ui.component.HuniSwitch
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -20,10 +17,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,221 +36,98 @@ import androidx.navigation.NavController
 import com.metrolist.music.BuildConfig
 import com.metrolist.music.LocalPlayerAwareWindowInsets
 import com.metrolist.music.R
-import com.metrolist.music.constants.CheckForUpdatesKey
-import com.metrolist.music.constants.UpdateNotificationsEnabledKey
 import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.component.Material3SettingsGroup
 import com.metrolist.music.ui.component.Material3SettingsItem
 import com.metrolist.music.ui.utils.backToMain
+import com.metrolist.music.utils.ReleaseInfo
 import com.metrolist.music.utils.Updater
 import com.metrolist.music.utils.rememberPreference
+import com.metrolist.music.constants.CheckForUpdatesKey
+import com.metrolist.music.constants.UpdateNotificationsEnabledKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.DateFormat
+import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UpdaterScreen(
-    navController: NavController
-) {
-    val (checkForUpdates, onCheckForUpdatesChange) = rememberPreference(CheckForUpdatesKey, true)
-    val (updateNotifications, onUpdateNotificationsChange) = rememberPreference(UpdateNotificationsEnabledKey, true)
-
+fun UpdaterScreen(navController: NavController) {
     val context = LocalContext.current
-    var isChecking by remember { mutableStateOf(false) }
-    var updateAvailable by remember { mutableStateOf(false) }
-    var latestVersion by remember { mutableStateOf<String?>(null) }
-    var showChangelog by remember { mutableStateOf(false) }
-    var changelogContent by remember { mutableStateOf<String?>(null) }
-    var checkError by remember { mutableStateOf<String?>(null) }
-    val failedToCheckUpdatesTemplate = stringResource(R.string.failed_to_check_updates)
+    val scope = rememberCoroutineScope()
+    val (checkForUpdates, onCheckForUpdatesChange) = rememberPreference(CheckForUpdatesKey, true)
+    val (notifications, onNotificationsChange) = rememberPreference(UpdateNotificationsEnabledKey, true)
+    var checking by remember { mutableStateOf(false) }
+    var release by remember { mutableStateOf<ReleaseInfo?>(null) }
+    var available by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf(false) }
+    var installError by remember { mutableStateOf<String?>(null) }
+    var lastChecked by remember { mutableStateOf<Long?>(null) }
 
-    val coroutineScope = rememberCoroutineScope()
-
-    fun performManualCheck() {
-        coroutineScope.launch {
-            isChecking = true
-            checkError = null
-            withContext(Dispatchers.IO) {
-                Updater
-                    .checkForUpdate(forceRefresh = true)
-                    .onSuccess { (releaseInfo, hasUpdate) ->
-                        if (releaseInfo != null) {
-                            latestVersion = releaseInfo.versionName
-                            updateAvailable = hasUpdate
-                            changelogContent = releaseInfo.description
-                        }
-                    }.onFailure {
-                        checkError = String.format(failedToCheckUpdatesTemplate, it.message ?: "Unknown error")
-                    }
-            }
-            isChecking = false
+    fun check(force: Boolean) {
+        if (checking) return
+        scope.launch {
+            checking = true; error = false; installError = null
+            val result = withContext(Dispatchers.IO) { Updater.checkForUpdate(force) }
+            result.onSuccess { (info, update) ->
+                release = info; available = update; lastChecked = Updater.lastCheckTime
+            }.onFailure { error = true }
+            checking = false
         }
     }
+    LaunchedEffect(checkForUpdates) { if (checkForUpdates) check(false) }
 
     Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .windowInsetsPadding(
-                    LocalPlayerAwareWindowInsets.current.only(
-                        WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
-                    ),
-                ).verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxWidth()
+            .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
+            .verticalScroll(rememberScrollState()).padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Spacer(
-            Modifier.windowInsetsPadding(
-                LocalPlayerAwareWindowInsets.current.only(
-                    WindowInsetsSides.Top,
-                ),
+        Spacer(Modifier.windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Top)))
+        Spacer(Modifier.height(4.dp))
+        Material3SettingsGroup(
+            title = "Current version",
+            items = listOf(Material3SettingsItem(title = { Text("${BuildConfig.VERSION_NAME} · Universal", maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) }, description = { Text("Package: ${BuildConfig.APPLICATION_ID}") })),
+        )
+        Spacer(Modifier.height(16.dp))
+        Material3SettingsGroup(
+            title = "Update settings",
+            items = listOf(
+                Material3SettingsItem(title = { Text("Check for updates", maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) }, icon = painterResource(R.drawable.update), trailingContent = { com.metrolist.music.ui.component.HuniSwitch(checked = checkForUpdates, onCheckedChange = onCheckForUpdatesChange) }, onClick = { onCheckForUpdatesChange(!checkForUpdates) }),
+                Material3SettingsItem(title = { Text("Update notifications", maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) }, icon = painterResource(R.drawable.notification), trailingContent = { com.metrolist.music.ui.component.HuniSwitch(checked = notifications, onCheckedChange = onNotificationsChange) }, onClick = { onNotificationsChange(!notifications) }),
             ),
         )
-
-        Spacer(Modifier.height(4.dp))
-
-        Material3SettingsGroup(
-            title = stringResource(R.string.current_version),
-            items =
-                listOf(
-                    Material3SettingsItem(
-                        title = {
-                            Text(stringResource(R.string.version_format, BuildConfig.VERSION_NAME))
-                        },
-                        description = {
-                            val arch = BuildConfig.ARCHITECTURE
-                            val variant = if (BuildConfig.CAST_AVAILABLE) "GMS" else "FOSS"
-                            Text("$arch - $variant")
-                        },
-                    ),
-                ),
-        )
-
         Spacer(Modifier.height(16.dp))
-
         Material3SettingsGroup(
-            title = stringResource(R.string.update_settings),
-            items =
-                buildList {
-                    add(
-                        Material3SettingsItem(
-                            title = { Text(stringResource(R.string.check_for_updates)) },
-                            icon = painterResource(R.drawable.update),
-                            trailingContent = {
-                                Switch(
-                                    checked = checkForUpdates,
-                                    onCheckedChange = onCheckForUpdatesChange,
-                                )
-                            },
-                            onClick = { onCheckForUpdatesChange(!checkForUpdates) },
-                        ),
-                    )
-
-                    if (checkForUpdates) {
-                        add(
-                            Material3SettingsItem(
-                                title = { Text(stringResource(R.string.update_notifications)) },
-                                icon = painterResource(R.drawable.notification),
-                                trailingContent = {
-                                    Switch(
-                                        checked = updateNotifications,
-                                        onCheckedChange = onUpdateNotificationsChange,
-                                    )
-                                },
-                                onClick = { onUpdateNotificationsChange(!updateNotifications) },
-                            ),
-                        )
-                    }
-                },
+            title = "Updates",
+            items = listOf(Material3SettingsItem(
+                icon = painterResource(R.drawable.refresh),
+                title = { Text(if (checking) "Checking for updates…" else if (available && release != null) "Update available: v${release!!.versionName}" else "Check for updates", maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
+                description = { Text(if (error) "Couldn't check for updates. Try again." else if (!available && release != null) "You're on the latest version (${BuildConfig.BASE_VERSION_NAME})" else lastChecked?.let { "Last checked: ${DateFormat.getDateTimeInstance().format(Date(it))}" } ?: "GitHub releases/latest") },
+                trailingContent = { if (checking) CircularProgressIndicator(Modifier.padding(end = 12.dp), strokeWidth = 2.dp) },
+                onClick = { check(true) },
+            )),
         )
-
-        Spacer(Modifier.height(16.dp))
-
-        Material3SettingsGroup(
-            title = stringResource(R.string.check_for_updates_title),
-            items =
-                listOf(
-                    Material3SettingsItem(
-                        icon = painterResource(R.drawable.refresh),
-                        title = {
-                            if (isChecking) {
-                                Text(stringResource(R.string.checking_for_updates))
-                            } else if (latestVersion != null) {
-                                Text(stringResource(R.string.latest_version_format, latestVersion!!))
-                            } else {
-                                Text(stringResource(R.string.check_for_updates_button))
-                            }
-                        },
-                        trailingContent = {
-                            if (isChecking) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.padding(end = 16.dp),
-                                    strokeWidth = 2.dp,
-                                )
-                            } else if (updateAvailable) {
-                                Icon(
-                                    painter = painterResource(R.drawable.download),
-                                    contentDescription = stringResource(R.string.update_available_title),
-                                    tint = MaterialTheme.colorScheme.primary,
-                                )
-                            }
-                        },
-                        onClick = { if (!isChecking) performManualCheck() },
-                    ),
-                ),
-        )
-
-        checkError?.let {
-            Spacer(Modifier.height(12.dp))
-            Text(
-                text = it,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(horizontal = 16.dp),
-            )
-        }
-
-        if (updateAvailable && latestVersion != null) {
+        if (available && release != null) {
             Spacer(Modifier.height(16.dp))
-            Button(
-                onClick = { showChangelog = !showChangelog },
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-            ) {
-                Text(if (showChangelog) stringResource(R.string.hide_changelog) else stringResource(R.string.view_changelog))
-            }
-
-            if (showChangelog && changelogContent != null) {
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text = changelogContent!!,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                )
-            }
+            Text(release!!.description.ifBlank { "No release notes provided." }, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.height(12.dp))
+            Button(onClick = {
+                scope.launch {
+                    installError = withContext(Dispatchers.IO) { Updater.downloadAndInstall(context, release!!).exceptionOrNull()?.message }
+                }
+            }, modifier = Modifier.fillMaxWidth()) { Text("Download and install") }
         }
-
+        installError?.let { message ->
+            Spacer(Modifier.height(12.dp))
+            Text(if (message.contains("signature", true)) "This update uses a new signing key. Uninstall Huni once and install it again. Your on-device data will be cleared." else "Couldn't check for updates. Try again.", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+        }
         Spacer(Modifier.height(32.dp))
     }
-
-    TopAppBar(
-        title = { Text(stringResource(R.string.updater)) },
-        navigationIcon = {
-            IconButton(
-                onClick = navController::navigateUp,
-                onLongClick = navController::backToMain,
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.arrow_back),
-                    contentDescription = null,
-                )
-            }
-        },
-    )
+    TopAppBar(title = {
+                            com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.updater))
+                        }, navigationIcon = {
+        IconButton(onClick = navController::navigateUp, onLongClick = navController::backToMain) { Icon(painterResource(R.drawable.arrow_back), null) }
+    })
 }

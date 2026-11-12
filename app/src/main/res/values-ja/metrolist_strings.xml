@@ -203,7 +203,7 @@
     <string name="lyrics_offset">歌詞のタイミングを調整</string>
     <string name="google_cast_description">Chromecastなどのキャスト対応のデバイスに音声をキャストできます</string>
     <string name="last_fm_send_likes">高評価/低評価を反映</string>
-    <string name="last_fm_send_likes_description">Meldで曲に高評価/低評価をつけると、Last.fmでもラブ/アンラブされます</string>
+    <string name="last_fm_send_likes_description">Huniで曲に高評価/低評価をつけると、Last.fmでもラブ/アンラブされます</string>
     <string name="edit_desc">タイトルやアーティスト名を編集します</string>
     <string name="start_radio_desc">この項目をもとにラジオを開始します</string>
     <string name="play_next_desc">キューの先頭に追加します</string>
@@ -218,7 +218,7 @@
     <string name="equalizer_desc">オーディオイコライザーを調整します</string>
     <string name="listen_together">Listen Together</string>
     <string name="play_pause">再生/停止</string>
-    <string name="wrapped_intro_title">MELD</string>
+    <string name="wrapped_intro_title">Huni</string>
     <string name="none">なし</string>
     <string name="cache_size_warning_confirm">続行</string>
     <string name="wrapped_top_song_album_art_content_description">アルバムアート</string>
@@ -277,7 +277,7 @@
     <string name="crash_title">アプリがクラッシュしました</string>
     <string name="crash_share_logs">クラッシュログを共有</string>
     <string name="crash_share_title">クラッシュレポートを共有</string>
-    <string name="crash_report_subject">Meldのクラッシュレポート</string>
+    <string name="crash_report_subject">Huniのクラッシュレポート</string>
     <string name="crash_close">閉じる</string>
     <string name="crash_no_log">クラッシュログがありません</string>
     <string name="palette_dynamic">ダイナミック</string>
@@ -348,7 +348,7 @@
     <string name="wrapped_total_songs_subtitle">ユニークな曲たち！</string>
     <string name="wrapped_intro_subtitle">今年聴いてきた曲を振り返る時が来ました…</string>
     <string name="wrapped_intro_button">さあ、始めよう！</string>
-    <string name="wrapped_logo_content_description">Meldロゴ</string>
+    <string name="wrapped_logo_content_description">Huniロゴ</string>
     <string name="wrapped_ready_title">あなたのWrappedが完成しました！</string>
     <string name="wrapped_ready_subtitle">今年あなたが夢中になった音楽を見てみましょう…</string>
     <string name="wrapped_thank_you">聴いてくれてありがとう！</string>
@@ -369,9 +369,9 @@
     <string name="failed_to_parse_proxy">プロキシURLを解析できません</string>
     <string name="error_playback_failed">再生に失敗しました</string>
     <string name="no_song_playing">再生中の曲はありません</string>
-    <string name="tap_to_open">タップしてMeldを開く</string>
+    <string name="tap_to_open">タップしてHuniを開く</string>
     <string name="previous">前へ</string>
-    <string name="tap_to_play">タップしてMeldを開く</string>
+    <string name="tap_to_play">タップしてHuniを開く</string>
     <string name="listen_together_you_are_host">あなたはホストです</string>
     <string name="listen_together_you_are_guest">あなたはゲストです</string>
     <string name="listen_together_join_requests">参加リクエスト</string>
@@ -453,7 +453,7 @@
     <string name="clear_recognition_history_confirm">認識履歴をすべて削除しますか？</string>
     <string name="delete_from_history">履歴から削除</string>
     <string name="re_listen">もう一度聴く</string>
-    <string name="play_on_app">Meldで再生</string>
+    <string name="play_on_app">Huniで再生</string>
     <string name="map_csv_columns">CSV列の対応設定</string>
     <string name="first_row_is_header">1行目をヘッダーとして扱う</string>
     <string name="artist_name_column">アーティスト名の列</string>
@@ -569,7 +569,7 @@
     <string name="credits_view_repo">リポジトリを表示</string>
     <string name="buy_mo_a_coffee">コーヒーをおごる</string>
     <string name="community_and_info">コミュニティと情報</string>
-    <string name="metrolist">MELD</string>
+    <string name="metrolist">Huni</string>
     <string name="wanna_play_favorite_song">お気に入りの曲を再生しますか？</string>
     <string name="yeah">はい</string>
     <string name="stands_with_palestine">このプロジェクトはパレスチナを支持しています 🇵🇸</string>
@@ -708,7 +708,7 @@
     <string name="recognition_notification_processing">認識中…</string>
     <string name="recognition_notification_no_match">一致する曲が見つかりませんでした</string>
     <string name="recognition_notification_failed">認識に失敗しました</string>
-    <string name="listen_on_metrolist">Meldで聴く</string>
+    <string name="listen_on_metrolist">Huniで聴く</string>
     <string name="android_auto">Android Auto</string>
     <string name="android_auto_visible_sections">表示する項目</string>
     <string name="android_auto_reorder_hint">項目をタップするとオン/オフを切り替えられます。長押しで並び替えができます。先頭の項目がデフォルトで表示されます</string>
@@ -866,15 +866,15 @@
     <plurals name="profiles_count">
         <item quantity="other">%dプロファイル</item>
     </plurals>
-    <string name="listening_to_metrolist">Meldで再生中</string>
+    <string name="listening_to_metrolist">Huniで再生中</string>
     <string name="crossfade_beta_title">ベータ機能</string>
     <string name="crossfade_beta_message">曲のクロスフェードは新機能のため、不具合が発生する場合があります。問題があればご報告してください。\n\n技術的な制限により、クロスフェードを使用中はオフロード再生が無効になります。</string>
     <string name="ai_error_unexpected">翻訳結果が正しくありません</string>
     <string name="login_successful">ログインに成功しました！</string>
     <string name="discord_button_text_variables">利用可能な変数：{song_name}, {artist_name}, {album_name}</string>
-    <string name="discord_playing_metrolist">Meldで再生中</string>
-    <string name="discord_watching_metrolist">Meldで視聴中</string>
-    <string name="discord_competing_metrolist">Meldで大会に参加中</string>
+    <string name="discord_playing_metrolist">Huniで再生中</string>
+    <string name="discord_watching_metrolist">Huniで視聴中</string>
+    <string name="discord_competing_metrolist">Huniで大会に参加中</string>
     <string name="discord_activity_name_description">アクティビティのカスタム名（空欄の場合はデフォルトを使用）</string>
     <string name="lyrics_romanize_hindi">ヒンディー語の歌詞にローマ字を追加</string>
     <string name="lyrics_romanize_punjabi">パンジャブ語の歌詞にローマ字を追加</string>
@@ -942,7 +942,7 @@
     <string name="wrapped_end_creating_playlist">作成中...</string>
     <string name="wrapped_end_playlist_saved">プレイリストを保存しました</string>
     <string name="listen_on_youtube_music">YouTube Musicで聴く</string>
-    <string name="visit_metrolist">Meldに移動</string>
+    <string name="visit_metrolist">Huniに移動</string>
     <string name="listen_together_leave_room">ルームから退出</string>
     <string name="enable_wavy_slider">波のシークバー</string>
     <string name="wrapped_end_create_playlist">Wrappedプレイリストを作成</string>
@@ -957,7 +957,7 @@
     <string name="reconnect">再接続</string>
     <string name="mini_player_outline">ミニプレーヤーの枠線</string>
     <string name="wrapped_artist_image_content_description">アーティスト画像</string>
-    <string name="wrapped_end_thanks">Meldで聴いてくれてありがとう！</string>
+    <string name="wrapped_end_thanks">Huniで聴いてくれてありがとう！</string>
     <string name="error_copied">エラー情報をクリップボードにコピーしました</string>
     <string name="error_copy_hint">エラー情報をコピーして、開発者が問題を特定できるようにします</string>
     <string name="queue_widget_description">再生キューを確認できる音楽プレーヤー</string>

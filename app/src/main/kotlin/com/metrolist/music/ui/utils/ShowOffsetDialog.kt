@@ -160,7 +160,7 @@ fun ShowOffsetDialog(songProvider: () -> SongEntity?) {
 
             Text(
                 text = "ms",
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.Medium
             )
