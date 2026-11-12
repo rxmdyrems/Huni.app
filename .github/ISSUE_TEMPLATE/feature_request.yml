@@ -1,5 +1,5 @@
 name: Feature request
-description: Suggest an idea for Meld
+description: Suggest an idea for Huni
 labels: [enhancement]
 body:
   - type: checkboxes
