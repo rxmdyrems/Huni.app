@@ -1,8 +1,10 @@
 # Huni Changelog
 ## Unreleased
-### Changed
-- Rewrote the README with banner, buttons, tech stack and install guide.
-- Removed leftover upstream naming from documentation.
+
+## v0.9.10 (2026-11-12)
+### Fixed
+- Local audio files (MP3, FLAC, OGG, WAV, AAC and others) play again.
+- Playback error report shows the correct time and no YouTube details for local files.
 
 ## v0.9.9 (2026-11-11)
 ### Changed
