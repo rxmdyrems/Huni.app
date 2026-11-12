@@ -1,5 +1,8 @@
 # Huni Changelog
 ## Unreleased
+### Changed
+- Rewrote the README with banner, buttons, tech stack and install guide.
+- Removed leftover upstream naming from documentation.
 
 ## v0.9.9 (2026-11-11)
 ### Changed
