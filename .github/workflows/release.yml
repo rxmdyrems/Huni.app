@@ -279,9 +279,18 @@ jobs:
         run: |
           echo "Creating release v${{ needs.check-version.outputs.new_version }}"
 
-          gh release create "v${{ needs.check-version.outputs.new_version }}" \
+          TAG="v${{ needs.check-version.outputs.new_version }}"
+          if git rev-parse --verify "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "::error::Tag $TAG already exists; refusing to move it"
+            exit 1
+          fi
+          git tag "$TAG" "$GITHUB_SHA"
+          git push origin "refs/tags/$TAG"
+
+          gh release create "$TAG" \
             --title "Huni v${{ needs.check-version.outputs.new_version }}" \
             --notes-file release_notes.md \
+            --verify-tag \
             --draft \
             --target "$GITHUB_SHA" \
             --latest=false \
