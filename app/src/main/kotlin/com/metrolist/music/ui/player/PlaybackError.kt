@@ -82,13 +82,20 @@ fun PlaybackError(
             isJobCancelled -> stringResource(R.string.error_job_cancelled)
             else -> null
         }
+    val isUnsupportedLocalFormat =
+        mediaMetadata?.id?.startsWith("local:") == true &&
+            error.errorCode == PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED
     val errorMessage =
-        playbackErrorMessages(
-            isOnline = isOnline,
-            offlineMessage = stringResource(R.string.error_offline_playback),
-            guidance = guidance,
-            rawErrorMessages = rawErrorMessages,
-        ).joinToString("\n").ifBlank { stringResource(R.string.error_unknown) }
+        if (isUnsupportedLocalFormat) {
+            "This file format isn't supported"
+        } else {
+            playbackErrorMessages(
+                isOnline = isOnline,
+                offlineMessage = stringResource(R.string.error_offline_playback),
+                guidance = guidance,
+                rawErrorMessages = rawErrorMessages,
+            ).joinToString("\n").ifBlank { stringResource(R.string.error_unknown) }
+        }
     val causeSummary =
         remember(causes) {
             causes
