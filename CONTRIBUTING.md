@@ -12,7 +12,7 @@ cd Huni.app
 ./gradlew assembleFossDebug --console=plain
 ```
 
-The normal local build is the `foss` flavor. `gms` adds Google Cast support and `izzy` disables the updater. The default application ID is `com.remycamiguel.huni`; debug builds add the `.debug` suffix unless `METROLIST_APPLICATION_ID` is set. The debug APK is at `app/build/outputs/apk/foss/debug/app-foss-debug.apk`.
+The normal local build is the `foss` flavor. `gms` adds Google Cast support and `izzy` disables the updater. Release variants always use `com.remycamiguel.huni`; debug builds use `com.remycamiguel.huni.debug`. The debug APK is at `app/build/outputs/apk/foss/debug/app-foss-debug.apk`.
 
 For optional local values, copy `local.properties.sample` to `local.properties`. Never commit it or any credentials. Source strings are in `app/src/main/res/values/metrolist_strings.xml`; do not rename the file.
 
@@ -28,6 +28,12 @@ Palette launcher assets are generated with `python3 scripts/generate_launcher_ic
 ```
 
 Contributors do not bump `versionName` or `versionCode`. The maintainer handles versions and releases. Contributors build unsigned or debug APKs locally. Signed releases are made only by the maintainer through GitHub Actions using `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD`. Never add their values to the repository.
+
+## Release-text emoji style
+Use one prefix emoji per line: ✨ new, 🎨 UI, 🐛 fix, ⚡ performance, 🔒 security, 🔄 updates, 📦 release, 🔧 under the hood.
+Prefix changelog entries, GitHub release notes, update-dialog text, and local update-notification text.
+Keep lines short; do not place emojis inside sentences or use more than one emoji per line.
+Edit English base strings only; leave localized string files untouched.
 
 ## Branches and commits
 

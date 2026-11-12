@@ -8,8 +8,7 @@ if (localPropertiesFile.exists()) {
 }
 val serviceCredential = localProperties.getProperty("huni.serviceCredential", "")
 
-val baseApplicationId = "com.metrolist.music"
-val applicationIdOverride = System.getenv("METROLIST_APPLICATION_ID")?.takeIf { it.isNotBlank() }
+val baseApplicationId = "com.remycamiguel.huni"
 val appNameOverride = System.getenv("METROLIST_APP_NAME")?.takeIf { it.isNotBlank() }
 val buildCommit =
     System.getenv("METROLIST_BUILD_COMMIT")
@@ -38,12 +37,12 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = applicationIdOverride ?: "com.remycamiguel.huni"
+        applicationId = baseApplicationId
         buildConfigField("String", "SERVICE_TOKEN", "\"${serviceCredential.replace("\\", "\\\\").replace("\"", "\\\"")}\"")
         minSdk = 26
         targetSdk = 36
-        versionCode = 36
-        versionName = "0.9.10"
+        versionCode = 37
+        versionName = "0.9.11"
         val baseVersionName = requireNotNull(versionName)
         buildConfigField("String", "BASE_VERSION_NAME", "\"$baseVersionName\"")
         buildCommit?.let { versionName = "$baseVersionName+$it" }
@@ -134,9 +133,7 @@ android {
             }
         }
         debug {
-            if (applicationIdOverride == null) {
-                applicationIdSuffix = ".debug"
-            }
+            applicationIdSuffix = ".debug"
             isDebuggable = true
             if (appNameOverride == null) {
                 resValue("string", "app_name", "Huni")

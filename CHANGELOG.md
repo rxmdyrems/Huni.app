@@ -1,14 +1,16 @@
-# 📜 Huni Changelog
-
-> Every notable change to Huni, newest first.&nbsp;&nbsp;✨ Added · 🔄 Changed · 🛠️ Fixed
+# Huni Changelog
+> Every notable change to Huni, newest first. New release-text emoji prefixes follow CONTRIBUTING.md.
 
 ## Unreleased
-
-### 🔄 Changed
-- Fixed the CI debug build keystore.
-
 ---
-
+## v0.9.11 (2026-11-13)
+### ✨ New
+- ✨ Added a local manga reader.
+### 🔧 Under the hood
+- 🔧 Fixed the CI debug build keystore.
+- 🔧 Kept release APKs on Huni's stable package ID.
+- 🔧 Added release APK identity verification and SHA-256 checksums.
+---
 ## v0.9.10 (2026-11-12)
 
 ### 🛠️ Fixed

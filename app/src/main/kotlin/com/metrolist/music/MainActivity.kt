@@ -563,7 +563,7 @@ class MainActivity : FragmentActivity() {
                             if (update.isKmp) {
                                 getString(R.string.kmp_upgrade_warning)
                             } else {
-                                update.release.versionName
+                                getString(R.string.update_available_message, update.release.versionName)
                             }
                         val notification =
                             NotificationCompat
