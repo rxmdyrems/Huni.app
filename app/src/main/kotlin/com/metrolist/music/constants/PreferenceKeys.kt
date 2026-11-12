@@ -190,6 +190,13 @@ val DiscordUserStatusKey = stringPreferencesKey("discordUserStatus")
 // Google Cast
 val EnableGoogleCastKey = booleanPreferencesKey("enableGoogleCast")
 
+// Local manga reader
+val ReaderReadingModeKey = stringPreferencesKey("readerReadingMode")
+val ReaderScaleModeKey = stringPreferencesKey("readerScaleMode")
+val ReaderBackgroundKey = stringPreferencesKey("readerBackground")
+val ReaderFullscreenKey = booleanPreferencesKey("readerFullscreen")
+val ReaderKeepScreenOnKey = booleanPreferencesKey("readerKeepScreenOn")
+
 // Listen Together
 val ListenTogetherServerUrlKey = stringPreferencesKey("listenTogetherServerUrl")
 val ListenTogetherUsernameKey = stringPreferencesKey("listenTogetherUsername")
