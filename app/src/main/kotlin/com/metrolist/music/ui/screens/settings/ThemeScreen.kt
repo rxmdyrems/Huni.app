@@ -47,6 +47,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import com.metrolist.music.ui.component.HuniScreenTitle
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.ripple
@@ -169,7 +170,7 @@ fun ThemeScreen(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.theme_colors)) },
+        title = { HuniScreenTitle(stringResource(R.string.theme_colors)) },
         navigationIcon = {
             IconButton(onClick = { navController.navigateUp() }) {
                 Icon(

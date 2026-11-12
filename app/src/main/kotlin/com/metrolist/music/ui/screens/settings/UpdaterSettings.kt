@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import com.metrolist.music.ui.component.HuniScreenTitle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,7 +30,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.metrolist.music.BuildConfig
 import com.metrolist.music.LocalPlayerAwareWindowInsets
@@ -38,6 +42,7 @@ import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.component.Material3SettingsGroup
 import com.metrolist.music.ui.component.Material3SettingsItem
 import com.metrolist.music.ui.utils.backToMain
+import com.metrolist.music.ui.utils.ReleaseNotesParser
 import com.metrolist.music.utils.ReleaseInfo
 import com.metrolist.music.utils.Updater
 import com.metrolist.music.utils.rememberPreference
@@ -62,6 +67,9 @@ fun UpdaterScreen(navController: NavController) {
     var error by remember { mutableStateOf(false) }
     var installError by remember { mutableStateOf<String?>(null) }
     var lastChecked by remember { mutableStateOf<Long?>(null) }
+    val releaseNotes = remember(release?.description) {
+        release?.description?.let { ReleaseNotesParser.parse(it) }
+    }
 
     fun check(force: Boolean) {
         if (checking) return
@@ -92,8 +100,8 @@ fun UpdaterScreen(navController: NavController) {
         Material3SettingsGroup(
             title = "Update settings",
             items = listOf(
-                Material3SettingsItem(title = { Text("Check for updates") }, icon = painterResource(R.drawable.update), trailingContent = { androidx.compose.material3.Switch(checked = checkForUpdates, onCheckedChange = onCheckForUpdatesChange) }, onClick = { onCheckForUpdatesChange(!checkForUpdates) }),
-                Material3SettingsItem(title = { Text("Update notifications") }, icon = painterResource(R.drawable.notification), trailingContent = { androidx.compose.material3.Switch(checked = notifications, onCheckedChange = onNotificationsChange) }, onClick = { onNotificationsChange(!notifications) }),
+                Material3SettingsItem(title = { Text("Check for updates") }, icon = painterResource(R.drawable.update), trailingContent = { com.metrolist.music.ui.component.HuniSwitch(checked = checkForUpdates, onCheckedChange = onCheckForUpdatesChange) }, onClick = { onCheckForUpdatesChange(!checkForUpdates) }),
+                Material3SettingsItem(title = { Text("Update notifications") }, icon = painterResource(R.drawable.notification), trailingContent = { com.metrolist.music.ui.component.HuniSwitch(checked = notifications, onCheckedChange = onNotificationsChange) }, onClick = { onNotificationsChange(!notifications) }),
             ),
         )
         Spacer(Modifier.height(16.dp))
@@ -109,7 +117,51 @@ fun UpdaterScreen(navController: NavController) {
         )
         if (available && release != null) {
             Spacer(Modifier.height(16.dp))
-            Text(release!!.description.ifBlank { "No release notes provided." }, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            val sections = releaseNotes?.preambleSections.orEmpty() + releaseNotes?.entries.orEmpty().flatMap { it.sections }
+            if (sections.isEmpty()) {
+                Text(
+                    ReleaseNotesParser.cleanDisplayText(release!!.description).ifBlank { "No release notes provided." },
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                    verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp),
+                ) {
+                    sections.forEach { section ->
+                        section.heading?.let { heading ->
+                            Text(
+                                heading,
+                                style = MaterialTheme.typography.titleSmall.copy(
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.primary,
+                                ),
+                            )
+                        }
+                        section.bullets.forEach { bullet ->
+                            Text(
+                                "• $bullet",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            }
+            releaseNotes?.footer?.let { footer ->
+                Text(
+                    footer,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
             Spacer(Modifier.height(12.dp))
             Button(onClick = {
                 scope.launch {
@@ -123,7 +175,7 @@ fun UpdaterScreen(navController: NavController) {
         }
         Spacer(Modifier.height(32.dp))
     }
-    TopAppBar(title = { Text(stringResource(R.string.updater)) }, navigationIcon = {
+    TopAppBar(title = { HuniScreenTitle(stringResource(R.string.updater)) }, navigationIcon = {
         IconButton(onClick = navController::navigateUp, onLongClick = navController::backToMain) { Icon(painterResource(R.drawable.arrow_back), null) }
     })
 }

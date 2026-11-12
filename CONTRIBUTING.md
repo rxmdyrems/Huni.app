@@ -16,6 +16,20 @@ The normal local build is the `foss` flavor. `gms` adds Google Cast support and 
 
 For optional local values, copy `local.properties.sample` to `local.properties`. Never commit it or any credentials. Source strings are in `app/src/main/res/values/metrolist_strings.xml`; do not rename the file.
 
+## UI conventions
+
+New screens and screen-level toolbar titles must use `HuniScreenTitle` from `ui/component/SectionHeader.kt`. Section headings must use `HuniSectionHeader`; settings groups should use `Material3SettingsGroup`, which supplies the shared section header and separate-card spacing. Use `HuniSwitch` for Compose switches so checked and unchecked states remain consistent across the app. Keep titles to one line where they are screen titles and allow section headers to wrap to two lines.
+
+## Palette launcher icons
+
+The palette icon vectors and adaptive-icon XML are generated with:
+
+```bash
+python3 scripts/generate_palette_icons.py
+```
+
+To add a palette, add its id, display name, dark background, and dark accent to `PALETTES` in that script, add the matching theme colors in `ui/theme/Theme.kt`, and add a launcher alias in `AndroidManifest.xml`. Register the id-to-alias mapping in `utils/IconUtils.kt`. Keep the Amber compatibility alias enabled by default and all non-default aliases disabled in the manifest. Each generated adaptive icon includes its palette background, safe-zone foreground, and Android 13 monochrome layer; commit both the generator and its generated resources. Do not change the application ID, deep links, or updater for an icon-only change.
+
 ## Checks
 
 ```bash
@@ -23,7 +37,7 @@ For optional local values, copy `local.properties.sample` to `local.properties`.
 ./gradlew --console=plain assembleFossDebug :app:lintFossDebug
 ```
 
-Contributors do not bump `versionName` or `versionCode`. The maintainer handles versions and releases. Contributors build unsigned or debug APKs locally. Signed releases are made only by the maintainer through GitHub Actions using `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD`. Never add their values to the repository.
+Contributors do not bump `versionName` or `versionCode`. The maintainer handles versions and releases. Contributors build unsigned or debug APKs locally. Signed releases are made only by the maintainer through GitHub Actions using the configured signing secrets. Never add their values to the repository.
 
 ## Branches and commits
 

@@ -1,5 +1,6 @@
 package com.metrolist.music.ui.screens.settings.integrations
 
+import com.metrolist.music.ui.component.HuniSwitch
 import android.app.Activity
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
@@ -40,7 +41,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -497,7 +497,7 @@ fun DiscordSettings(
                     Material3SettingsItem(
                         title = { Text(stringResource(R.string.enable_discord_rpc)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = discordRPC,
                                 onCheckedChange = onDiscordRPCChange,
                                 enabled = isLoggedIn,
@@ -519,7 +519,7 @@ fun DiscordSettings(
                         title = { Text(stringResource(R.string.discord_advanced_mode)) },
                         description = { Text(stringResource(R.string.discord_advanced_mode_description)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = advancedMode,
                                 onCheckedChange = {
                                     onAdvancedModeChange(it)
@@ -593,7 +593,7 @@ fun DiscordSettings(
                                 Material3SettingsItem(
                                     title = { Text(stringResource(R.string.discord_enable_button_1)) },
                                     trailingContent = {
-                                        Switch(
+                                        HuniSwitch(
                                             checked = btn1Enabled,
                                             onCheckedChange = {
                                                 onBtn1EnabledChange(it)
@@ -636,7 +636,7 @@ fun DiscordSettings(
                                 Material3SettingsItem(
                                     title = { Text(stringResource(R.string.discord_enable_button_2)) },
                                     trailingContent = {
-                                        Switch(
+                                        HuniSwitch(
                                             checked = btn2Enabled,
                                             onCheckedChange = {
                                                 onBtn2EnabledChange(it)

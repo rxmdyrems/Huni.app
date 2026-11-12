@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -15,7 +16,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TriStateCheckbox
@@ -107,7 +107,7 @@ fun RomanizationSettings(
                 Material3SettingsItem(
                     title = { Text(stringResource(R.string.lyrics_romanize_as_main)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = lyricsRomanizeAsMain,
                             onCheckedChange = onLyricsRomanizeAsMainChange,
                         )
@@ -117,7 +117,7 @@ fun RomanizationSettings(
                 Material3SettingsItem(
                     title = { Text(stringResource(R.string.line_by_line_option_title)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = lyricsRomanizeCyrillicByLine,
                             onCheckedChange = onLyricsRomanizeCyrillicByLineChange,
                         )

@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
@@ -30,11 +31,11 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import com.metrolist.music.ui.component.HuniScreenTitle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -251,7 +252,7 @@ fun ContentSettings(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(stringResource(R.string.enable_authentication))
-                        Switch(
+                        HuniSwitch(
                             checked = authEnabled,
                             onCheckedChange = {
                                 authEnabled = it
@@ -393,7 +394,7 @@ fun ContentSettings(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Switch(
+                        HuniSwitch(
                             checked = enableLrclib,
                             onCheckedChange = onEnableLrclibChange,
                             thumbContent = {
@@ -422,7 +423,7 @@ fun ContentSettings(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Switch(
+                        HuniSwitch(
                             checked = enableKugou,
                             onCheckedChange = onEnableKugouChange,
                             thumbContent = {
@@ -451,7 +452,7 @@ fun ContentSettings(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Switch(
+                        HuniSwitch(
                             checked = enableBetterLyrics,
                             onCheckedChange = onEnableBetterLyricsChange,
                             thumbContent = {
@@ -480,7 +481,7 @@ fun ContentSettings(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Switch(
+                        HuniSwitch(
                             checked = enablePaxsenix,
                             onCheckedChange = onEnablePaxsenixChange,
                             thumbContent = {
@@ -509,7 +510,7 @@ fun ContentSettings(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Switch(
+                        HuniSwitch(
                             checked = enableLyricsPlus,
                             onCheckedChange = onEnableLyricsPlusChange,
                             thumbContent = {
@@ -538,7 +539,7 @@ fun ContentSettings(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Switch(
+                        HuniSwitch(
                             checked = enableZemer,
                             onCheckedChange = onEnableZemerChange,
                             thumbContent = {
@@ -770,7 +771,7 @@ fun ContentSettings(
                     icon = painterResource(R.drawable.explicit),
                     title = { Text(stringResource(R.string.hide_explicit)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = hideExplicit,
                             onCheckedChange = onHideExplicitChange,
                             thumbContent = {
@@ -790,7 +791,7 @@ fun ContentSettings(
                     icon = painterResource(R.drawable.slow_motion_video),
                     title = { Text(stringResource(R.string.hide_video_songs)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = hideVideoSongs,
                             onCheckedChange = onHideVideoSongsChange,
                             thumbContent = {
@@ -810,7 +811,7 @@ fun ContentSettings(
                     icon = painterResource(R.drawable.hide_image),
                     title = { Text(stringResource(R.string.hide_youtube_shorts)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = hideYoutubeShorts,
                             onCheckedChange = onHideYoutubeShortsChange,
                             thumbContent = {
@@ -859,7 +860,7 @@ fun ContentSettings(
                     icon = painterResource(R.drawable.info),
                     title = { Text(stringResource(R.string.show_artist_description)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = showArtistDescription,
                             onCheckedChange = onShowArtistDescriptionChange,
                             thumbContent = {
@@ -879,7 +880,7 @@ fun ContentSettings(
                     icon = painterResource(R.drawable.person),
                     title = { Text(stringResource(R.string.show_artist_subscriber_count)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = showArtistSubscriberCount,
                             onCheckedChange = onShowArtistSubscriberCountChange,
                             thumbContent = {
@@ -899,7 +900,7 @@ fun ContentSettings(
                     icon = painterResource(R.drawable.person),
                     title = { Text(stringResource(R.string.show_artist_monthly_listeners)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = showMonthlyListeners,
                             onCheckedChange = onShowMonthlyListenersChange,
                             thumbContent = {
@@ -961,7 +962,7 @@ fun ContentSettings(
                         icon = painterResource(R.drawable.wifi_proxy),
                         title = { Text(stringResource(R.string.enable_proxy)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = proxyEnabled,
                                 onCheckedChange = onProxyEnabledChange,
                                 thumbContent = {
@@ -1025,7 +1026,7 @@ fun ContentSettings(
                     title = { Text(stringResource(R.string.show_most_stats_playlists)) },
                     description = { Text(stringResource(R.string.show_most_stats_playlists_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = showMostStatsPlaylists,
                             onCheckedChange = onShowMostStatsPlaylistsChange,
                             thumbContent = {
@@ -1045,7 +1046,7 @@ fun ContentSettings(
                     icon = painterResource(R.drawable.trending_up),
                     title = { Text(stringResource(R.string.show_wrapped_card)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = showWrappedCard,
                             onCheckedChange = onShowWrappedCardChange,
                             thumbContent = {
@@ -1074,7 +1075,7 @@ fun ContentSettings(
                     title = { Text(stringResource(R.string.randomize_home_order)) },
                     description = { Text(stringResource(R.string.randomize_home_order_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = randomizeHomeOrder,
                             onCheckedChange = onRandomizeHomeOrderChange,
                             thumbContent = {
@@ -1115,7 +1116,7 @@ fun ContentSettings(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.content)) },
+        title = { HuniScreenTitle(stringResource(R.string.content)) },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -31,7 +32,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.dp
 
 /**
@@ -51,10 +54,15 @@ fun Material3SettingsGroup(
     ) {
         // Section title
         title?.let {
-            HuniSectionHeader(
-                text = it,
-                modifier = Modifier.padding(bottom = 8.dp, top = 8.dp),
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                HuniSectionHeader(
+                    text = it,
+                    modifier = Modifier.weight(1f).padding(bottom = 8.dp, top = 8.dp),
+                )
+            }
         }
 
         // Settings items
@@ -148,11 +156,16 @@ private fun Material3SettingsItemRow(
         Column(
             modifier = Modifier.weight(1f)
         ) {
-            // Title content
-            ProvideTextStyle(
-                MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface)
-            ) {
-                item.title()
+            // Cap titles at two lines and use heading-aware line breaking to avoid orphan words.
+            Box(modifier = Modifier.heightIn(max = 48.dp).clipToBounds()) {
+                ProvideTextStyle(
+                    MaterialTheme.typography.titleMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurface,
+                        lineBreak = LineBreak.Heading,
+                    )
+                ) {
+                    item.title()
+                }
             }
 
             // Description if provided

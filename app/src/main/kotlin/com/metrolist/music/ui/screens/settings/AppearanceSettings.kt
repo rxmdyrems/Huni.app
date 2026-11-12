@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
 import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,7 +31,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -111,6 +111,8 @@ import com.metrolist.music.constants.UseNewPlayerDesignKey
 import com.metrolist.music.ui.component.DefaultDialog
 import com.metrolist.music.ui.component.EnumDialog
 import com.metrolist.music.ui.component.IconButton
+import com.metrolist.music.ui.component.HuniSectionHeader
+import com.metrolist.music.ui.component.HuniScreenTitle
 import com.metrolist.music.ui.component.Material3SettingsGroup
 import com.metrolist.music.ui.component.Material3SettingsItem
 import com.metrolist.music.ui.component.PlayerSliderTrack
@@ -150,6 +152,7 @@ fun AppearanceSettings(
     val (darkMode, onDarkModeChange) = rememberEnumPreference(DarkModeKey, DarkMode.ON)
     val (selectedPaletteId, onSelectedPaletteChange) = rememberPreference(ThemePaletteKey, DefaultPalette.id)
     val selectedPalette = HuniPalettes.find { it.id == selectedPaletteId } ?: DefaultPalette
+    val (matchAppIcon, onMatchAppIconChange) = rememberPreference(EnableDynamicIconKey, false)
     val isDark = when (darkMode) {
         DarkMode.AUTO -> isSystemInDarkTheme()
         DarkMode.ON -> true
@@ -900,12 +903,9 @@ fun AppearanceSettings(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp),
     ) {
-        Text(
-            text = "Theme",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
-        )
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            HuniSectionHeader("Theme", Modifier.weight(1f).padding(top = 8.dp, bottom = 8.dp))
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -934,24 +934,22 @@ fun AppearanceSettings(
                 }
             }
         }
-        Text(
-            text = "Color",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(top = 20.dp, bottom = 10.dp),
-        )
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            HuniSectionHeader("Color", Modifier.weight(1f).padding(top = 20.dp, bottom = 10.dp))
+        }
         HuniPalettes.chunked(5).forEach { rowPalettes ->
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 rowPalettes.forEach { palette ->
                     val selected = palette.id == selectedPalette.id
                     Column(
-                        modifier = Modifier.weight(1f).clickable { onSelectedPaletteChange(palette.id) },
+                        modifier = Modifier.weight(1f),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Box(
                             modifier = Modifier
                                 .size(48.dp)
                                 .clip(CircleShape)
+                                .clickable { onSelectedPaletteChange(palette.id) }
                                 .background(if (isDark) palette.accentDark else palette.accentLight)
                                 .border(if (selected) 3.dp else 0.dp, MaterialTheme.colorScheme.onSurface, CircleShape),
                             contentAlignment = Alignment.Center,
@@ -970,18 +968,49 @@ fun AppearanceSettings(
             }
             Spacer(Modifier.height(12.dp))
         }
+        Material3SettingsGroup(
+            items = listOf(
+                Material3SettingsItem(
+                    icon = painterResource(R.drawable.palette),
+                    title = { Text(stringResource(R.string.match_app_icon_to_color)) },
+                    description = { Text(stringResource(R.string.match_app_icon_to_color_desc)) },
+                    trailingContent = {
+                        HuniSwitch(
+                            checked = matchAppIcon,
+                            onCheckedChange = onMatchAppIconChange,
+                            thumbContent = {
+                                Icon(
+                                    painterResource(if (matchAppIcon) R.drawable.check else R.drawable.close),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(SwitchDefaults.IconSize),
+                                )
+                            },
+                        )
+                    },
+                    onClick = { onMatchAppIconChange(!matchAppIcon) },
+                ),
+            ),
+        )
+        Text(
+            text = stringResource(R.string.themed_icons_launcher_note),
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 4.dp),
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
         Spacer(Modifier.height(8.dp))
         Material3SettingsGroup(
-            title = stringResource(R.string.theme),
+            title = "Display",
             items =
                 buildList {
                     add(
                         Material3SettingsItem(
                             icon = painterResource(R.drawable.speed),
-                            title = { Text(stringResource(R.string.enable_high_refresh_rate)) },
-                            description = { Text(stringResource(R.string.enable_high_refresh_rate_desc)) },
+                            title = { Text(stringResource(R.string.high_refresh_rate)) },
+                            description = { Text(stringResource(R.string.high_refresh_rate_desc)) },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = enableHighRefreshRate,
                                     onCheckedChange = onEnableHighRefreshRateChange,
                                     thumbContent = {
@@ -1005,7 +1034,7 @@ fun AppearanceSettings(
                             title = { Text(stringResource(R.string.enable_landscape_scaling)) },
                             description = { Text(stringResource(R.string.enable_landscape_scaling_desc)) },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = enableLandscapeScaling,
                                     onCheckedChange = onEnableLandscapeScalingChange,
                                     thumbContent = {
@@ -1038,7 +1067,7 @@ fun AppearanceSettings(
                         icon = painterResource(R.drawable.palette),
                         title = { Text(stringResource(R.string.new_player_design)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = useNewPlayerDesign,
                                 onCheckedChange = onUseNewPlayerDesignChange,
                                 thumbContent = {
@@ -1074,7 +1103,7 @@ fun AppearanceSettings(
                         title = { Text(stringResource(R.string.hide_player_thumbnail)) },
                         description = { Text(stringResource(R.string.hide_player_thumbnail_desc)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = hidePlayerThumbnail,
                                 onCheckedChange = onHidePlayerThumbnailChange,
                                 thumbContent = {
@@ -1096,7 +1125,7 @@ fun AppearanceSettings(
                         title = { Text(stringResource(R.string.crop_album_art)) },
                         description = { Text(stringResource(R.string.crop_album_art_desc)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = cropAlbumArt,
                                 onCheckedChange = onCropAlbumArtChange,
                                 thumbContent = {
@@ -1159,7 +1188,7 @@ fun AppearanceSettings(
                         icon = painterResource(R.drawable.swipe),
                         title = { Text(stringResource(R.string.enable_swipe_thumbnail)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = swipeThumbnail,
                                 onCheckedChange = onSwipeThumbnailChange,
                                 thumbContent = {
@@ -1278,7 +1307,7 @@ fun AppearanceSettings(
                             description = { Text(stringResource(R.string.experimental_lyrics_desc)) },
                             showBadge = true,
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = experimentalLyrics,
                                     onCheckedChange = {
                                         if (!experimentalLyrics) {
@@ -1316,7 +1345,7 @@ fun AppearanceSettings(
                                 title = { Text(stringResource(R.string.lyrics_glow_effect)) },
                                 description = { Text(stringResource(R.string.lyrics_glow_effect_desc)) },
                                 trailingContent = {
-                                    Switch(
+                                    HuniSwitch(
                                         checked = lyricsGlowEffect,
                                         onCheckedChange = onLyricsGlowEffectChange,
                                         thumbContent = {
@@ -1393,7 +1422,7 @@ fun AppearanceSettings(
                             title = { Text(stringResource(R.string.respect_agent_positioning)) },
                             description = { Text(stringResource(R.string.respect_agent_positioning_desc)) },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = respectAgentPositioning,
                                     onCheckedChange = onRespectAgentPositioningChange,
                                     thumbContent = {
@@ -1416,7 +1445,7 @@ fun AppearanceSettings(
                             icon = painterResource(R.drawable.lyrics),
                             title = { Text(stringResource(R.string.lyrics_click_change)) },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = lyricsClick,
                                     onCheckedChange = onLyricsClickChange,
                                     thumbContent = {
@@ -1439,7 +1468,7 @@ fun AppearanceSettings(
                             icon = painterResource(R.drawable.lyrics),
                             title = { Text(stringResource(R.string.lyrics_auto_scroll)) },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = lyricsScroll,
                                     onCheckedChange = onLyricsScrollChange,
                                     thumbContent = {
@@ -1463,7 +1492,7 @@ fun AppearanceSettings(
                             title = { Text(stringResource(R.string.hide_status_bar_fullscreen)) },
                             description = { Text(stringResource(R.string.hide_status_bar_fullscreen_desc)) },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = hideStatusBarOnFullscreen,
                                     onCheckedChange = onHideStatusBarOnFullscreenChange,
                                     thumbContent = {
@@ -1526,7 +1555,7 @@ fun AppearanceSettings(
                         icon = painterResource(R.drawable.swipe),
                         title = { Text(stringResource(R.string.swipe_song_to_add)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = swipeToSong,
                                 onCheckedChange = onSwipeToSongChange,
                                 thumbContent = {
@@ -1547,7 +1576,7 @@ fun AppearanceSettings(
                         icon = painterResource(R.drawable.swipe),
                         title = { Text(stringResource(R.string.swipe_song_to_remove)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = swipeToRemoveSong,
                                 onCheckedChange = onSwipeToRemoveSongChange,
                                 thumbContent = {
@@ -1568,7 +1597,7 @@ fun AppearanceSettings(
                         icon = painterResource(R.drawable.nav_bar),
                         title = { Text(stringResource(R.string.slim_navbar)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = slimNav,
                                 onCheckedChange = onSlimNavChange,
                                 thumbContent = {
@@ -1590,7 +1619,7 @@ fun AppearanceSettings(
                         title = { Text(stringResource(R.string.listen_together_in_top_bar)) },
                         description = { Text(stringResource(R.string.listen_together_in_top_bar_desc)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = listenTogetherInTopBar,
                                 onCheckedChange = onListenTogetherInTopBarChange,
                                 thumbContent = {
@@ -1641,7 +1670,7 @@ fun AppearanceSettings(
                         icon = painterResource(R.drawable.favorite),
                         title = { Text(stringResource(R.string.show_liked_playlist)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = showLikedPlaylist,
                                 onCheckedChange = onShowLikedPlaylistChange,
                                 thumbContent = {
@@ -1662,7 +1691,7 @@ fun AppearanceSettings(
                         icon = painterResource(R.drawable.offline),
                         title = { Text(stringResource(R.string.show_downloaded_playlist)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = showDownloadedPlaylist,
                                 onCheckedChange = onShowDownloadedPlaylistChange,
                                 thumbContent = {
@@ -1683,7 +1712,7 @@ fun AppearanceSettings(
                         icon = painterResource(R.drawable.trending_up),
                         title = { Text(stringResource(R.string.show_top_playlist)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = showTopPlaylist,
                                 onCheckedChange = onShowTopPlaylistChange,
                                 thumbContent = {
@@ -1704,7 +1733,7 @@ fun AppearanceSettings(
                         icon = painterResource(R.drawable.cached),
                         title = { Text(stringResource(R.string.show_cached_playlist)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = showCachedPlaylist,
                                 onCheckedChange = onShowCachedPlaylistChange,
                                 thumbContent = {
@@ -1725,7 +1754,7 @@ fun AppearanceSettings(
                         icon = painterResource(R.drawable.backup),
                         title = { Text(stringResource(R.string.show_uploaded_playlist)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = showUploadedPlaylist,
                                 onCheckedChange = onShowUploadedPlaylistChange,
                                 thumbContent = {
@@ -1768,7 +1797,7 @@ fun AppearanceSettings(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.appearance)) },
+        title = { HuniScreenTitle(stringResource(R.string.appearance)) },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

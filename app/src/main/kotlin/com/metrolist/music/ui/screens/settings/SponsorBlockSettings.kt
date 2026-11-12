@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -18,7 +19,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -76,7 +76,7 @@ fun SponsorBlockSettings(navController: NavController) {
                     title = { Text(stringResource(R.string.sponsorblock_enable)) },
                     description = { Text(stringResource(R.string.sponsorblock_enable_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = enabled,
                             onCheckedChange = onEnabledChange,
                             thumbContent = {
@@ -98,7 +98,7 @@ fun SponsorBlockSettings(navController: NavController) {
                     description = { Text(stringResource(R.string.sponsorblock_show_toast_desc)) },
                     enabled = enabled,
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = showToast,
                             enabled = enabled,
                             onCheckedChange = onShowToastChange,

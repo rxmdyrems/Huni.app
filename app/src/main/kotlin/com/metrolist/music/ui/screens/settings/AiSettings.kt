@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import com.metrolist.music.ui.component.HuniScreenTitle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -658,7 +659,7 @@ fun AiSettings(navController: NavController) {
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.ai_lyrics_translation)) },
+        title = { HuniScreenTitle(stringResource(R.string.ai_lyrics_translation)) },
         navigationIcon = {
             IconButton(onClick = { navController.navigateUp() }) {
                 Icon(

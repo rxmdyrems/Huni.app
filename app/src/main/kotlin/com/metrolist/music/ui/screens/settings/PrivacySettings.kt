@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -18,7 +19,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -40,6 +40,7 @@ import com.metrolist.music.constants.DisableScreenshotKey
 import com.metrolist.music.constants.PauseListenHistoryKey
 import com.metrolist.music.constants.PauseSearchHistoryKey
 import com.metrolist.music.ui.component.DefaultDialog
+import com.metrolist.music.ui.component.HuniScreenTitle
 import com.metrolist.music.ui.screens.CrashReportDialog
 import com.metrolist.music.utils.CrashReporter
 import com.metrolist.music.ui.component.IconButton
@@ -102,7 +103,7 @@ fun PrivacySettings(
                         }
                     },
                 ) {
-                    Text(text = stringResource(android.R.string.ok))
+                    Text(text = stringResource(R.string.clear_history_action))
                 }
             },
         )
@@ -137,7 +138,7 @@ fun PrivacySettings(
                         }
                     },
                 ) {
-                    Text(text = stringResource(android.R.string.ok))
+                    Text(text = stringResource(R.string.clear_history_action))
                 }
             },
         )
@@ -168,7 +169,7 @@ fun PrivacySettings(
                     icon = painterResource(R.drawable.history),
                     title = { Text(stringResource(R.string.pause_listen_history)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = pauseListenHistory,
                             onCheckedChange = onPauseListenHistoryChange,
                             thumbContent = {
@@ -201,7 +202,7 @@ fun PrivacySettings(
                     icon = painterResource(R.drawable.search_off),
                     title = { Text(stringResource(R.string.pause_search_history)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = pauseSearchHistory,
                             onCheckedChange = onPauseSearchHistoryChange,
                             thumbContent = {
@@ -218,7 +219,7 @@ fun PrivacySettings(
                     onClick = { onPauseSearchHistoryChange(!pauseSearchHistory) }
                 ),
                 Material3SettingsItem(
-                    icon = painterResource(R.drawable.clear_all),
+                    icon = painterResource(R.drawable.delete_sweep),
                     title = { Text(stringResource(R.string.clear_search_history)) },
                     onClick = { showClearSearchHistoryDialog = true }
                 )
@@ -235,7 +236,7 @@ fun PrivacySettings(
                     title = { Text(stringResource(R.string.disable_screenshot)) },
                     description = { Text(stringResource(R.string.disable_screenshot_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = disableScreenshot,
                             onCheckedChange = onDisableScreenshotChange,
                             thumbContent = {
@@ -251,39 +252,44 @@ fun PrivacySettings(
                     },
                     onClick = { onDisableScreenshotChange(!disableScreenshot) }
                 ),
+            )
+        )
+        Spacer(modifier = Modifier.height(27.dp))
+        Material3SettingsGroup(
+            title = stringResource(R.string.crash_reports_section),
+            items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.bug_report),
                     title = { Text(stringResource(R.string.crash_reporting)) },
                     description = { Text(stringResource(R.string.crash_reporting_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = crashReportingEnabled,
                             onCheckedChange = onCrashReportingEnabledChange,
                             thumbContent = {
                                 Icon(
-                                    painter = painterResource(
-                                        id = if (crashReportingEnabled) R.drawable.check else R.drawable.close
-                                    ),
+                                    painter = painterResource(if (crashReportingEnabled) R.drawable.check else R.drawable.close),
                                     contentDescription = null,
-                                    modifier = Modifier.size(androidx.compose.material3.SwitchDefaults.IconSize)
+                                    modifier = Modifier.size(androidx.compose.material3.SwitchDefaults.IconSize),
                                 )
-                            }
+                            },
                         )
                     },
-                    onClick = { onCrashReportingEnabledChange(!crashReportingEnabled) }
+                    onClick = { onCrashReportingEnabledChange(!crashReportingEnabled) },
                 ),
                 Material3SettingsItem(
-                    icon = painterResource(R.drawable.bug_report),
+                    icon = painterResource(R.drawable.visibility),
                     title = { Text("Preview crash report") },
-                    onClick = { showCrashPreview = true }
-                )
-            )
+                    description = { Text(stringResource(R.string.crash_report_preview_desc)) },
+                    onClick = { showCrashPreview = true },
+                ),
+            ),
         )
         Spacer(modifier = Modifier.height(16.dp))
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.privacy)) },
+        title = { HuniScreenTitle(stringResource(R.string.privacy)) },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

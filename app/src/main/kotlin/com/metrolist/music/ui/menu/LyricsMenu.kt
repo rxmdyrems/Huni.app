@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.menu
 
+import com.metrolist.music.ui.component.HuniSwitch
 import android.app.SearchManager
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -37,7 +38,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -502,7 +502,7 @@ fun LyricsMenu(
                                     }
                                 },
                                 trailingContent = {
-                                    Switch(
+                                    HuniSwitch(
                                         checked = hasTranslations,
                                         onCheckedChange = { newCheckedState ->
                                             if (newCheckedState) {
@@ -528,11 +528,6 @@ fun LyricsMenu(
                                                 modifier = Modifier.size(SwitchDefaults.IconSize)
                                             )
                                         },
-                                        colors = SwitchDefaults.colors(
-                                            uncheckedThumbColor = MaterialTheme.colorScheme.primaryContainer,
-                                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                                            checkedTrackColor = MaterialTheme.colorScheme.primary
-                                        )
                                     )
                                 }
                             )
@@ -553,7 +548,7 @@ fun LyricsMenu(
                                 respectAgentPositioning = !respectAgentPositioning
                             },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = respectAgentPositioning,
                                     onCheckedChange = { newCheckedState ->
                                         respectAgentPositioning = newCheckedState
@@ -567,11 +562,6 @@ fun LyricsMenu(
                                             modifier = Modifier.size(SwitchDefaults.IconSize)
                                         )
                                     },
-                                    colors = SwitchDefaults.colors(
-                                        uncheckedThumbColor = MaterialTheme.colorScheme.primaryContainer,
-                                        checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                                        checkedTrackColor = MaterialTheme.colorScheme.primary
-                                    )
                                 )
                             }
                         )
@@ -591,7 +581,7 @@ fun LyricsMenu(
                                 showIntervalIndicator = !showIntervalIndicator
                             },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = showIntervalIndicator,
                                     onCheckedChange = { newCheckedState ->
                                         showIntervalIndicator = newCheckedState
@@ -605,11 +595,6 @@ fun LyricsMenu(
                                             modifier = Modifier.size(SwitchDefaults.IconSize)
                                         )
                                     },
-                                    colors = SwitchDefaults.colors(
-                                        uncheckedThumbColor = MaterialTheme.colorScheme.primaryContainer,
-                                        checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                                        checkedTrackColor = MaterialTheme.colorScheme.primary
-                                    )
                                 )
                             }
                         )
@@ -656,7 +641,7 @@ fun LyricsMenu(
                                 }
                             },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = isChecked,
                                     onCheckedChange = { newCheckedState ->
                                         isChecked = newCheckedState
@@ -675,11 +660,6 @@ fun LyricsMenu(
                                             modifier = Modifier.size(SwitchDefaults.IconSize)
                                         )
                                     },
-                                    colors = SwitchDefaults.colors(
-                                        uncheckedThumbColor = MaterialTheme.colorScheme.primaryContainer,
-                                        checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                                        checkedTrackColor = MaterialTheme.colorScheme.primary
-                                    )
                                 )
                             }
                         )

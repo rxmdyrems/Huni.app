@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,11 +23,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import com.metrolist.music.ui.component.HuniScreenTitle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -335,7 +336,7 @@ fun StorageSettings(
                     title = { Text(stringResource(R.string.enable_song_cache)) },
                     description = { Text(stringResource(R.string.enable_song_cache_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = enableSongCache,
                             onCheckedChange = onEnableSongCacheChange,
                             thumbContent = {
@@ -460,7 +461,7 @@ fun StorageSettings(
                     enabled = enableSongCache && preCacheTracks > 0,
                     description = { Text(stringResource(R.string.pre_cache_only_wifi_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = preCacheOnlyWifi,
                             onCheckedChange = onPreCacheOnlyWifiChange,
                             enabled = enableSongCache && preCacheTracks > 0,
@@ -545,7 +546,7 @@ fun StorageSettings(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.storage)) },
+        title = { HuniScreenTitle(stringResource(R.string.storage)) },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

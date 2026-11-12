@@ -146,6 +146,7 @@ import com.metrolist.music.constants.DismissedStandaloneUpdateKey
 import com.metrolist.music.constants.DensityScaleKey
 import com.metrolist.music.constants.DisableScreenshotKey
 import com.metrolist.music.constants.DynamicThemeKey
+import com.metrolist.music.constants.EnableDynamicIconKey
 import com.metrolist.music.constants.EnableHighRefreshRateKey
 import com.metrolist.music.constants.EnableLandscapeScalingKey
 import com.metrolist.music.constants.ExperimentalLyricsKey
@@ -201,11 +202,13 @@ import com.metrolist.music.ui.screens.settings.DarkMode
 import com.metrolist.music.ui.screens.settings.NavigationTab
 import com.metrolist.music.ui.theme.DefaultPalette
 import com.metrolist.music.ui.theme.HuniPalettes
+import com.metrolist.music.ui.component.HuniScreenTitle
 import com.metrolist.music.ui.theme.MetrolistTheme
 import com.metrolist.music.ui.theme.bbhBartle
 import com.metrolist.music.ui.utils.appBarScrollBehavior
 import com.metrolist.music.ui.utils.resetHeightOffset
 import com.metrolist.music.utils.ReleaseInfo
+import com.metrolist.music.utils.IconUtils
 import com.metrolist.music.utils.SearchRoutes
 import com.metrolist.music.utils.SyncUtils
 import com.metrolist.music.utils.ArtistNameAliases
@@ -217,6 +220,7 @@ import com.metrolist.music.utils.get
 import com.metrolist.music.utils.rememberEnumPreference
 import com.metrolist.music.utils.rememberPreference
 import com.metrolist.music.utils.reportException
+import kotlinx.coroutines.delay
 import com.metrolist.spotify.Spotify
 
 import com.metrolist.music.utils.setAppLocale
@@ -657,6 +661,11 @@ class MainActivity : FragmentActivity() {
 
         val selectedPaletteId by rememberPreference(ThemePaletteKey, defaultValue = initialPaletteId)
         val selectedPalette = HuniPalettes.find { it.id == selectedPaletteId } ?: DefaultPalette
+        val matchAppIcon by rememberPreference(EnableDynamicIconKey, defaultValue = false)
+        LaunchedEffect(matchAppIcon, selectedPaletteId) {
+            delay(1_500)
+            IconUtils.applyPalette(this@MainActivity, if (matchAppIcon) selectedPaletteId else DefaultPalette.id)
+        }
         val selectedThemeColor = if (useDarkTheme) selectedPalette.accentDark else selectedPalette.accentLight
         val showChangelog = rememberSaveable { mutableStateOf(false) }
         MetrolistTheme(
@@ -852,6 +861,7 @@ class MainActivity : FragmentActivity() {
                             bottom += NavigationBarHeight
                         }
                         if (!playerBottomSheetState.isDismissed) bottom += MiniPlayerBottomSpacing + MiniPlayerHeight
+                        bottom += 16.dp
                         windowsInsets
                             .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
                             .add(WindowInsets(top = AppBarHeight, bottom = bottom))
@@ -1065,18 +1075,15 @@ class MainActivity : FragmentActivity() {
                                                             fontFamily = FontFamily.Default,
                                                             fontSize = 13.sp,
                                                         ),
-                                                        color = Color(0xFFA99FB8),
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                         maxLines = 1,
                                                         softWrap = false,
                                                     )
                                                 }
                                             } else {
-                                                Text(
+                                                HuniScreenTitle(
                                                     text = currentTitleRes?.let { stringResource(it) } ?: "",
-                                                    style = MaterialTheme.typography.titleLarge,
-                                                    fontWeight = FontWeight.SemiBold,
-                                                    maxLines = 1,
-                                                    softWrap = false,
+                                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
                                                 )
                                             }
                                         },

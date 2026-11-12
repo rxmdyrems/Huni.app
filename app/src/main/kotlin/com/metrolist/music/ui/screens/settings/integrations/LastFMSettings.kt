@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens.settings.integrations
 
+import com.metrolist.music.ui.component.HuniSwitch
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,7 +28,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -332,7 +332,7 @@ fun LastFMSettings(
                 Material3SettingsItem(
                     title = { Text(stringResource(R.string.enable_scrobbling)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = lastfmScrobbling,
                             onCheckedChange = onlastfmScrobblingChange,
                             enabled = isLoggedIn,
@@ -344,7 +344,7 @@ fun LastFMSettings(
                 Material3SettingsItem(
                     title = { Text(stringResource(R.string.lastfm_now_playing)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = useNowPlaying,
                             onCheckedChange = onUseNowPlayingChange,
                             enabled = isLoggedIn && lastfmScrobbling,
@@ -357,7 +357,7 @@ fun LastFMSettings(
                     title = { Text(stringResource(R.string.last_fm_send_likes)) },
                     description = { stringResource(R.string.last_fm_send_likes_description) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = useSendLikes,
                             onCheckedChange = onUseSendLikes,
                             enabled = isLoggedIn,

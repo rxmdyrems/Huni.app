@@ -4,6 +4,7 @@
  */
 package com.metrolist.music.ui.component
 
+import com.metrolist.music.ui.component.HuniSwitch
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
@@ -347,7 +347,7 @@ fun SleepTimerDialog(
                                 text = stringResource(R.string.sleep_timer_weekdays),
                                 modifier = Modifier.weight(1f),
                             )
-                            Switch(
+                            HuniSwitch(
                                 checked = weekdaysEnabled,
                                 onCheckedChange = { weekdaysEnabled = it },
                                 thumbContent = {
@@ -399,7 +399,7 @@ fun SleepTimerDialog(
                                 text = stringResource(R.string.sleep_timer_weekends),
                                 modifier = Modifier.weight(1f),
                             )
-                            Switch(
+                            HuniSwitch(
                                 checked = weekendsEnabled,
                                 onCheckedChange = { weekendsEnabled = it },
                                 thumbContent = {
@@ -492,7 +492,7 @@ fun SleepTimerDialog(
                                         modifier = Modifier.weight(1f),
                                         style = MaterialTheme.typography.bodyMedium,
                                     )
-                                    Switch(
+                                    HuniSwitch(
                                         checked = isDaySelected,
                                         onCheckedChange = {
                                             selectedDays =

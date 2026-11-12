@@ -747,6 +747,13 @@
     <string name="play_all">Play all</string>
     <string name="enable_high_refresh_rate">Enable high refresh rate</string>
     <string name="enable_high_refresh_rate_desc">Forces the display to run at its highest supported refresh rate (e.g. 120Hz)</string>
+    <string name="high_refresh_rate">High refresh rate</string>
+    <string name="high_refresh_rate_desc">Use the highest supported refresh rate</string>
+    <string name="match_app_icon_to_color">Match app icon to color</string>
+    <string name="match_app_icon_to_color_desc">Changes the launcher icon. Some launchers remove pinned shortcuts.</string>
+    <string name="themed_icons_launcher_note">Themed icons (Android 13+) are controlled by your launcher.</string>
+    <string name="crash_reports_section">Crash reports</string>
+    <string name="crash_report_preview_desc">Shows a sample report. Nothing is sent.</string>
     <string name="enable_landscape_scaling">Landscape Scaling</string>
     <string name="enable_landscape_scaling_desc">Scale UI in landscape mode for larger screens</string>
 
@@ -922,7 +929,7 @@
     <!-- Android Auto settings -->
     <string name="android_auto">Android Auto</string>
     <string name="android_auto_visible_sections">Visible sections</string>
-    <string name="android_auto_reorder_hint">Tap a section to enable or disable it.\nLong-press the drag handle to reorder. The first section will be shown by default</string>
+    <string name="android_auto_reorder_hint">Tap to turn a section on or off. Hold the handle to reorder. The first section shows by default.</string>
     <string name="android_auto_youtube_playlists">Show YouTube suggested playlists</string>
     <string name="android_auto_youtube_playlists_desc">Show YouTube Music recommended playlists in the playlists section while browsing with Android Auto</string>
     <string name="android_auto_target_playlist">Quick-add destination</string>

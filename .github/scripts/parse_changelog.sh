@@ -1,33 +1,16 @@
 #!/usr/bin/env bash
-# parse_changelog.sh — Extract the changelog entry for a specific version
-#
-# Reads changelog.md (or a custom file) and outputs the content block
-# associated with the given version, as delimited by ---vX.Y.Z separators.
-#
-# Usage:
-#   ./parse_changelog.sh <version> [changelog_file]
-#
-# Examples:
-#   ./parse_changelog.sh 13.2.1
-#   ./parse_changelog.sh v13.2.1 changelog.md
-#   ./parse_changelog.sh 13.2.1 /path/to/changelog.md
-#
-# Exit codes:
-#   0 — Version found; content written to stdout
-#   1 — Error (missing args, file not found, version not found)
-
+# Extract a version's release notes from a Markdown changelog or legacy ---v file.
+# Usage: parse_changelog.sh <version> [CHANGELOG.md]
 set -euo pipefail
 
 VERSION="${1:-}"
-CHANGELOG_FILE="${2:-changelog.md}"
+CHANGELOG_FILE="${2:-CHANGELOG.md}"
 
 if [ -z "$VERSION" ]; then
     echo "Error: version argument required" >&2
-    echo "Usage: $0 <version> [changelog_file]" >&2
-    echo "Example: $0 13.2.1" >&2
+    echo "Usage: $0 <version> [CHANGELOG.md]" >&2
     exit 1
 fi
-
 if [ ! -f "$CHANGELOG_FILE" ]; then
     echo "Error: changelog file not found: '$CHANGELOG_FILE'" >&2
     exit 1
@@ -35,16 +18,66 @@ fi
 
 VERSION="${VERSION#v}"
 
-if ! grep -q "^---v${VERSION}$" "$CHANGELOG_FILE"; then
+if grep -Eq "^## v?${VERSION}([[:space:](]|$)" "$CHANGELOG_FILE"; then
+    awk -v ver="$VERSION" '
+        function trim(value) {
+            sub(/^[[:space:]]+/, "", value)
+            sub(/[[:space:]]+$/, "", value)
+            return value
+        }
+        /^## / {
+            heading = $0
+            sub(/^## /, "", heading)
+            sub(/^v/, "", heading)
+            split(heading, parts, /[[:space:](]/)
+            if (parts[1] == ver) {
+                found = 1
+                lines[++count] = $0
+                next
+            }
+            if (found) exit
+        }
+        found { lines[++count] = $0 }
+        END {
+            if (!found) exit 1
+            while (count > 0) {
+                tail = tolower(trim(lines[count]))
+                if (tail == "" || tail ~ /^---+$/ || tail ~ /<\/?sub([[:space:]>]|\/)/) {
+                    count--
+                } else {
+                    break
+                }
+            }
+            for (i = 1; i <= count; i++) print lines[i]
+        }
+    ' "$CHANGELOG_FILE"
+elif grep -q "^---v${VERSION}$" "$CHANGELOG_FILE"; then
+    awk -v ver="$VERSION" '
+        function trim(value) {
+            sub(/^[[:space:]]+/, "", value)
+            sub(/[[:space:]]+$/, "", value)
+            return value
+        }
+        /^---v/ {
+            if (found) exit
+            if ($0 == "---v" ver) { found = 1; next }
+            next
+        }
+        found { lines[++count] = $0 }
+        END {
+            if (!found) exit 1
+            while (count > 0) {
+                tail = tolower(trim(lines[count]))
+                if (tail == "" || tail ~ /^---+$/ || tail ~ /<\/?sub([[:space:]>]|\/)/) {
+                    count--
+                } else {
+                    break
+                }
+            }
+            for (i = 1; i <= count; i++) print lines[i]
+        }
+    ' "$CHANGELOG_FILE"
+else
     echo "Error: version '$VERSION' not found in '$CHANGELOG_FILE'" >&2
     exit 1
 fi
-
-awk -v ver="$VERSION" '
-    /^---v/ {
-        if (found) exit
-        if ($0 == "---v" ver) { found=1; next }
-        next
-    }
-    found { print }
-' "$CHANGELOG_FILE"

@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens.settings.integrations
 
+import com.metrolist.music.ui.component.HuniSwitch
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
@@ -46,7 +47,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -427,7 +427,7 @@ fun ListenTogetherSettings(navController: NavController) {
                                 Text(stringResource(R.string.listen_together_auto_approval_joins_desc))
                             },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = autoApprovalJoins,
                                     onCheckedChange = { autoApprovalJoins = it },
                                     // Only disable for guests in a room (hosts can always change)
@@ -454,7 +454,7 @@ fun ListenTogetherSettings(navController: NavController) {
                                 Text(stringResource(R.string.listen_together_auto_approval_suggestions_desc))
                             },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = autoApproveSuggestions,
                                     onCheckedChange = { autoApproveSuggestions = it },
                                     // Only disable for guests in a room (hosts can always change)
@@ -481,7 +481,7 @@ fun ListenTogetherSettings(navController: NavController) {
                                 Text(stringResource(R.string.listen_together_sync_volume_desc))
                             },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = syncHostVolume,
                                     onCheckedChange = { syncHostVolume = it },
                                     thumbContent = {

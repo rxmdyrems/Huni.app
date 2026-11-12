@@ -33,6 +33,7 @@ import com.metrolist.music.BuildConfig
 import com.metrolist.music.LocalPlayerAwareWindowInsets
 import com.metrolist.music.R
 import com.metrolist.music.ui.component.IconButton
+import com.metrolist.music.ui.component.HuniScreenTitle
 import com.metrolist.music.ui.component.Material3SettingsGroup
 import com.metrolist.music.ui.component.Material3SettingsItem
 import com.metrolist.music.ui.component.ReleaseNotesCard
@@ -270,7 +271,7 @@ fun SettingsScreen(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.settings), maxLines = 1, softWrap = false) },
+        title = { HuniScreenTitle(stringResource(R.string.settings)) },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

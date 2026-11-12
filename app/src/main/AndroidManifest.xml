@@ -37,10 +37,10 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="true"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher_amber"
         android:label="@string/app_name"
         android:networkSecurityConfig="@xml/network_security_config"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_launcher_amber"
         android:supportsRtl="false"
         android:theme="@style/Theme.Metrolist"
         tools:targetApi="tiramisu">
@@ -181,9 +181,9 @@
             android:name=".MainActivityAlias"
             android:enabled="true"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher"
+            android:icon="@mipmap/ic_launcher_amber"
             android:label="@string/app_name"
-            android:roundIcon="@mipmap/ic_launcher_round"
+            android:roundIcon="@mipmap/ic_launcher_amber"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -203,6 +203,34 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity-alias>
+
+        <activity-alias android:name=".MainActivityIconViolet" android:enabled="false" android:exported="true" android:icon="@mipmap/ic_launcher_violet" android:label="Huni" android:roundIcon="@mipmap/ic_launcher_violet" android:targetActivity=".MainActivity">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
+        <activity-alias android:name=".MainActivityIconGreen" android:enabled="false" android:exported="true" android:icon="@mipmap/ic_launcher_green" android:label="Huni" android:roundIcon="@mipmap/ic_launcher_green" android:targetActivity=".MainActivity">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
+        <activity-alias android:name=".MainActivityIconMaroon" android:enabled="false" android:exported="true" android:icon="@mipmap/ic_launcher_maroon" android:label="Huni" android:roundIcon="@mipmap/ic_launcher_maroon" android:targetActivity=".MainActivity">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
+        <activity-alias android:name=".MainActivityIconOcean" android:enabled="false" android:exported="true" android:icon="@mipmap/ic_launcher_ocean" android:label="Huni" android:roundIcon="@mipmap/ic_launcher_ocean" android:targetActivity=".MainActivity">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
+        <activity-alias android:name=".MainActivityIconTeal" android:enabled="false" android:exported="true" android:icon="@mipmap/ic_launcher_teal" android:label="Huni" android:roundIcon="@mipmap/ic_launcher_teal" android:targetActivity=".MainActivity">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
+        <activity-alias android:name=".MainActivityIconRose" android:enabled="false" android:exported="true" android:icon="@mipmap/ic_launcher_rose" android:label="Huni" android:roundIcon="@mipmap/ic_launcher_rose" android:targetActivity=".MainActivity">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
+        <activity-alias android:name=".MainActivityIconOrange" android:enabled="false" android:exported="true" android:icon="@mipmap/ic_launcher_orange" android:label="Huni" android:roundIcon="@mipmap/ic_launcher_orange" android:targetActivity=".MainActivity">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
+        <activity-alias android:name=".MainActivityIconIndigo" android:enabled="false" android:exported="true" android:icon="@mipmap/ic_launcher_indigo" android:label="Huni" android:roundIcon="@mipmap/ic_launcher_indigo" android:targetActivity=".MainActivity">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
+        <activity-alias android:name=".MainActivityIconSlate" android:enabled="false" android:exported="true" android:icon="@mipmap/ic_launcher_slate" android:label="Huni" android:roundIcon="@mipmap/ic_launcher_slate" android:targetActivity=".MainActivity">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
 
         <activity

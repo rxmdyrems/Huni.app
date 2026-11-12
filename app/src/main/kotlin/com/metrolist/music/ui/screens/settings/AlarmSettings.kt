@@ -1,5 +1,6 @@
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
 import android.app.AlarmManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -28,7 +29,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -315,7 +315,7 @@ private fun AlarmSwitch(
     onCheckedChange: (Boolean) -> Unit,
     enabled: Boolean = true
 ) {
-    Switch(
+    HuniSwitch(
         checked = checked,
         onCheckedChange = onCheckedChange,
         enabled = enabled,

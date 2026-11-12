@@ -5,7 +5,9 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
@@ -24,7 +26,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -36,11 +37,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.metrolist.music.LocalDatabase
 import com.metrolist.music.LocalPlayerAwareWindowInsets
@@ -52,6 +56,8 @@ import com.metrolist.music.constants.AndroidAutoYouTubePlaylistsKey
 import com.metrolist.music.constants.MediaSessionConstants
 import com.metrolist.music.constants.SpotifyAccessTokenKey
 import com.metrolist.music.ui.component.IconButton
+import com.metrolist.music.ui.component.HuniScreenTitle
+import com.metrolist.music.ui.component.HuniSectionHeader
 import com.metrolist.music.ui.component.Material3SettingsGroup
 import com.metrolist.music.ui.component.Material3SettingsItem
 import com.metrolist.music.ui.utils.backToMain
@@ -184,24 +190,31 @@ fun AndroidAutoSettings(
             .windowInsetsPadding(LocalPlayerAwareWindowInsets.current)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)
+            .padding(bottom = 16.dp)
     ) {
         // Visible sections
-        Material3SettingsGroup(
-            title = stringResource(R.string.android_auto_visible_sections),
-            items = listOf(
-                Material3SettingsItem(
-                    title = {},
-                    description = { Text(stringResource(R.string.android_auto_reorder_hint)) },
-                    onClick = null
-                )
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            HuniSectionHeader(stringResource(R.string.android_auto_visible_sections), Modifier.weight(1f))
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(painterResource(R.drawable.info), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+            Text(
+                text = stringResource(R.string.android_auto_reorder_hint),
+                modifier = Modifier.weight(1f).padding(start = 8.dp),
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-        )
+        }
 
         LazyColumn(
             state = lazyListState,
             modifier = Modifier
                 .fillMaxWidth()
-                .height((visibleSections.size * 80).dp),
+                .height((visibleSections.size * 88).dp),
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
             userScrollEnabled = false,
         ) {
             items(visibleSections, key = { (section, _) -> section.id }) { (section, enabled) ->
@@ -223,20 +236,24 @@ fun AndroidAutoSettings(
                                 title = { Text(section.label()) },
                                 trailingContent = {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.drag_handle),
-                                            contentDescription = null,
+                                        Box(
                                             modifier = Modifier
-                                                .size(24.dp)
+                                                .size(48.dp)
                                                 .longPressDraggableHandle(
-                                            onDragStarted = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            }
-                                        ),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                                Spacer(Modifier.width(12.dp))
-                                Switch(
+                                                    onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
+                                                )
+                                                .semantics { contentDescription = "Reorder" },
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.drag_indicator),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(24.dp),
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            )
+                                        }
+                                Spacer(Modifier.width(8.dp))
+                                HuniSwitch(
                                     checked = enabled,
                                     onCheckedChange = { newValue ->
                                         sections = sections.map { (s, e) ->
@@ -337,7 +354,7 @@ fun AndroidAutoSettings(
                     title = { Text(stringResource(R.string.android_auto_youtube_playlists)) },
                     description = { Text(stringResource(R.string.android_auto_youtube_playlists_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = youtubePlaylistsEnabled,
                             onCheckedChange = onYoutubePlaylistsChange,
                             thumbContent = {
@@ -398,7 +415,7 @@ fun AndroidAutoSettings(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.android_auto)) },
+        title = { HuniScreenTitle(stringResource(R.string.android_auto)) },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

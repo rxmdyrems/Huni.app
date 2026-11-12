@@ -205,20 +205,26 @@ jobs:
 
           find downloaded_artifacts -name "*.apk" -exec cp {} release_files/ \;
 
-          echo "APKs ready for release:"
+          VERSION="${{ needs.check-version.outputs.new_version }}"
+          git archive --format=zip --prefix="Huni-v${VERSION}/" "$GITHUB_SHA" > "release_files/Huni-v${VERSION}-source.zip"
+          for apk in release_files/*.apk; do
+            sha256sum "$apk" > "$apk.sha256"
+          done
+
+          echo "Release assets ready:"
           ls -la release_files/
 
-      - name: Parse release notes from changelog
+      - name: Parse release notes from CHANGELOG.md
         run: |
           VERSION="${{ needs.check-version.outputs.new_version }}"
           chmod +x .github/scripts/parse_changelog.sh
 
-          if bash .github/scripts/parse_changelog.sh "$VERSION" changelog.md > release_notes.md; then
-            echo "Release notes sourced from changelog.md for v$VERSION"
+          if bash .github/scripts/parse_changelog.sh "$VERSION" CHANGELOG.md > release_notes.md; then
+            echo "Release notes sourced from CHANGELOG.md for v$VERSION"
             echo "--- Preview (first 20 lines) ---"
             head -20 release_notes.md
           else
-            echo "::warning::v$VERSION not found in changelog.md — falling back to git log"
+            echo "::warning::v$VERSION not found in CHANGELOG.md — falling back to git log"
             {
               echo "Release of version $VERSION"
               echo ""
@@ -233,7 +239,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          echo "Creating release v${{ needs.check-version.outputs.new_version }}"
+          echo "Creating draft prerelease v${{ needs.check-version.outputs.new_version }}"
 
           {
             echo "Released by @${{ github.triggering_actor }}"
@@ -242,10 +248,12 @@ jobs:
           } > attributed_release_notes.md
 
           gh release create "v${{ needs.check-version.outputs.new_version }}" \
-            --title "${{ needs.check-version.outputs.new_version }}" \
+            --title "Huni v${{ needs.check-version.outputs.new_version }}" \
+            --target "$GITHUB_SHA" \
             --notes-file attributed_release_notes.md \
             --draft \
-            release_files/*.apk
+            --prerelease \
+            release_files/*
 
           echo "Release created successfully!"
 

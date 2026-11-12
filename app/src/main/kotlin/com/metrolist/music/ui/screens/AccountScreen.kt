@@ -55,6 +55,7 @@ import com.metrolist.music.constants.GridThumbnailHeight
 import com.metrolist.music.db.entities.PodcastEntity
 import com.metrolist.music.ui.component.ChipsRow
 import com.metrolist.music.ui.component.IconButton
+import com.metrolist.music.ui.component.HuniScreenTitle
 import com.metrolist.music.ui.component.LocalMenuState
 import com.metrolist.music.ui.component.YouTubeGridItem
 import com.metrolist.music.ui.component.shimmer.GridItemPlaceHolder
@@ -319,7 +320,7 @@ fun AccountScreen(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.account)) },
+        title = { HuniScreenTitle(stringResource(R.string.account)) },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

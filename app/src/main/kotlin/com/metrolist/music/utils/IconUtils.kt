@@ -5,20 +5,40 @@ import android.content.Context
 import android.content.pm.PackageManager
 
 object IconUtils {
-    fun setIcon(context: Context, enabled: Boolean) {
-        val pm = context.packageManager
-        val dynamic = ComponentName(context, "com.metrolist.music.MainActivityAlias")
-        val static = ComponentName(context, "com.metrolist.music.MainActivityStatic")
+    private val paletteAliases = mapOf(
+        "amber" to "MainActivityAlias",
+        "violet" to "MainActivityIconViolet",
+        "green" to "MainActivityIconGreen",
+        "maroon" to "MainActivityIconMaroon",
+        "ocean" to "MainActivityIconOcean",
+        "teal" to "MainActivityIconTeal",
+        "rose" to "MainActivityIconRose",
+        "orange" to "MainActivityIconOrange",
+        "indigo" to "MainActivityIconIndigo",
+        "slate" to "MainActivityIconSlate",
+    )
 
-        pm.setComponentEnabledSetting(
-            dynamic,
-            if (enabled) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-            PackageManager.DONT_KILL_APP
+    fun applyPalette(context: Context, paletteId: String) {
+        val packageManager = context.packageManager
+        val chosenId = paletteId.lowercase().takeIf(paletteAliases::containsKey) ?: "amber"
+        val chosenAlias = paletteAliases.getValue(chosenId)
+        packageManager.setComponentEnabledSetting(
+            ComponentName(context, "com.metrolist.music.$chosenAlias"),
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+            PackageManager.DONT_KILL_APP,
         )
-        pm.setComponentEnabledSetting(
-            static,
-            if (enabled) PackageManager.COMPONENT_ENABLED_STATE_DISABLED else PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-            PackageManager.DONT_KILL_APP
+        paletteAliases.filterValues { it != chosenAlias }.values.forEach { alias ->
+            packageManager.setComponentEnabledSetting(
+                ComponentName(context, "com.metrolist.music.$alias"),
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP,
+            )
+        }
+        // Kept disabled as an upgrade-compatibility alias from earlier builds.
+        packageManager.setComponentEnabledSetting(
+            ComponentName(context, "com.metrolist.music.MainActivityStatic"),
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+            PackageManager.DONT_KILL_APP,
         )
     }
 }

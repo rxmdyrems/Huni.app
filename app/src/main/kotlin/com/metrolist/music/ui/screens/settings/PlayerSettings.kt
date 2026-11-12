@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.HuniSwitch
+import com.metrolist.music.ui.component.HuniScreenTitle
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -18,7 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -310,7 +311,7 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.crossfade)) },
                     description = { Text(stringResource(R.string.crossfade_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = crossfadeEnabled,
                             onCheckedChange = onCrossfadeEnabledChange,
                             thumbContent = {
@@ -347,7 +348,7 @@ fun PlayerSettings(
                         title = { Text(stringResource(R.string.crossfade_gapless)) },
                         description = { Text(stringResource(R.string.crossfade_gapless_desc)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = crossfadeGapless,
                                 onCheckedChange = onCrossfadeGaplessChange,
                                 thumbContent = {
@@ -383,7 +384,7 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.skip_silence)) },
                     description = { Text(stringResource(R.string.skip_silence_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = skipSilence,
                             onCheckedChange = onSkipSilenceChange,
                             thumbContent = {
@@ -404,7 +405,7 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.skip_silence_instant)) },
                     description = { Text(stringResource(R.string.skip_silence_instant_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = skipSilenceInstant,
                             onCheckedChange = { onSkipSilenceInstantChange(it) },
                             enabled = skipSilence,
@@ -425,7 +426,7 @@ fun PlayerSettings(
                     icon = painterResource(R.drawable.volume_up),
                     title = { Text(stringResource(R.string.audio_normalization)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = audioNormalization,
                             onCheckedChange = onAudioNormalizationChange,
                             thumbContent = {
@@ -456,7 +457,7 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.play_over_other_audio)) },
                     description = { Text(stringResource(R.string.play_over_other_audio_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = !audioFocusEnabled,
                             onCheckedChange = { onAudioFocusEnabledChange(!it) },
                             thumbContent = {
@@ -482,7 +483,7 @@ fun PlayerSettings(
                         )
                     },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = if (crossfadeEnabled) false else audioOffload,
                             onCheckedChange = onAudioOffloadChange,
                             enabled = !crossfadeEnabled,
@@ -508,7 +509,7 @@ fun PlayerSettings(
                         )
                     },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = varispeed,
                             onCheckedChange = onVarispeedChange,
                             thumbContent = {
@@ -531,7 +532,7 @@ fun PlayerSettings(
                         Text(stringResource(R.string.audio_track_playback_params_description))
                     },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = audioTrackPlaybackParams,
                             onCheckedChange = onAudioTrackPlaybackParamsChange,
                             thumbContent = {
@@ -554,7 +555,7 @@ fun PlayerSettings(
                         title = { Text(stringResource(R.string.google_cast)) },
                         description = { Text(stringResource(R.string.google_cast_description)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = enableGoogleCast,
                                 onCheckedChange = onEnableGoogleCastChange,
                                 thumbContent = {
@@ -576,7 +577,7 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.seek_seconds_addup)) },
                     description = { Text(stringResource(R.string.seek_seconds_addup_description)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = seekExtraSeconds,
                             onCheckedChange = onSeekExtraSeconds,
                             thumbContent = {
@@ -665,7 +666,7 @@ fun PlayerSettings(
                         title = { Text(stringResource(R.string.enable_automatic_sleeptimer)) },
                         description = { Text(stringResource(R.string.sleeptimer_description)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = sleepTimerEnabled,
                                 onCheckedChange = onSleepTimerEnabledChange,
                                 thumbContent = {
@@ -693,7 +694,7 @@ fun PlayerSettings(
                                 )
                             },
                             trailingContent = {
-                                Switch(
+                                HuniSwitch(
                                     checked = sleepTimerEnabled,
                                     onCheckedChange = {showSleepTimerDialog = true},
                                     thumbContent = {
@@ -718,7 +719,7 @@ fun PlayerSettings(
                         title = { Text(stringResource(R.string.sleep_timer_stop_after_current_song_title)) },
                         description = { Text(stringResource(R.string.sleep_timer_stop_after_current_song_description)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = sleepTimerStopAfterCurrentSong,
                                 onCheckedChange = onSleepTimerStopAfterCurrentSongChange,
                                 thumbContent = {
@@ -742,7 +743,7 @@ fun PlayerSettings(
                         title = { Text(stringResource(R.string.sleep_timer_fade_out_title)) },
                         description = { Text(stringResource(R.string.sleep_timer_fade_out_description)) },
                         trailingContent = {
-                            Switch(
+                            HuniSwitch(
                                 checked = sleepTimerFadeOut,
                                 onCheckedChange = onSleepTimerFadeOutChange,
                                 thumbContent = {
@@ -775,7 +776,7 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.persistent_queue)) },
                     description = { Text(stringResource(R.string.persistent_queue_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = persistentQueue,
                             onCheckedChange = onPersistentQueueChange,
                             thumbContent = {
@@ -796,7 +797,7 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.auto_load_more)) },
                     description = { Text(stringResource(R.string.auto_load_more_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = autoLoadMore,
                             onCheckedChange = onAutoLoadMoreChange,
                             thumbContent = {
@@ -817,7 +818,7 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.auto_radio_queue)) },
                     description = { Text(stringResource(R.string.auto_radio_queue_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = autoRadioQueue,
                             onCheckedChange = onAutoRadioQueueChange,
                             thumbContent = {
@@ -838,7 +839,7 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.autoplay)) },
                     description = { Text(stringResource(R.string.autoplay_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = autoplay,
                             onCheckedChange = onAutoplayChange,
                             thumbContent = {
@@ -859,7 +860,7 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.disable_load_more_when_repeat_all)) },
                     description = { Text(stringResource(R.string.disable_load_more_when_repeat_all_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = disableLoadMoreWhenRepeatAll,
                             onCheckedChange = onDisableLoadMoreWhenRepeatAllChange,
                             thumbContent = {
@@ -880,7 +881,7 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.auto_download_on_like)) },
                     description = { Text(stringResource(R.string.auto_download_on_like_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = autoDownloadOnLike,
                             onCheckedChange = onAutoDownloadOnLikeChange,
                             thumbContent = {
@@ -901,7 +902,7 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.enable_similar_content)) },
                     description = { Text(stringResource(R.string.similar_content_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = similarContentEnabled,
                             onCheckedChange = similarContentEnabledChange,
                             thumbContent = {
@@ -922,7 +923,7 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.persistent_shuffle_title)) },
                     description = { Text(stringResource(R.string.persistent_shuffle_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = persistentShuffleAcrossQueues,
                             onCheckedChange = onPersistentShuffleAcrossQueuesChange,
                             thumbContent = {
@@ -943,7 +944,7 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.remember_shuffle_and_repeat)) },
                     description = { Text(stringResource(R.string.remember_shuffle_and_repeat_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = rememberShuffleAndRepeat,
                             onCheckedChange = onRememberShuffleAndRepeatChange,
                             thumbContent = {
@@ -964,7 +965,7 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.shuffle_playlist_first)) },
                     description = { Text(stringResource(R.string.shuffle_playlist_first_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = shufflePlaylistFirst,
                             onCheckedChange = onShufflePlaylistFirstChange,
                             thumbContent = {
@@ -985,7 +986,7 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.prevent_duplicate_tracks_in_queue)) },
                     description = { Text(stringResource(R.string.prevent_duplicate_tracks_in_queue_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = preventDuplicateTracksInQueue,
                             onCheckedChange = onPreventDuplicateTracksInQueueChange,
                             thumbContent = {
@@ -1006,7 +1007,7 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.auto_skip_next_on_error)) },
                     description = { Text(stringResource(R.string.auto_skip_next_on_error_desc)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = autoSkipNextOnError,
                             onCheckedChange = onAutoSkipNextOnErrorChange,
                             thumbContent = {
@@ -1034,7 +1035,7 @@ fun PlayerSettings(
                     icon = painterResource(R.drawable.clear_all),
                     title = { Text(stringResource(R.string.stop_music_on_task_clear)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = stopMusicOnTaskClear,
                             onCheckedChange = onStopMusicOnTaskClearChange,
                             thumbContent = {
@@ -1054,7 +1055,7 @@ fun PlayerSettings(
                     icon = painterResource(R.drawable.volume_off_pause),
                     title = { Text(stringResource(R.string.pause_music_when_media_is_muted)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = pauseOnMute,
                             onCheckedChange = onPauseOnMuteChange,
                             thumbContent = {
@@ -1074,7 +1075,7 @@ fun PlayerSettings(
                     icon = painterResource(R.drawable.bluetooth),
                     title = { Text(stringResource(R.string.resume_on_bluetooth_connect)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = resumeOnBluetoothConnect,
                             onCheckedChange = onResumeOnBluetoothConnectChange,
                             thumbContent = {
@@ -1094,7 +1095,7 @@ fun PlayerSettings(
                     icon = painterResource(R.drawable.screenshot),
                     title = { Text(stringResource(R.string.keep_screen_on_when_player_is_expanded)) },
                     trailingContent = {
-                        Switch(
+                        HuniSwitch(
                             checked = keepScreenOn,
                             onCheckedChange = onKeepScreenOnChange,
                             thumbContent = {
@@ -1122,7 +1123,7 @@ fun PlayerSettings(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.player_and_audio)) },
+        title = { HuniScreenTitle(stringResource(R.string.player_and_audio)) },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,
