@@ -32,6 +32,8 @@ import com.metrolist.music.ui.screens.artist.ArtistSongsScreen
 import com.metrolist.music.ui.screens.equalizer.EqScreen
 import com.metrolist.music.ui.screens.equalizer.wizard.WizardScreen
 import com.metrolist.music.ui.screens.library.LibraryScreen
+import com.metrolist.music.reader.ui.ReaderLibraryScreen
+import com.metrolist.music.reader.ui.ReaderScreen
 import com.metrolist.music.ui.screens.playlist.AutoPlaylistScreen
 import com.metrolist.music.ui.screens.playlist.CachePlaylistScreen
 import com.metrolist.music.ui.screens.playlist.LocalPlaylistScreen
@@ -103,6 +105,19 @@ fun NavGraphBuilder.navigationBuilder(
 
     composable(Screens.Library.route) {
         LibraryScreen()
+    }
+
+    composable("reader") {
+        ReaderLibraryScreen(navController)
+    }
+
+    composable(
+        route = "reader/{bookId}",
+        arguments = listOf(navArgument("bookId") { type = NavType.StringType }),
+    ) { backStackEntry ->
+        backStackEntry.arguments?.getString("bookId")?.let { bookId ->
+            ReaderScreen(bookId = bookId, navController = navController)
+        }
     }
 
     composable(Screens.ListenTogether.route) {

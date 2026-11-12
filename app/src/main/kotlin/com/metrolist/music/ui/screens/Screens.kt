@@ -45,7 +45,14 @@ sealed class Screens(
         route = "library"
     )
 
+    object Reader : Screens(
+        titleId = R.string.reader,
+        iconIdInactive = R.drawable.library_add,
+        iconIdActive = R.drawable.library_add_check,
+        route = "reader"
+    )
+
     companion object {
-        val MainScreens = listOf(Home, Search, ListenTogether, Library)
+        val MainScreens = listOf(Home, Search, ListenTogether, Library, Reader)
     }
 }

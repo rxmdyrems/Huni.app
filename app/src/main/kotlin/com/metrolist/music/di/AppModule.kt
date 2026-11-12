@@ -17,6 +17,7 @@ import com.metrolist.music.db.InternalDatabase
 import com.metrolist.music.db.MusicDatabase
 import com.metrolist.music.listentogether.ListenTogetherClient
 import com.metrolist.music.listentogether.ListenTogetherManager
+import com.metrolist.music.reader.db.ReaderDatabase
 import com.metrolist.music.utils.CrashReporter
 import com.metrolist.music.utils.dataStore
 import com.metrolist.music.utils.get
@@ -67,6 +68,16 @@ object AppModule {
     fun provideDatabase(
         internalDatabase: InternalDatabase,
     ): MusicDatabase = MusicDatabase(internalDatabase)
+
+    @Singleton
+    @Provides
+    fun provideReaderDatabase(
+        @ApplicationContext context: Context,
+    ): ReaderDatabase = androidx.room.Room.databaseBuilder(
+        context,
+        ReaderDatabase::class.java,
+        "reader.db",
+    ).build()
 
     @Singleton
     @Provides
