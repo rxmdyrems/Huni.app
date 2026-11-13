@@ -139,6 +139,7 @@ import com.metrolist.music.constants.AppBarHeight
 import com.metrolist.music.constants.AppLanguageKey
 import com.metrolist.music.constants.CheckForUpdatesKey
 import com.metrolist.music.constants.ChannelSwitchCompletedKey
+import com.metrolist.music.constants.OnboardingDoneKey
 import com.metrolist.music.constants.DarkModeKey
 import com.metrolist.music.constants.DefaultOpenTabKey
 import com.metrolist.music.constants.DismissedKmpUpdateKey
@@ -530,6 +531,7 @@ class MainActivity : FragmentActivity() {
         initialPaletteId: String,
     ) {
         val checkForUpdates by rememberPreference(CheckForUpdatesKey, defaultValue = true)
+        val onboardingDone by rememberPreference(OnboardingDoneKey, defaultValue = false)
         var availableUpdate by remember { mutableStateOf<AvailableUpdate?>(null) }
         var showCrashReport by remember { mutableStateOf(pendingCrashReport != null) }
 
@@ -1448,6 +1450,11 @@ class MainActivity : FragmentActivity() {
                     }
 
                     if (!showChangelog.value) {
+                        if (!onboardingDone) {
+                            Dialog(onDismissRequest = {}) {
+                                OnboardingScreen(onFinished = {})
+                            }
+                        }
                         availableUpdate?.let { update ->
                             val dismissUpdate: () -> Unit = {
                                 availableUpdate = null

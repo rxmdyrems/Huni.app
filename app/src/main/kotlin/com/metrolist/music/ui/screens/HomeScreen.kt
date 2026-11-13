@@ -123,6 +123,7 @@ import com.metrolist.music.constants.ShowPlayRandomButtonKey
 import com.metrolist.music.constants.ShowRecognizeButtonKey
 import com.metrolist.music.constants.SmallGridThumbnailHeight
 import com.metrolist.music.constants.ThumbnailCornerRadius
+import com.metrolist.music.constants.UserNameKey
 import com.metrolist.music.db.entities.Album
 import com.metrolist.music.db.entities.Artist
 import com.metrolist.music.db.entities.LocalItem
@@ -719,6 +720,7 @@ fun HomeScreen(
     val innerTubeCookie by rememberPreference(InnerTubeCookieKey, "")
     val (randomizeHomeOrder) = rememberPreference(RandomizeHomeOrderKey, true)
     val autoRadioQueue by rememberPreference(AutoRadioQueueKey, defaultValue = true)
+    val profileName by rememberPreference(UserNameKey, defaultValue = "")
 
     LaunchedEffect(Unit) { viewModel.loadHomeData() }
 
@@ -1311,6 +1313,15 @@ fun HomeScreen(
                 state = lazylistState,
                 contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
             ) {
+                if (profileName.isNotBlank()) {
+                    item(key = "profile_greeting") {
+                        Text(
+                            text = "Good evening, $profileName",
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                        )
+                    }
+                }
                 item {
                     ChipsRow(
                         chips = listOf<Pair<com.metrolist.innertube.pages.HomePage.Chip?, String>>(null to "All") + (homePage?.chips?.map { it to it.title } ?: emptyList()),
