@@ -23,17 +23,24 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -54,6 +62,11 @@ import com.metrolist.music.LocalPlayerAwareWindowInsets
 import com.metrolist.music.R
 import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.utils.backToMain
+import com.metrolist.music.utils.dataStore
+import androidx.datastore.preferences.core.edit
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private data class AboutLink(val title: String, val subtitle: String, val icon: Int, val url: String)
 private val aboutLinks = listOf(
@@ -66,6 +79,10 @@ private val aboutLinks = listOf(
 @Composable
 fun AboutScreen(navController: NavController, scrollBehavior: TopAppBarScrollBehavior) {
     val uriHandler = LocalUriHandler.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var deleteConfirmation by remember { mutableStateOf("") }
     Column(
         modifier = Modifier.fillMaxSize()
             .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
@@ -115,6 +132,13 @@ fun AboutScreen(navController: NavController, scrollBehavior: TopAppBarScrollBeh
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
         )
+        Spacer(Modifier.height(20.dp))
+        Surface(Modifier.fillMaxWidth(), RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Local profile", style = MaterialTheme.typography.titleMedium)
+                Text("Your name and avatar stay on this device and are excluded from Android backup.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
         Spacer(Modifier.height(24.dp)); SectionLabel("Links"); Spacer(Modifier.height(10.dp))
         Surface(Modifier.fillMaxWidth(), RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface) {
             Column(Modifier.padding(vertical = 4.dp)) {
@@ -141,7 +165,47 @@ fun AboutScreen(navController: NavController, scrollBehavior: TopAppBarScrollBeh
                 UpstreamRow("Ktor, Coil, and Material 3", "Apache 2.0")
             }
         }
+        Spacer(Modifier.height(24.dp))
+        Surface(Modifier.fillMaxWidth(), RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.errorContainer) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Delete all data", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onErrorContainer)
+                Text("Remove library, settings, account data, caches, downloads, and your local profile. This cannot be undone.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onErrorContainer)
+                OutlinedButton(onClick = { deleteConfirmation = ""; showDeleteDialog = true }) { Text("Delete all data") }
+            }
+        }
         Spacer(Modifier.height(32.dp))
+    }
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete all data?") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("This permanently removes all local Huni data. Type DELETE to confirm.")
+                    OutlinedTextField(value = deleteConfirmation, onValueChange = { deleteConfirmation = it }, singleLine = true, label = { Text("Type DELETE") })
+                }
+            },
+            confirmButton = {
+                Button(enabled = deleteConfirmation == "DELETE", onClick = {
+                    scope.launch(Dispatchers.IO) {
+                        context.dataStore.edit { it.clear() }
+                        context.deleteDatabase("song.db")
+                        context.cacheDir.deleteRecursively()
+                        context.filesDir.resolve("profile").deleteRecursively()
+                        context.filesDir.resolve("download").deleteRecursively()
+                        context.noBackupFilesDir.deleteRecursively()
+                        withContext(Dispatchers.Main) {
+                            context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+                                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                context.startActivity(this)
+                            }
+                            (context as? android.app.Activity)?.finishAffinity()
+                        }
+                    }
+                }) { Text("Delete permanently") }
+            },
+            dismissButton = { TextButton(onClick = { showDeleteDialog = false }) { Text("Cancel") } },
+        )
     }
     TopAppBar(title = { com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.about)) }, navigationIcon = {
         IconButton(onClick = navController::navigateUp, onLongClick = navController::backToMain) { Icon(painterResource(R.drawable.arrow_back), stringResource(R.string.cd_back)) }
