@@ -1,9 +1,9 @@
-name: Build and Sign Huni APK
+name: Build Huni test APK
 
 on:
   push:
     branches:
-      - redesign-v1
+      - "fix/**"
   workflow_dispatch:
 
 permissions:
@@ -11,7 +11,9 @@ permissions:
 
 jobs:
   build:
+    name: Signed FOSS test APK
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Check out source
         uses: actions/checkout@v4
@@ -20,61 +22,134 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: "21"
 
       - name: Install project Android SDK packages
         run: |
+          set -euo pipefail
           SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | sort -V | tail -1)"
           test -x "$SDKMANAGER"
           echo "$(dirname "$SDKMANAGER")" >> "$GITHUB_PATH"
-          yes | "$SDKMANAGER" --licenses
+          yes | "$SDKMANAGER" --licenses >/dev/null
           "$SDKMANAGER" --install 'platform-tools' 'platforms;android-37.0' 'build-tools;37.0.0'
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build Foss release APK
-        run: ./gradlew assembleFossRelease --console=plain -q
+      - name: Build the same FOSS release APK as the release job
+        run: ./gradlew --console=plain assembleFossRelease --warning-mode summary
         env:
-          METROLIST_APPLICATION_ID: com.remycamiguel.huni
           METROLIST_APP_NAME: Huni
+          PULL_REQUEST: "false"
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
+          LASTFM_SECRET: ${{ secrets.LASTFM_SECRET }}
 
-      - name: Sign APK
+      - name: Sign with the release keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          set -eu
+          set -euo pipefail
+          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Required signing secret $name is unavailable on this branch push; refusing to produce an unsigned APK."
+              exit 1
+            fi
+          done
           KEYSTORE_FILE="$RUNNER_TEMP/huni-release.keystore"
           trap 'rm -f "$KEYSTORE_FILE"' EXIT
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_FILE"
-          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -1)
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -1)"
           test -x "$APKSIGNER"
-          UNSIGNED_APK=$(find app/build/outputs/apk/foss/release -maxdepth 1 -type f -name '*unsigned*.apk' -print -quit)
-          test -n "$UNSIGNED_APK"
+          UNSIGNED_APK="$(find app/build/outputs/apk/foss/release -maxdepth 1 -type f -name '*unsigned*.apk' -print -quit)"
+          if [ -z "$UNSIGNED_APK" ]; then
+            echo "::error::The FOSS release signing step did not produce an unsigned APK; refusing to produce a test artifact."
+            exit 1
+          fi
           SIGNED_APK="${UNSIGNED_APK%-unsigned.apk}-signed.apk"
-          "$APKSIGNER" sign --ks "$KEYSTORE_FILE" --ks-pass "pass:$KEYSTORE_PASSWORD" --ks-key-alias "$KEY_ALIAS" --key-pass "pass:$KEY_PASSWORD" --out "$SIGNED_APK" "$UNSIGNED_APK"
+          "$APKSIGNER" sign \
+            --ks "$KEYSTORE_FILE" \
+            --ks-pass "pass:$KEYSTORE_PASSWORD" \
+            --ks-key-alias "$KEY_ALIAS" \
+            --key-pass "pass:$KEY_PASSWORD" \
+            --out "$SIGNED_APK" "$UNSIGNED_APK"
 
-      - name: Rename APK and create checksum
-        id: rename_apk
+      - name: Verify and stage Huni-test.apk
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
           OUTPUT_DIR="app/build/outputs/apk/foss/release"
+          SIGNED_APK="$(find "$OUTPUT_DIR" -maxdepth 1 -type f -name '*-signed.apk' -print -quit)"
+          if [ -z "$SIGNED_APK" ]; then
+            echo "::error::No signed APK was produced; refusing to upload an artifact."
+            exit 1
+          fi
+          if [[ "$(basename "$SIGNED_APK")" == *unsigned* ]]; then
+            echo "::error::The APK filename contains unsigned; refusing to upload it."
+            exit 1
+          fi
           mkdir -p "$OUTPUT_DIR/out"
-          SIGNED_APK=$(find "$OUTPUT_DIR" -maxdepth 1 -type f -name '*-signed.apk' -print -quit)
-          test -n "$SIGNED_APK"
-          APP_VERSION=$(grep -m1 -oP '^\s*versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
-          test -n "$APP_VERSION"
-          TARGET_APK="Huni-${APP_VERSION}.apk"
-          mv "$SIGNED_APK" "$OUTPUT_DIR/out/$TARGET_APK"
-          (cd "$OUTPUT_DIR/out" && sha256sum "$TARGET_APK" > "$TARGET_APK.sha256")
-          echo "version=$APP_VERSION" >> "$GITHUB_OUTPUT"
+          APK_PATH="$OUTPUT_DIR/out/Huni-test.apk"
+          mv "$SIGNED_APK" "$APK_PATH"
 
-      - name: Upload signed APK artifact
+          BUILD_TOOLS="$(find "$ANDROID_HOME/build-tools" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -1)"
+          AAPT2="$BUILD_TOOLS/aapt2"
+          ZIPALIGN="$BUILD_TOOLS/zipalign"
+          APKSIGNER="$BUILD_TOOLS/apksigner"
+          test -x "$AAPT2"; test -x "$ZIPALIGN"; test -x "$APKSIGNER"
+
+          echo "== aapt2 badging =="
+          BADGING="$($AAPT2 dump badging "$APK_PATH")"
+          printf '%s\n' "$BADGING" | grep -E "^package:|^sdkVersion:|^targetSdkVersion:" || true
+          PACKAGE="$(printf '%s\n' "$BADGING" | sed -n "s/^package: name='\\([^']*\\)'.*/\\1/p" | head -n1)"
+          LABEL="$(printf '%s\n' "$BADGING" | sed -n "s/^application-label:'\\([^']*\\)'.*/\\1/p" | head -n1)"
+          VERSION_NAME="$(printf '%s\n' "$BADGING" | sed -n "s/^package:.* versionName='\\([^']*\\)'.*/\\1/p" | head -n1)"
+          VERSION_CODE="$(printf '%s\n' "$BADGING" | sed -n "s/^package:.* versionCode='\\([^']*\\)'.*/\\1/p" | head -n1)"
+          MIN_SDK="$(printf '%s\n' "$BADGING" | sed -n "s/^sdkVersion:'\\([^']*\\)'.*/\\1/p" | head -n1)"
+          TARGET_SDK="$(printf '%s\n' "$BADGING" | sed -n "s/^targetSdkVersion:'\\([^']*\\)'.*/\\1/p" | head -n1)"
+          printf 'package=%s label=%s versionName=%s versionCode=%s minSdk=%s targetSdk=%s\n' "$PACKAGE" "$LABEL" "$VERSION_NAME" "$VERSION_CODE" "$MIN_SDK" "$TARGET_SDK"
+          test "$PACKAGE" = "com.remycamiguel.huni"
+          test "$LABEL" = "Huni"
+          test -n "$VERSION_NAME"; test -n "$VERSION_CODE"; test -n "$MIN_SDK"; test -n "$TARGET_SDK"
+
+          echo "== unzip -t =="
+          unzip -t "$APK_PATH"
+          echo "== zipalign =="
+          "$ZIPALIGN" -c -P 16 -v 4 "$APK_PATH"
+          echo "== apksigner =="
+          VERIFY_OUTPUT="$($APKSIGNER verify --verbose --print-certs "$APK_PATH" 2>&1)"
+          printf '%s\n' "$VERIFY_OUTPUT"
+          printf '%s\n' "$VERIFY_OUTPUT" | grep -Eq 'Verified using v[23] scheme \(APK Signature Scheme v[23]\): true'
+          SIGNER_COUNT="$(printf '%s\n' "$VERIFY_OUTPUT" | grep -c '^Signer #')"
+          test "$SIGNER_COUNT" -eq 1
+
+          BASE_TAG="$(gh release list --repo "$GITHUB_REPOSITORY" --limit 20 --json tagName,isLatest --jq '.[] | select(.isLatest == true) | .tagName' | head -n1)"
+          if [ -z "$BASE_TAG" ]; then
+            echo "::error::Could not determine the Latest release tag for signing comparison."
+            exit 1
+          fi
+          STABLE_DIR="$RUNNER_TEMP/latest-release"
+          mkdir -p "$STABLE_DIR"
+          gh release download "$BASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern Huni.apk --dir "$STABLE_DIR"
+          STABLE_APK="$STABLE_DIR/Huni.apk"
+          cert_sha256() {
+            "$APKSIGNER" verify --print-certs "$1" 2>&1 \
+              | sed -n 's/.*certificate SHA-256 digest: //p' \
+              | head -n1 | tr -d '[:space:]:' | tr '[:upper:]' '[:lower:]'
+          }
+          TEST_CERT="$(cert_sha256 "$APK_PATH")"
+          STABLE_CERT="$(cert_sha256 "$STABLE_APK")"
+          printf 'latestRelease=%s testSignerSha256=%s latestSignerSha256=%s\n' "$BASE_TAG" "$TEST_CERT" "$STABLE_CERT"
+          test -n "$TEST_CERT"; test "$TEST_CERT" = "$STABLE_CERT"
+
+      - name: Upload Huni-test artifact
         uses: actions/upload-artifact@v4
         with:
-          name: huni-${{ steps.rename_apk.outputs.version }}-foss-universal
-          path: app/build/outputs/apk/foss/release/out/*
+          name: Huni-test
+          path: app/build/outputs/apk/foss/release/out/Huni-test.apk
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 14
