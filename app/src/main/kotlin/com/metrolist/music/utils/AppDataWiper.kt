@@ -5,7 +5,6 @@ import android.content.Intent
 import android.webkit.CookieManager
 import android.webkit.WebStorage
 import androidx.datastore.preferences.core.edit
-import androidx.work.WorkManager
 import com.metrolist.music.playback.ExoDownloadService
 import com.metrolist.music.playback.MusicService
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +14,6 @@ import java.io.File
 object AppDataWiper {
     suspend fun wipe(context: Context): Boolean = withContext(Dispatchers.IO) {
         runCatching {
-            WorkManager.getInstance(context).cancelAllWork()
             context.stopService(Intent(context, MusicService::class.java))
             context.stopService(Intent(context, ExoDownloadService::class.java))
             context.dataStore.edit { it.clear() }

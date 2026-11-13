@@ -10,6 +10,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -35,6 +36,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -84,6 +86,7 @@ private val aboutLinks = listOf(
 )
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun AboutScreen(navController: NavController, scrollBehavior: androidx.compose.material3.TopAppBarScrollBehavior) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -115,7 +118,7 @@ fun AboutScreen(navController: NavController, scrollBehavior: androidx.compose.m
         Spacer(Modifier.height(10.dp))
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(name.ifBlank { "Music lover" }, style = MaterialTheme.typography.headlineSmall.copy(fontSize = 22.sp), maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis)
-            IconButton(onClick = { nameDraft = name; editName = true }) { Icon(painterResource(R.drawable.edit), "Edit name", Modifier.size(19.dp)) }
+            IconButton(onClick = { nameDraft = name; editName = true }, onLongClick = {}) { Icon(painter = painterResource(R.drawable.edit), contentDescription = "Edit name", modifier = Modifier.size(19.dp)) }
         }
         Text("Your music, your way.", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
         Spacer(Modifier.height(22.dp))
@@ -132,7 +135,7 @@ fun AboutScreen(navController: NavController, scrollBehavior: androidx.compose.m
             Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Image(painterResource(R.drawable.avatar_remy), "Remy Camiguel", Modifier.size(40.dp).clip(CircleShape), contentScale = ContentScale.Crop)
                 Column(Modifier.weight(1f)) { Text("Remy Camiguel", maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis); Text("Developer of Huni", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall) }
-                Surface(RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHighest) { Text("${BuildConfig.VERSION_NAME} · Universal", Modifier.padding(horizontal = 9.dp, vertical = 5.dp), style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false) }
+                Surface(shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHighest) { Text(text = "${BuildConfig.VERSION_NAME} · Universal", modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp), style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false) }
             }
             aboutLinks.forEachIndexed { i, link ->
                 DividerRow(); ActionRow(link.icon, link.title, link.subtitle) { uriHandler.openUri(link.url) }
@@ -143,7 +146,7 @@ fun AboutScreen(navController: NavController, scrollBehavior: androidx.compose.m
         Spacer(Modifier.height(28.dp))
     }
 
-    if (editName) AlertDialog(onDismissRequest = { editName = false }, title = { Text("Edit name") }, text = { OutlinedTextField(nameDraft, { nameDraft = it.take(20) }, label = { Text("Name") }, singleLine = true) }, confirmButton = { Button(onClick = { scope.launch { context.safeDataStoreEdit { it[UserNameKey] = nameDraft.trim().ifBlank { "Music lover" } } }; editName = false }) { Text("Save") } }, dismissButton = { TextButton({ editName = false }) { Text("Cancel") } })
+    if (editName) AlertDialog(onDismissRequest = { editName = false }, title = { Text("Edit name") }, text = { OutlinedTextField(value = nameDraft, onValueChange = { nameDraft = it.take(20) }, label = { Text("Name") }, singleLine = true) }, confirmButton = { Button(onClick = { scope.launch { context.safeDataStoreEdit { it[UserNameKey] = nameDraft.trim().ifBlank { "Music lover" } } }; editName = false }) { Text("Save") } }, dismissButton = { TextButton(onClick = { editName = false }) { Text("Cancel") } })
     if (photoSheet) ModalBottomSheet(onDismissRequest = { photoSheet = false }) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) { Text("Change photo", style = MaterialTheme.typography.titleLarge); Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) { avatarPresets.take(6).forEachIndexed { i, res -> Image(painterResource(res), avatarIds[i], Modifier.size(48.dp).clip(CircleShape).clickable { scope.launch { context.safeDataStoreEdit { it[UserAvatarKey] = avatarIds[i] } }; photoSheet = false }) } }; TextButton({ picker.launch("image/*"); photoSheet = false }) { Text("Upload your own photo") }; TextButton({ scope.launch { context.safeDataStoreEdit { it[UserAvatarKey] = "avatar_amber" }; File(context.filesDir, "profile/avatar.webp").delete() }; photoSheet = false }) { Text("Remove photo") } } }
     if (deleteDialog) AlertDialog(properties = androidx.compose.ui.window.DialogProperties(dismissOnClickOutside = !wiping, dismissOnBackPress = !wiping), onDismissRequest = { if (!wiping) deleteDialog = false }, title = { Text("Delete all app data?") }, text = { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { Text("This erases your settings, library, history, sign-ins, name and photo. Your own music files are not touched. Huni will restart and show the welcome pages again."); OutlinedTextField(deleteText, { deleteText = it }, label = { Text("Type DELETE to confirm") }, singleLine = true); if (wiping) Text("Wiping your Huni data…", color = MaterialTheme.colorScheme.primary); if (wipeError) Text("Couldn't delete everything. Please try again.", color = MaterialTheme.colorScheme.error) } }, confirmButton = { Button(enabled = deleteText.trim().equals("DELETE", true) && !wiping, onClick = { wiping = true; scope.launch { val ok = AppDataWiper.wipe(context); if (ok) { context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK); context.startActivity(this) }; (context as? android.app.Activity)?.finishAffinity() } else { wiping = false; wipeError = true } } }) { Text("Delete everything") } }, dismissButton = { TextButton(enabled = !wiping, onClick = { deleteDialog = false }) { Text("Cancel") } })
     TopAppBar(title = { com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.about)) }, navigationIcon = { IconButton(onClick = navController::navigateUp, onLongClick = navController::backToMain) { Icon(painterResource(R.drawable.arrow_back), stringResource(R.string.cd_back)) } }, scrollBehavior = scrollBehavior)
@@ -153,5 +156,5 @@ fun AboutScreen(navController: NavController, scrollBehavior: androidx.compose.m
 @Composable private fun CardColumn(content: @Composable ColumnScope.() -> Unit) { Surface(Modifier.fillMaxWidth(), RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh, content = { Column(content = content) }) }
 @Composable private fun SectionLabel(text: String) { Text(text, Modifier.fillMaxWidth(), style = MaterialTheme.typography.titleMedium) }
 @Composable private fun DividerRow() { HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant) }
-@Composable private fun ActionRow(icon: Int, title: String, subtitle: String, tint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface, onClick: () -> Unit) { Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) { Icon(painterResource(icon), null, tint = tint, Modifier.size(22.dp)); Column(Modifier.weight(1f)) { Text(title, color = tint, maxLines = 1, overflow = TextOverflow.Ellipsis); Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis) } } }
+@Composable private fun ActionRow(icon: Int, title: String, subtitle: String, tint: androidx.compose.ui.graphics.Color? = null, onClick: () -> Unit) { val rowTint = tint ?: MaterialTheme.colorScheme.onSurface; Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) { Icon(painter = painterResource(icon), contentDescription = null, tint = rowTint, modifier = Modifier.size(22.dp)); Column(Modifier.weight(1f)) { Text(title, color = rowTint, maxLines = 1, overflow = TextOverflow.Ellipsis); Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis) } } }
 @Composable private fun UpstreamRow(name: String, license: String) { Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), horizontalArrangement = Arrangement.SpaceBetween) { Text(name, Modifier.weight(1f)); Text(license, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall) } }
