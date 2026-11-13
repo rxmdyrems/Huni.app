@@ -27,7 +27,7 @@ Huni is a personal, open-source music player with a calm dark-first interface, f
 - **Open source:** inspect, build, and improve the GPL v3 app.
 - **Themeable:** choose from ten color palettes plus light, dark, or system appearance modes; optionally match the launcher icon.
 - **No account required to start:** optional integrations are off until you enable them.
-- **Private first launch:** onboarding supports a local name and avatar; profile data is stored only on the device.
+- **Private first launch:** onboarding supports a local name and avatar; your name and photo stay on this device.
 
 ## Features
 
@@ -73,7 +73,7 @@ The in-app updater checks GitHub Releases at most every 24 hours, asks before in
 
 ## Privacy and data
 
-Huni needs no account to play YouTube or local music. Optional integrations such as a YouTube account, Last.fm scrobbling, Spotify, and Discord remain off until you enable them. Features that use third-party services contact those services when used. Crash reports are prepared locally, redacted, and never sent automatically; after a crash, Huni asks whether to open a GitHub issue or an email draft. Review the app's Privacy settings for the current controls.
+Huni needs no account to play YouTube or local music. Optional integrations such as a YouTube account, Last.fm scrobbling, Spotify, and Discord remain off until you enable them. Features that use third-party services contact those services when used. Your local name and photo stay on this device and are excluded from Android backup. Crash reports are prepared locally, redacted, and never sent automatically; after a crash, Huni asks whether to open a GitHub issue or an email draft. Review the app's Privacy settings for the current controls.
 
 ## Build from source
 

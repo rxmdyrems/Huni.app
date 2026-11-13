@@ -2,11 +2,20 @@
 > Every notable change to Huni, newest first. New release-text emoji prefixes follow CONTRIBUTING.md.
 
 ## Unreleased
-### Added
-- Added local onboarding with private name and avatar setup, customizable navigation tabs, and exact-confirmation all-data deletion in About.
 
-### Changed
-- Persisted YouTube channel switching and excluded local profile data from Android backup.
+### 🛠️ Fixed
+- 🛠️ Fixed Settings, About, and other secondary screens returning to Home.
+- 🛠️ Fixed the duplicate greeting on Home.
+- 🛠️ Fixed Speed dial “More” tile alignment.
+
+### ✨ Added
+- ✨ Added welcome pages, local name and avatar, customizable navigation bar with Reader shown by default, and delete app data.
+
+### 🔄 Changed
+- 🔄 Changed the About layout.
+- 🔄 Changed YouTube channel switching to persist the selected channel and confirm completion after restart.
+- 🔄 Kept local profile data excluded from Android backup.
+
 ---
 ## v0.9.12 (2026-11-13)
 ### ✨ New
