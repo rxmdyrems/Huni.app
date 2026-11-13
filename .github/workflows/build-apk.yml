@@ -111,6 +111,12 @@ jobs:
           VERSION_CODE="$(printf '%s\n' "$BADGING" | sed -n "s/^package:.* versionCode='\\([^']*\\)'.*/\\1/p" | head -n1)"
           MIN_SDK="$(printf '%s\n' "$BADGING" | sed -n "s/^sdkVersion:'\\([^']*\\)'.*/\\1/p" | head -n1)"
           TARGET_SDK="$(printf '%s\n' "$BADGING" | sed -n "s/^targetSdkVersion:'\\([^']*\\)'.*/\\1/p" | head -n1)"
+          if [ -z "$MIN_SDK" ]; then
+            MIN_SDK_HEX="$($AAPT2 dump xmltree "$APK_PATH" AndroidManifest.xml | sed -n 's/.*android:minSdkVersion(.*)=0x\\([0-9a-fA-F]*\\).*/\\1/p' | head -n1)"
+            if [ -n "$MIN_SDK_HEX" ]; then
+              MIN_SDK="$((16#$MIN_SDK_HEX))"
+            fi
+          fi
           printf 'package=%s label=%s versionName=%s versionCode=%s minSdk=%s targetSdk=%s\n' "$PACKAGE" "$LABEL" "$VERSION_NAME" "$VERSION_CODE" "$MIN_SDK" "$TARGET_SDK"
           test "$PACKAGE" = "com.remycamiguel.huni"
           test "$LABEL" = "Huni"
