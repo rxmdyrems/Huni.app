@@ -78,6 +78,7 @@ import com.metrolist.music.constants.HidePlayerThumbnailKey
 import com.metrolist.music.constants.HideStatusBarOnFullscreenKey
 import com.metrolist.music.constants.LibraryFilter
 import com.metrolist.music.constants.ListenTogetherInTopBarKey
+import com.metrolist.music.constants.NavigationTabsKey
 import com.metrolist.music.constants.MatchAppIconToColorKey
 import com.metrolist.music.constants.LyricsAnimationStyle
 import com.metrolist.music.constants.LyricsAnimationStyleKey
@@ -220,6 +221,9 @@ fun AppearanceSettings(
             DefaultOpenTabKey,
             defaultValue = NavigationTab.HOME,
         )
+    val (navigationTabsValue, onNavigationTabsChange) =
+        rememberPreference(NavigationTabsKey, NavigationConfig.defaultValue)
+    val visibleNavigationTabs = remember(navigationTabsValue) { NavigationConfig.parse(navigationTabsValue) }
     val (playerButtonsStyle, onPlayerButtonsStyleChange) =
         rememberEnumPreference(
             PlayerButtonsStyleKey,
@@ -614,6 +618,7 @@ fun AppearanceSettings(
                     NavigationTab.HOME -> stringResource(R.string.home)
                     NavigationTab.SEARCH -> stringResource(R.string.search)
                     NavigationTab.LIBRARY -> stringResource(R.string.filter_library)
+                    NavigationTab.READER -> "Reader · Beta"
                 }
             },
         )
@@ -1534,6 +1539,54 @@ fun AppearanceSettings(
 
         Spacer(modifier = Modifier.height(27.dp))
 
+        Text("Navigation bar", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+        Text("Choose which tabs stay visible. At least two must remain on.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(modifier = Modifier.height(8.dp))
+        Material3SettingsGroup(
+            items = NavigationConfig.orderedTabs.map { tab ->
+                val enabled = tab in visibleNavigationTabs
+                val locked = enabled && visibleNavigationTabs.size == 2
+                Material3SettingsItem(
+                icon = painterResource(R.drawable.nav_bar),
+                title = {
+                    Text(
+                        when (tab) {
+                            NavigationTab.HOME -> stringResource(R.string.home)
+                            NavigationTab.SEARCH -> stringResource(R.string.search)
+                            NavigationTab.LIBRARY -> stringResource(R.string.filter_library)
+                            NavigationTab.READER -> "Reader · Beta"
+                        },
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                },
+                description = if (locked) ({ Text("At least two tabs must stay on") }) else null,
+                trailingContent = {
+                    HuniSwitch(
+                        checked = enabled,
+                        enabled = !locked,
+                        onCheckedChange = { checked ->
+                            onNavigationTabsChange(NavigationConfig.serialize(NavigationConfig.toggle(visibleNavigationTabs, tab, checked)))
+                        },
+                    )
+                },
+                onClick = if (locked) null else ({
+                    onNavigationTabsChange(NavigationConfig.serialize(NavigationConfig.toggle(visibleNavigationTabs, tab, !enabled)))
+                }),
+                )
+            },
+        )
+        Text("Preview", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(18.dp)).padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+        ) {
+            NavigationConfig.screens(visibleNavigationTabs).forEach { screen ->
+                Text(stringResource(screen.titleId), style = MaterialTheme.typography.labelSmall, maxLines = 1)
+            }
+        }
+        Spacer(modifier = Modifier.height(27.dp))
+
         Material3SettingsGroup(
             title = stringResource(R.string.misc),
             items =
@@ -1547,6 +1600,7 @@ fun AppearanceSettings(
                                     NavigationTab.HOME -> stringResource(R.string.home)
                                     NavigationTab.SEARCH -> stringResource(R.string.search)
                                     NavigationTab.LIBRARY -> stringResource(R.string.filter_library)
+                                    NavigationTab.READER -> "Reader · Beta"
                                 },
                             )
                         },
@@ -1841,6 +1895,7 @@ enum class NavigationTab {
     HOME,
     SEARCH,
     LIBRARY,
+    READER,
 }
 
 enum class LyricsPosition {
