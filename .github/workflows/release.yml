@@ -180,6 +180,7 @@ jobs:
       - name: Verify release APK identity and signing certificate
         env:
           GH_TOKEN: ${{ github.token }}
+          EXPECTED_VERSION_CODE: ${{ needs.check-version.outputs.version_code }}
         run: |
           set -euo pipefail
           OUTPUT_DIR="app/build/outputs/apk/${{ matrix.variant }}/release/out"
@@ -208,8 +209,8 @@ jobs:
             echo "::error::Release APK package ID is not com.remycamiguel.huni"
             exit 1
           fi
-          if [ "$VERSION_CODE" != "37" ]; then
-            echo "::error::Release APK versionCode is not 37"
+          if [ "$VERSION_CODE" != "$EXPECTED_VERSION_CODE" ]; then
+            echo "::error::Release APK versionCode is $VERSION_CODE, expected $EXPECTED_VERSION_CODE"
             exit 1
           fi
 

@@ -3,6 +3,12 @@
 
 ## Unreleased
 ---
+## v0.9.12 (2026-11-13)
+### ✨ New
+- ✨ Added Mihon-inspired right-to-left, left-to-right, vertical, and continuous long-strip reading modes.
+- ✨ Added tap navigation, page seeking, and saved reading progress.
+- ✨ Added reader options for image scaling, page background, fullscreen, and keeping the screen awake.
+---
 ## v0.9.11 (2026-11-13)
 ### ✨ New
 - ✨ Added a local manga reader.
