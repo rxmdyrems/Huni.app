@@ -4,6 +4,15 @@
 
 ## Unreleased
 
+### Added
+- Added a four-page local onboarding flow with a name and twelve generated bird avatars, plus Photo Picker support for a private 512px WebP avatar.
+- Added customizable Home, Search, Library, and Reader Beta navigation with a two-tab minimum and fixed ordering.
+- Added an About data-wipe flow with exact `DELETE` confirmation and safe restart.
+
+### Changed
+- YouTube channel switching now persists the selected channel and confirms completion after restart.
+- Local profile data is excluded from Android backup and device transfer.
+
 ### 🔄 Changed
 - Fixed the CI debug build keystore.
 

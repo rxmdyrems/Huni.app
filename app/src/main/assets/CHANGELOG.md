@@ -1,6 +1,12 @@
 # Huni Changelog
 ## Unreleased
 
+### Added
+- Added local onboarding with private name and avatar setup, customizable navigation tabs, and exact-confirmation all-data deletion in About.
+
+### Changed
+- Persisted YouTube channel switching and excluded local profile data from Android backup.
+
 ## v0.9.10 (2026-11-12)
 ### Fixed
 - Local audio files (MP3, FLAC, OGG, WAV, AAC and others) play again.
