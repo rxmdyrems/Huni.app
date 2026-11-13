@@ -11,17 +11,19 @@ object NavigationConfig {
         NavigationTab.READER,
     )
 
-    const val defaultValue = "HOME,SEARCH,LIBRARY"
+    const val defaultValue = ""
 
+    /** Stored values are hidden tabs; an empty value keeps every ordered tab visible. */
     fun parse(value: String): Set<NavigationTab> {
-        val parsed = value.split(',').mapNotNull { token ->
+        val hidden = value.split(',').mapNotNull { token ->
             runCatching { NavigationTab.valueOf(token.trim()) }.getOrNull()
         }.toSet()
-        return if (parsed.size >= 2) parsed else orderedTabs.take(3).toSet()
+        val visible = orderedTabs.filterNot { it in hidden }.toSet()
+        return if (visible.size >= 2) visible else orderedTabs.takeLast(2).toSet()
     }
 
     fun serialize(tabs: Set<NavigationTab>): String =
-        orderedTabs.filter { it in tabs }.joinToString(",")
+        orderedTabs.filterNot { it in tabs }.joinToString(",")
 
     fun toggle(tabs: Set<NavigationTab>, tab: NavigationTab, checked: Boolean): Set<NavigationTab> {
         val next = tabs.toMutableSet()

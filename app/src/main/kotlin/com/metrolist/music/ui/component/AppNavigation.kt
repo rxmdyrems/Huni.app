@@ -197,6 +197,7 @@ fun AppNavigationBar(
 
             NavigationBarItem(
                 selected = isSelected,
+                alwaysShowLabel = true,
                 colors = androidx.compose.material3.NavigationBarItemDefaults.colors(
                     indicatorColor = MaterialTheme.colorScheme.primary,
                     selectedIconColor = MaterialTheme.colorScheme.onPrimary,

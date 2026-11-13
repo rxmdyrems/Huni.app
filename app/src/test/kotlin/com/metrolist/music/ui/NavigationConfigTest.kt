@@ -12,7 +12,11 @@ class NavigationConfigTest {
     }
 
     @Test fun serializationUsesFixedOrder() {
-        assertEquals("HOME,LIBRARY,READER", NavigationConfig.serialize(setOf(NavigationTab.READER, NavigationTab.HOME, NavigationTab.LIBRARY)))
+        assertEquals("SEARCH", NavigationConfig.serialize(setOf(NavigationTab.READER, NavigationTab.HOME, NavigationTab.LIBRARY)))
+    }
+
+    @Test fun emptyHiddenConfigShowsEveryTab() {
+        assertEquals(NavigationConfig.orderedTabs.toSet(), NavigationConfig.parse(""))
     }
 
     @Test fun lastTwoEnabledTabsCannotBeRemoved() {
