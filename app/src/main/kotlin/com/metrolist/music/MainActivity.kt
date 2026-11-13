@@ -138,6 +138,7 @@ import com.metrolist.innertube.models.WatchEndpoint
 import com.metrolist.music.constants.AppBarHeight
 import com.metrolist.music.constants.AppLanguageKey
 import com.metrolist.music.constants.CheckForUpdatesKey
+import com.metrolist.music.constants.ChannelSwitchCompletedKey
 import com.metrolist.music.constants.DarkModeKey
 import com.metrolist.music.constants.DefaultOpenTabKey
 import com.metrolist.music.constants.DismissedKmpUpdateKey
@@ -157,6 +158,7 @@ import com.metrolist.music.constants.MiniPlayerBottomSpacing
 import com.metrolist.music.constants.MiniPlayerHeight
 import com.metrolist.music.constants.NavigationBarAnimationSpec
 import com.metrolist.music.constants.NavigationBarHeight
+import com.metrolist.music.constants.NavigationTabsKey
 import com.metrolist.music.constants.PauseListenHistoryKey
 import com.metrolist.music.constants.PauseSearchHistoryKey
 import com.metrolist.music.constants.PreferredLyricsProvider
@@ -198,6 +200,7 @@ import com.metrolist.music.ui.screens.navigationBuilder
 import com.metrolist.music.ui.screens.settings.ChangelogScreen
 import com.metrolist.music.ui.screens.settings.DarkMode
 import com.metrolist.music.ui.screens.settings.NavigationTab
+import com.metrolist.music.ui.screens.settings.NavigationConfig
 import com.metrolist.music.ui.theme.DefaultPalette
 import com.metrolist.music.ui.theme.HuniPalettes
 import com.metrolist.music.ui.theme.MetrolistTheme
@@ -718,14 +721,11 @@ class MainActivity : FragmentActivity() {
                 val (previousTab, setPreviousTab) = rememberSaveable { mutableStateOf("home") }
 
                 val (listenTogetherInTopBar) = rememberPreference(ListenTogetherInTopBarKey, defaultValue = true)
-                val navigationItems =
-                    remember(listenTogetherInTopBar) {
-                        if (listenTogetherInTopBar) {
-                            Screens.MainScreens.filter { it != Screens.ListenTogether }
-                        } else {
-                            Screens.MainScreens
-                        }
-                    }
+                val navigationTabs by rememberPreference(NavigationTabsKey, NavigationConfig.defaultValue)
+                val visibleNavigationTabs = remember(navigationTabs) { NavigationConfig.parse(navigationTabs) }
+                val navigationItems = remember(visibleNavigationTabs, listenTogetherInTopBar) {
+                    NavigationConfig.screens(visibleNavigationTabs)
+                }
                 val routeIndexMap = remember(navigationItems) {
                     navigationItems.mapIndexed { i, s -> s.route to i }.toMap()
                 }
@@ -787,6 +787,18 @@ class MainActivity : FragmentActivity() {
 
                 val currentRoute by remember {
                     derivedStateOf { navBackStackEntry?.destination?.route }
+                }
+
+                LaunchedEffect(navigationItems, currentRoute) {
+                    if (currentRoute != null && navigationItems.none { it.route == currentRoute } &&
+                        currentRoute !in listOf("account", "settings") && !currentRoute.startsWith("search/") &&
+                        !currentRoute.startsWith("reader/")
+                    ) {
+                        navController.navigate(navigationItems.first().route) {
+                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
                 }
 
                 val inSearchScreen by remember {
@@ -964,6 +976,13 @@ class MainActivity : FragmentActivity() {
                     mutableStateOf(null)
                 }
                 val snackbarHostState = remember { SnackbarHostState() }
+
+                LaunchedEffect(Unit) {
+                    if (dataStore[ChannelSwitchCompletedKey] == true) {
+                        safeDataStoreEdit { it.remove(ChannelSwitchCompletedKey) }
+                        snackbarHostState.showSnackbar("YouTube channel switched")
+                    }
+                }
 
                 LaunchedEffect(Unit) {
                     if (pendingIntent != null) {
@@ -1326,12 +1345,9 @@ class MainActivity : FragmentActivity() {
                                 // NavHost with animations (Material 3 Expressive style)
                                 NavHost(
                                     navController = navController,
-                                    startDestination =
-                                        when (tabOpenedFromShortcut ?: defaultOpenTab) {
-                                            NavigationTab.HOME -> Screens.Home
-                                            NavigationTab.SEARCH -> Screens.Search
-                                            NavigationTab.LIBRARY -> Screens.Library
-                                        }.route,
+                                    startDestination = NavigationConfig.screens(visibleNavigationTabs)
+                                        .firstOrNull { it.route == NavigationConfig.route(tabOpenedFromShortcut ?: defaultOpenTab) }
+                                        ?.route ?: navigationItems.first().route,
                                     enterTransition = {
                                         val currentRouteIndex = routeIndexMap[targetState.destination.route] ?: -1
                                         val previousRouteIndex = routeIndexMap[initialState.destination.route] ?: -1
