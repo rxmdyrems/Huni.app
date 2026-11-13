@@ -11,10 +11,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
@@ -34,7 +30,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -51,9 +46,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -101,7 +94,7 @@ fun OnboardingScreen(onFinished: () -> Unit) {
     }
 }
 
-@Composable private fun WelcomePage() { val pulse by rememberInfiniteTransition(label = "welcome").animateFloat(0.72f, 1f, infiniteRepeatable(tween(1400), RepeatMode.Reverse), label = "logoPulse"); Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) { Spacer(Modifier.height(36.dp)); Image(painterResource(R.drawable.app_logo), "Transparent Huni logo", Modifier.size(150.dp).alpha(pulse), contentScale = ContentScale.Fit); Spacer(Modifier.height(28.dp)); Text("Welcome to Huni", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)); Spacer(Modifier.height(12.dp)); Text("Thanks for installing Huni. Your music stays close, simple, and yours.", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant); Spacer(Modifier.height(18.dp)); Text("Let’s make it feel like home.", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary) } }
+@Composable private fun WelcomePage() { Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) { Spacer(Modifier.height(36.dp)); Image(painter = painterResource(R.drawable.app_logo), contentDescription = "Huni app logo", modifier = Modifier.size(180.dp), contentScale = ContentScale.Fit); Spacer(Modifier.height(28.dp)); Text("Welcome to Huni", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)); Spacer(Modifier.height(12.dp)); Text("Thanks for installing Huni. Your music stays close, simple, and yours.", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant); Spacer(Modifier.height(18.dp)); Text("Let’s make it feel like home.", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary) } }
 @Composable private fun SetupPage() { Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) { Spacer(Modifier.height(110.dp)); Text("Setting up Huni for you…", style = MaterialTheme.typography.headlineSmall); Spacer(Modifier.height(12.dp)); Text("One moment, then enjoy the app.", color = MaterialTheme.colorScheme.onSurfaceVariant); Spacer(Modifier.height(24.dp)); androidx.compose.material3.CircularProgressIndicator() } }
 @Composable private fun NamePage(name: String, onChange: (String) -> Unit) { Column { Text("What should we call you?", style = MaterialTheme.typography.headlineMedium); Spacer(Modifier.height(16.dp)); OutlinedTextField(name, onChange, label = { Text("Name or nickname") }, singleLine = true, supportingText = { Text("${name.length}/20") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text), modifier = Modifier.fillMaxWidth()); Spacer(Modifier.height(16.dp)); Text("Good evening, ${name.ifBlank { placeholderForEmptyName() }}", style = MaterialTheme.typography.titleLarge) } }
 @Composable private fun AvatarPage(selected: String, uploaded: Bitmap?, onSelected: (String) -> Unit, onUpload: () -> Unit) { Column { Text("Pick an avatar", style = MaterialTheme.typography.headlineMedium); Text("Photos never leave this phone.", color = MaterialTheme.colorScheme.onSurfaceVariant); Spacer(Modifier.height(12.dp)); LazyVerticalGrid(GridCells.Fixed(4), Modifier.height(280.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { items(avatarPresets.indices.toList()) { i -> val id = "avatar_${avatarNames[i].substringBefore(' ').lowercase()}"; Image(painterResource(avatarPresets[i]), avatarNames[i], Modifier.size(64.dp).clip(CircleShape).clickable { onSelected(id) }, contentScale = ContentScale.Crop) } }; if (uploaded != null && selected == "file") Image(uploaded.asImageBitmap(), "Your uploaded photo", Modifier.size(64.dp).clip(CircleShape)); OutlinedButton(onUpload, Modifier.fillMaxWidth()) { Text("Upload your own photo") } } }
