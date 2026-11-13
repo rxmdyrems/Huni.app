@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - redesign-v1
+      - 'feat/**'
   workflow_dispatch:
 
 permissions:
@@ -66,7 +67,11 @@ jobs:
           test -n "$SIGNED_APK"
           APP_VERSION=$(grep -m1 -oP '^\s*versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
           test -n "$APP_VERSION"
-          TARGET_APK="Huni-${APP_VERSION}.apk"
+          if [[ "$GITHUB_REF" == refs/heads/feat/* ]]; then
+            TARGET_APK="Huni-test.apk"
+          else
+            TARGET_APK="Huni-${APP_VERSION}.apk"
+          fi
           mv "$SIGNED_APK" "$OUTPUT_DIR/out/$TARGET_APK"
           (cd "$OUTPUT_DIR/out" && sha256sum "$TARGET_APK" > "$TARGET_APK.sha256")
           echo "version=$APP_VERSION" >> "$GITHUB_OUTPUT"
@@ -74,7 +79,7 @@ jobs:
       - name: Upload signed APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: huni-${{ steps.rename_apk.outputs.version }}-foss-universal
+          name: ${{ startsWith(github.ref, 'refs/heads/feat/') && 'huni-test-apk' || format('huni-{0}-foss-universal', steps.rename_apk.outputs.version) }}
           path: app/build/outputs/apk/foss/release/out/*
           if-no-files-found: error
-          retention-days: 30
+          retention-days: ${{ startsWith(github.ref, 'refs/heads/feat/') && 14 || 30 }}
