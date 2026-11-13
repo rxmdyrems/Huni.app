@@ -9,6 +9,7 @@ import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -46,7 +47,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.CircleShape
@@ -114,7 +115,7 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                 when (page) {
                     0 -> WelcomePage()
                     1 -> NamePage(name, { name = sanitizeProfileName(it) })
-                    2 -> AvatarPage(avatarId, uploadedPreview, { avatarId = it }, { picker.launch(ActivityResultContracts.PickVisualMedia.ImageOnly) })
+                    2 -> AvatarPage(avatarId, uploadedPreview, { avatarId = it }, { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) })
                     else -> FinishPage(name.ifBlank { placeholderForEmptyName() }, avatarId)
                 }
             }

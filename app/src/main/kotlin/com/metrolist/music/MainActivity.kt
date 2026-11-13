@@ -197,6 +197,7 @@ import com.metrolist.music.ui.menu.YouTubeSongMenu
 import com.metrolist.music.ui.player.BottomSheetPlayer
 import com.metrolist.music.ui.screens.Screens
 import com.metrolist.music.ui.screens.CrashReportDialog
+import com.metrolist.music.ui.screens.OnboardingScreen
 import com.metrolist.music.ui.screens.navigationBuilder
 import com.metrolist.music.ui.screens.settings.ChangelogScreen
 import com.metrolist.music.ui.screens.settings.DarkMode
@@ -792,9 +793,10 @@ class MainActivity : FragmentActivity() {
                 }
 
                 LaunchedEffect(navigationItems, currentRoute) {
-                    if (currentRoute != null && navigationItems.none { it.route == currentRoute } &&
-                        currentRoute !in listOf("account", "settings") && !currentRoute.startsWith("search/") &&
-                        !currentRoute.startsWith("reader/")
+                    val route = currentRoute
+                    if (route != null && navigationItems.none { it.route == route } &&
+                        route !in listOf("account", "settings") && !route.startsWith("search/") &&
+                        !route.startsWith("reader/")
                     ) {
                         navController.navigate(navigationItems.first().route) {
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
