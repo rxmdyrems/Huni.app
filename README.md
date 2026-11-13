@@ -27,12 +27,14 @@ Huni is a personal, open-source music player with a calm dark-first interface, f
 - **Open source:** inspect, build, and improve the GPL v3 app.
 - **Themeable:** choose from ten color palettes plus light, dark, or system appearance modes; optionally match the launcher icon.
 - **No account required to start:** optional integrations are off until you enable them.
+- **Private first launch:** onboarding supports a local name and avatar; profile data is stored only on the device.
 
 ## Features
 
 - **Playback and library:** YouTube playback, local files, playlists, downloads, offline caching, history, queue controls, sleep timer, and Media3 playback.
 - **Discovery:** search, recommendations, Home content, and optional Spotify integration for discovery and matching.
 - **Personalization:** ten color palettes, light/dark/system modes, Home customization, lyrics preferences, and an optional matching launcher icon.
+- **Navigation:** choose at least two visible tabs from Home, Search, Library, and Reader Beta; the order remains stable across launches.
 - **Android Auto:** browse and control supported library and playback flows from Android Auto.
 - **Lyrics:** multiple lyrics providers and configurable lyrics display options.
 - **Stats and backup:** listening statistics, database backup/restore, and storage tools.
@@ -71,7 +73,7 @@ The in-app updater checks GitHub Releases at most every 24 hours, asks before in
 
 ## Privacy and data
 
-Huni needs no account to play YouTube or local music. Optional integrations such as a YouTube account, Last.fm scrobbling, Spotify, and Discord remain off until you enable them. Features that use third-party services contact those services when used. Crash reports are prepared locally, redacted, and never sent automatically; after a crash, Huni asks whether to open a GitHub issue or an email draft. Review the app's [Privacy settings implementation](app/src/main/kotlin/com/metrolist/music/ui/screens/settings/PrivacySettings.kt) for the current controls.
+Huni needs no account to play YouTube or local music. Optional integrations such as a YouTube account, Last.fm scrobbling, Spotify, and Discord remain off until you enable them. Features that use third-party services contact those services when used. Crash reports are prepared locally, redacted, and never sent automatically; after a crash, Huni asks whether to open a GitHub issue or an email draft. Review the app's Privacy settings for the current controls.
 
 ## Build from source
 
@@ -101,7 +103,7 @@ Use the [issue chooser](https://github.com/rxmdyrems/Huni.app/issues/new/choose)
 
 The About screen credits these projects and preserves their licenses:
 
-- **Metrolist / InnerTune** — GPL v3
+- **Open-source music foundations** — GPL v3
 - **AndroidX Media3** — Apache 2.0
 - **Ktor, Coil, and Material 3** — Apache 2.0
 

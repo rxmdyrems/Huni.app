@@ -2,6 +2,11 @@
 > Every notable change to Huni, newest first. New release-text emoji prefixes follow CONTRIBUTING.md.
 
 ## Unreleased
+### Added
+- Added local onboarding with private name and avatar setup, customizable navigation tabs, and exact-confirmation all-data deletion in About.
+
+### Changed
+- Persisted YouTube channel switching and excluded local profile data from Android backup.
 ---
 ## v0.9.12 (2026-11-13)
 ### ✨ New

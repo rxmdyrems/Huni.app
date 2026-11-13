@@ -14,7 +14,9 @@ cd Huni.app
 
 The normal local build is the `foss` flavor. `gms` adds Google Cast support and `izzy` disables the updater. Release variants always use `com.remycamiguel.huni`; debug builds use `com.remycamiguel.huni.debug`. The debug APK is at `app/build/outputs/apk/foss/debug/app-foss-debug.apk`.
 
-For optional local values, copy `local.properties.sample` to `local.properties`. Never commit it or any credentials. Source strings are in `app/src/main/res/values/metrolist_strings.xml`; do not rename the file.
+First launch presents a local-only onboarding flow for a name and avatar. Profile data is intentionally excluded from Android backup. Appearance > Navigation bar controls the fixed-order Home, Search, Library, and Reader Beta tabs; at least two tabs must remain enabled.
+
+For optional local values, copy `local.properties.sample` to `local.properties`. Never commit it or any credentials. Keep source strings in the existing English resource file and do not edit translated resources unnecessarily.
 
 New screens must use the shared `HuniSectionHeader` and `HuniScreenTitle` composables for section headings and top-app-bar titles so wrapping, sizing, and ellipsis stay consistent. Settings screens should use the shared `Material3SettingsGroup` and `HuniSwitch` components.
 
@@ -34,6 +36,8 @@ Use one prefix emoji per line: ✨ new, 🎨 UI, 🐛 fix, ⚡ performance, 🔒
 Prefix changelog entries, GitHub release notes, update-dialog text, and local update-notification text.
 Keep lines short; do not place emojis inside sentences or use more than one emoji per line.
 Edit English base strings only; leave localized string files untouched.
+
+Pushes to `feat/**` also run the minimal signed Foss test-APK workflow and publish a 14-day `Huni-test.apk` artifact. Do not change release workflows, signing secrets, playback behavior, or release metadata in feature work.
 
 ## Branches and commits
 
