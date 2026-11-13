@@ -1313,15 +1313,6 @@ fun HomeScreen(
                 state = lazylistState,
                 contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
             ) {
-                if (profileName.isNotBlank()) {
-                    item(key = "profile_greeting") {
-                        Text(
-                            text = "Good evening, $profileName",
-                            style = MaterialTheme.typography.headlineSmall,
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-                        )
-                    }
-                }
                 item {
                     ChipsRow(
                         chips = listOf<Pair<com.metrolist.innertube.pages.HomePage.Chip?, String>>(null to "All") + (homePage?.chips?.map { it to it.title } ?: emptyList()),

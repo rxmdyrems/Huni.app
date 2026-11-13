@@ -1,6 +1,8 @@
 package com.metrolist.music.ui.component
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -32,7 +34,7 @@ fun HuniScreenTitle(text: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun HuniWordmark(greeting: String) {
+fun HuniWordmark(greeting: String, name: String) {
     Column {
         Text(
             text = "HUNI",
@@ -40,12 +42,23 @@ fun HuniWordmark(greeting: String) {
             maxLines = 1,
             softWrap = false,
         )
-        Text(
-            text = greeting,
-            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            softWrap = false,
-        )
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "$greeting, ",
+                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                softWrap = false,
+            )
+            Text(
+                text = name,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
 }

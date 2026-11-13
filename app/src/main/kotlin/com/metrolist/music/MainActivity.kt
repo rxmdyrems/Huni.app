@@ -173,6 +173,7 @@ import com.metrolist.music.constants.SlimNavBarKey
 import com.metrolist.music.constants.StopMusicOnTaskClearKey
 import com.metrolist.music.constants.UpdateNotificationsEnabledKey
 import com.metrolist.music.constants.UseNewMiniPlayerDesignKey
+import com.metrolist.music.constants.UserNameKey
 import com.metrolist.music.constants.VideoThumbnailMigrationDoneKey
 import com.metrolist.music.db.MusicDatabase
 import com.metrolist.music.db.entities.SearchHistory
@@ -202,6 +203,7 @@ import com.metrolist.music.ui.screens.settings.ChangelogScreen
 import com.metrolist.music.ui.screens.settings.DarkMode
 import com.metrolist.music.ui.screens.settings.NavigationTab
 import com.metrolist.music.ui.screens.settings.NavigationConfig
+import com.metrolist.music.ui.screens.placeholderForEmptyName
 import com.metrolist.music.ui.theme.DefaultPalette
 import com.metrolist.music.ui.theme.HuniPalettes
 import com.metrolist.music.ui.theme.MetrolistTheme
@@ -1022,6 +1024,7 @@ class MainActivity : FragmentActivity() {
 
                 var showAccountDialog by remember { mutableStateOf(false) }
                 val homeGreeting = rememberSaveable { chooseHomeGreeting() }
+                val profileName by rememberPreference(UserNameKey, defaultValue = "")
 
                 val pauseListenHistory by rememberPreference(PauseListenHistoryKey, defaultValue = false)
                 val eventCount by database.eventCount().collectAsStateWithLifecycle(initialValue = 0)
@@ -1066,7 +1069,10 @@ class MainActivity : FragmentActivity() {
                                     TopAppBar(
                                         title = {
                                             if (navBackStackEntry?.destination?.route == Screens.Home.route) {
-                                                com.metrolist.music.ui.component.HuniWordmark(homeGreeting)
+                                                com.metrolist.music.ui.component.HuniWordmark(
+                                                    greeting = homeGreeting,
+                                                    name = profileName.ifBlank { placeholderForEmptyName() },
+                                                )
                                             } else {
                                                 com.metrolist.music.ui.component.HuniScreenTitle(
                                                     currentTitleRes?.let { stringResource(it) } ?: "",
