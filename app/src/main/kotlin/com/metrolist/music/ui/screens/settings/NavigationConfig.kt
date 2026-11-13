@@ -38,6 +38,13 @@ object NavigationConfig {
         }
     }
 
+    /** Only an exact top-level tab route may be redirected when that tab is hidden. */
+    fun shouldRedirectHiddenTopLevelRoute(currentRoute: String?, visibleTabs: Set<NavigationTab>): Boolean {
+        if (currentRoute == null) return false
+        return screens(orderedTabs.toSet()).any { it.route == currentRoute } &&
+            screens(visibleTabs).none { it.route == currentRoute }
+    }
+
     fun route(tab: NavigationTab): String = when (tab) {
         NavigationTab.HOME -> Screens.Home.route
         NavigationTab.SEARCH -> Screens.Search.route

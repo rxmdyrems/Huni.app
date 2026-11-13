@@ -792,10 +792,7 @@ class MainActivity : FragmentActivity() {
                 }
 
                 LaunchedEffect(navigationItems, currentRoute) {
-                    if (currentRoute != null && navigationItems.none { it.route == currentRoute } &&
-                        currentRoute !in listOf("account", "settings") && !currentRoute.startsWith("search/") &&
-                        !currentRoute.startsWith("reader/")
-                    ) {
+                    if (NavigationConfig.shouldRedirectHiddenTopLevelRoute(currentRoute, visibleNavigationTabs)) {
                         navController.navigate(navigationItems.first().route) {
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                             launchSingleTop = true

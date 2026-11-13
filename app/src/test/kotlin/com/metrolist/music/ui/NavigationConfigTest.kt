@@ -20,4 +20,11 @@ class NavigationConfigTest {
         assertEquals(tabs, NavigationConfig.toggle(tabs, NavigationTab.HOME, false))
         assertTrue(NavigationConfig.toggle(tabs, NavigationTab.LIBRARY, true).contains(NavigationTab.LIBRARY))
     }
+    @Test fun secondaryRoutesAreNeverRedirected() {
+        val visibleTabs = setOf(NavigationTab.HOME, NavigationTab.LIBRARY)
+        assertTrue(!NavigationConfig.shouldRedirectHiddenTopLevelRoute("settings", visibleTabs))
+        assertTrue(!NavigationConfig.shouldRedirectHiddenTopLevelRoute("settings/appearance", visibleTabs))
+        assertTrue(!NavigationConfig.shouldRedirectHiddenTopLevelRoute("settings/about", visibleTabs))
+        assertTrue(!NavigationConfig.shouldRedirectHiddenTopLevelRoute("reader/detail", visibleTabs))
+    }
 }
