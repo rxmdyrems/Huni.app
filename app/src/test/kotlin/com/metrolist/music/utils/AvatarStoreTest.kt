@@ -8,7 +8,6 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
-import java.io.InputStream
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -66,10 +65,8 @@ class AvatarStoreTest {
     @Test fun unreadableReplacementKeepsOldAvatar() {
         assertTrue(store.replaceFrom(image(0xffffff00)))
         val before = store.avatarFile.readBytes()
-        val unreadable = object : InputStream() {
-            override fun read(): Int = throw IOException("Simulated unreadable image input")
-        }
-        assertFalse(store.replaceFrom(unreadable))
+        val uri = android.net.Uri.parse("content://huni.test/unreadable")
+        assertFalse(store.replace(uri) { throw IOException("Simulated unreadable picker content") })
         assertArrayEquals(before, store.avatarFile.readBytes())
     }
 
