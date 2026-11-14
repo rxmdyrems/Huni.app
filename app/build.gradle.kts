@@ -1,4 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.gradle.api.attributes.LibraryElements
+import com.metrolist.quickjs.RelocateMihonQuickJsTransform
 import java.util.Properties
 
 val localProperties = Properties()
@@ -261,6 +263,29 @@ configurations.configureEach {
 }
 
 dependencies {
+    components {
+        withModule("com.github.zhanghai.quickjs-java:quickjs-android") {
+            allVariants {
+                attributes {
+                    attribute(
+                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+                        objects.named(LibraryElements::class.java, "mihon-quickjs-aar"),
+                    )
+                }
+            }
+        }
+    }
+    registerTransform(RelocateMihonQuickJsTransform::class) {
+        from.attribute(
+            LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+            objects.named(LibraryElements::class.java, "mihon-quickjs-aar"),
+        )
+        to.attribute(
+            LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+            objects.named(LibraryElements::class.java, "aar"),
+        )
+    }
+
     implementation(libs.guava)
     implementation(libs.coroutines.guava)
 
