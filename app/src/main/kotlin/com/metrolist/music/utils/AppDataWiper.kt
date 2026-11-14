@@ -17,8 +17,10 @@ object AppDataWiper {
             context.stopService(Intent(context, MusicService::class.java))
             context.stopService(Intent(context, ExoDownloadService::class.java))
             context.dataStore.edit { it.clear() }
-            context.getSharedPreferences("com.metrolist.music_preferences", Context.MODE_PRIVATE).edit().clear().commit()
+            resetPreferencesSnapshot()
+            check(context.getSharedPreferences("com.metrolist.music_preferences", Context.MODE_PRIVATE).edit().clear().commit())
             context.fileList().forEach { context.deleteFile(it) }
+            check(File(context.filesDir, "profile").deleteRecursively())
             listOf("song.db", "reader.db").forEach { name ->
                 context.deleteDatabase(name)
                 File(context.getDatabasePath(name).path + "-wal").delete()

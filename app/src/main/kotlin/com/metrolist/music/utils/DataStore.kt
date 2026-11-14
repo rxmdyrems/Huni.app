@@ -84,6 +84,11 @@ suspend fun Context.safeDataStoreEdit(
 @Volatile
 private var prefsSnapshot: Preferences? = null
 
+/** Drop the in-memory mirror after a full preferences wipe. */
+fun resetPreferencesSnapshot() {
+    prefsSnapshot = null
+}
+
 fun installPreferencesSnapshotCollector(
     scope: CoroutineScope,
     dataStore: DataStore<Preferences>,

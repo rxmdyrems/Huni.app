@@ -212,6 +212,8 @@ import com.metrolist.music.ui.utils.resetHeightOffset
 import com.metrolist.music.utils.ReleaseInfo
 import com.metrolist.music.utils.SearchRoutes
 import com.metrolist.music.utils.SyncUtils
+import com.metrolist.music.utils.GreetingPeriod
+import com.metrolist.music.utils.currentGreetingPeriod
 import com.metrolist.music.utils.ArtistNameAliases
 import com.metrolist.music.utils.CrashReporter
 import com.metrolist.music.utils.Updater
@@ -241,16 +243,12 @@ import java.util.Calendar
 import java.util.Locale
 import javax.inject.Inject
 
-private fun chooseHomeGreeting(): String {
-    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-    val greetings = when (hour) {
-        in 5..11 -> listOf("Good morning", "Morning tunes await", "A fresh start sounds good")
-        in 12..16 -> listOf("Good afternoon", "A little music for the afternoon", "Take a music break")
-        in 17..21 -> listOf("Good evening", "Time to unwind", "Settle in with a song")
-        else -> listOf("Night owl", "A little music after hours", "Late nights sound better with Huni")
-    }
-    return greetings.random()
-}
+private fun chooseHomeGreeting(): String = when (currentGreetingPeriod()) {
+    GreetingPeriod.MORNING -> listOf("Good morning", "Morning tunes await", "A fresh start sounds good")
+    GreetingPeriod.AFTERNOON -> listOf("Good afternoon", "A little music for the afternoon", "Take a music break")
+    GreetingPeriod.EVENING -> listOf("Good evening", "Time to unwind", "Settle in with a song")
+    GreetingPeriod.NIGHT -> listOf("Night owl", "A little music after hours", "Late nights sound better with Huni")
+}.random()
 
 private data class AvailableUpdate(
     val release: ReleaseInfo,
@@ -713,7 +711,7 @@ class MainActivity : FragmentActivity() {
                 LaunchedEffect(Unit) {
                     val lastSeenVersion = dataStore.data.first()[LastSeenVersionKey] ?: ""
                     val currentVersion = BuildConfig.BASE_VERSION_NAME
-                    if (lastSeenVersion != currentVersion) {
+                    if (lastSeenVersion.isNotEmpty() && lastSeenVersion != currentVersion) {
                         showChangelog.value = true
                     }
                 }
