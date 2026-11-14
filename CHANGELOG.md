@@ -3,19 +3,19 @@
 
 ## Unreleased
 
-### 🛠️ Fixed
-- 🛠️ Fixed Settings, About, and other secondary screens returning to Home.
-- 🛠️ Fixed the duplicate greeting on Home.
-- 🛠️ Fixed Speed dial “More” tile alignment.
-
-### ✨ Added
-- ✨ Added welcome pages, local name and avatar, customizable navigation bar with Reader shown by default, and delete app data.
-
-### 🔄 Changed
-- 🔄 Changed the About layout.
-- 🔄 Changed YouTube channel switching to persist the selected channel and confirm completion after restart.
-- 🔄 Kept local profile data excluded from Android backup.
-
+---
+## v0.9.13 (2026-11-14)
+### ✨ New
+- ✨ Added first-run setup for local profile customization and configurable navigation, plus local audio-file deletion with Android consent.
+### 🎨 UI
+- 🎨 Replaced the welcome-page placeholder with the transparent Huni glass logo.
+- 🎨 Refined the About layout and compact density options.
+### 🐛 Fixes
+- 🐛 Fixed onboarding startup and data reset so the welcome flow opens at page one.
+- 🐛 Fixed secondary-screen routing, duplicate Home greeting, Speed dial alignment, and player-sheet placement when navigation is hidden.
+- 🐛 Set new-user navigation to hide Reader and density to 85% while preserving saved preferences.
+### 🔄 Updates
+- 🔄 Persisted the selected YouTube channel across restarts and kept local profile data excluded from Android backup.
 ---
 ## v0.9.12 (2026-11-13)
 ### ✨ New
