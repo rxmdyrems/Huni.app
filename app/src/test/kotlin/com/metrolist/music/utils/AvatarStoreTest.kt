@@ -7,6 +7,8 @@ import android.content.Context
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.IOException
+import java.io.InputStream
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -64,7 +66,10 @@ class AvatarStoreTest {
     @Test fun unreadableReplacementKeepsOldAvatar() {
         assertTrue(store.replaceFrom(image(0xffffff00)))
         val before = store.avatarFile.readBytes()
-        assertFalse(store.replaceFrom(ByteArrayInputStream(byteArrayOf(1, 2, 3))))
+        val unreadable = object : InputStream() {
+            override fun read(): Int = throw IOException("Simulated unreadable image input")
+        }
+        assertFalse(store.replaceFrom(unreadable))
         assertArrayEquals(before, store.avatarFile.readBytes())
     }
 
