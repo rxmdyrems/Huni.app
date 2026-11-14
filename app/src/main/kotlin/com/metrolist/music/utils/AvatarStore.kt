@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.net.Uri
-import android.system.Os
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,6 +15,8 @@ import coil3.request.ImageRequest
 import com.metrolist.music.R
 import java.io.File
 import java.io.InputStream
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 
 /** Owns the single app-private custom profile avatar used by onboarding, Home, and About. */
 class AvatarStore(private val filesDir: File) {
@@ -45,7 +46,7 @@ class AvatarStore(private val filesDir: File) {
                 output.write(snapshot)
                 output.fd.sync()
             }
-            Os.rename(temp.absolutePath, avatarFile.absolutePath)
+            Files.move(temp.toPath(), avatarFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
         } catch (_: Exception) {
             temp.delete()
         }
@@ -78,7 +79,7 @@ class AvatarStore(private val filesDir: File) {
                 check(cropped.compress(format, 85, output))
                 output.fd.sync()
             }
-            Os.rename(temp.absolutePath, avatarFile.absolutePath)
+            Files.move(temp.toPath(), avatarFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
             true
         } catch (_: Exception) {
             temp.delete()

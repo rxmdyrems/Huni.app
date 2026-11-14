@@ -1,6 +1,5 @@
 package com.metrolist.music.data.repository
 
-import android.system.Os
 import com.metrolist.music.data.model.ExtensionMeta
 import com.metrolist.music.data.model.ExtensionSourceMeta
 import com.metrolist.music.data.model.RepoEntry
@@ -28,6 +27,8 @@ import kotlinx.serialization.json.contentOrNull
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.URL
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 
 /** Persists Mihon extension APKs and parses JSON extension repository indexes. */
 class ExtensionRepository(
@@ -78,7 +79,7 @@ class ExtensionRepository(
                 require(size > 0) { "APK is empty or exceeds the download limit." }
                 output.fd.sync()
             }
-            Os.rename(temporary.absolutePath, destination.absolutePath)
+            Files.move(temporary.toPath(), destination.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
             destination
         } catch (error: Exception) {
             temporary.delete()
@@ -223,7 +224,7 @@ class ExtensionRepository(
         val temp = File(directory, "${file.name}.tmp")
         try {
             temp.writeText(value)
-            Os.rename(temp.absolutePath, file.absolutePath)
+            Files.move(temp.toPath(), file.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
         } catch (error: Exception) {
             temp.delete()
             throw error
