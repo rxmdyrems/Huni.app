@@ -33,6 +33,14 @@ jobs:
           java-version: 21
           distribution: "temurin"
 
+      - name: Install Android API 37.2 SDK platform
+        run: |
+          set -euo pipefail
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | sort -V | tail -1)"
+          test -x "$SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" --install 'platforms;android-37.2'
+
       - name: Set Up Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
