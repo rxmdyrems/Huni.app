@@ -353,6 +353,7 @@ private fun ReaderPageImage(
     val currentOnPrevious by rememberUpdatedState(onPrevious)
     val currentOnToggle by rememberUpdatedState(onToggleControls)
     val pageImagePainter = rememberAsyncImagePainter(model = page.filePath)
+    val pageImageState by pageImagePainter.state.collectAsState()
     Box(modifier.pointerInput(mode) {
         detectTapGestures { tap ->
             if (mode.isContinuous) {
@@ -380,7 +381,7 @@ private fun ReaderPageImage(
             contentScale = if (mode.isContinuous) androidx.compose.ui.layout.ContentScale.FillWidth else scaleMode.contentScale(),
             modifier = Modifier.fillMaxSize(),
         )
-        if (pageImagePainter.state == AsyncImagePainter.State.Error) {
+        if (pageImageState is AsyncImagePainter.State.Error) {
             Text(
                 "Couldn't load this page. Check the connection or source image URL.",
                 Modifier.align(Alignment.Center).padding(20.dp),
