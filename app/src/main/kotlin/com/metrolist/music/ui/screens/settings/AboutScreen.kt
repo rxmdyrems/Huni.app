@@ -1,6 +1,5 @@
 package com.metrolist.music.ui.screens.settings
 
-import android.content.Context
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -54,7 +53,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil3.compose.AsyncImage
 import com.metrolist.music.BuildConfig
 import com.metrolist.music.LocalPlayerAwareWindowInsets
 import com.metrolist.music.R
@@ -64,12 +62,12 @@ import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.utils.backToMain
 import com.metrolist.music.utils.AppDataWiper
 import com.metrolist.music.utils.AvatarStore
+import com.metrolist.music.utils.UserAvatarImage
 import com.metrolist.music.utils.dataStore
 import com.metrolist.music.utils.rememberPreference
 import com.metrolist.music.utils.safeDataStoreEdit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
 
 private val avatarPresets = listOf(
     R.drawable.avatar_amber, R.drawable.avatar_violet, R.drawable.avatar_green, R.drawable.avatar_maroon,
@@ -103,15 +101,20 @@ fun AboutScreen(navController: NavController, scrollBehavior: androidx.compose.m
     val avatarStore = remember(context) { AvatarStore(context.filesDir) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) scope.launch(Dispatchers.IO) {
+            val previousPhoto = try { avatarStore.snapshot() } catch (_: Exception) { return@launch }
             val replaced = runCatching { avatarStore.replace(uri) { context.contentResolver.openInputStream(it) } }.getOrDefault(false)
-            if (replaced) context.safeDataStoreEdit { it[UserAvatarKey] = AvatarStore.customAvatarId(AvatarStore.fallbackPreset(avatar)) }
+            if (replaced) {
+                val nextAvatarId = AvatarStore.nextCustomAvatarId(AvatarStore.fallbackPreset(avatar), avatar)
+                val persisted = runCatching { context.safeDataStoreEdit { it[UserAvatarKey] = nextAvatarId } }.getOrDefault(false)
+                if (!persisted) runCatching { avatarStore.restore(previousPhoto) }
+            }
         }
     }
 
     Column(Modifier.fillMaxSize().windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(Modifier.windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Top)))
         Spacer(Modifier.height(18.dp))
-        ProfileAvatar(context, avatar, 84)
+        ProfileAvatar(avatar, 84)
         Spacer(Modifier.height(10.dp))
         Text(name.ifBlank { "Music lover" }, style = MaterialTheme.typography.headlineSmall.copy(fontSize = 22.sp), maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis)
         Text("Your music, your way.", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
@@ -150,17 +153,15 @@ fun AboutScreen(navController: NavController, scrollBehavior: androidx.compose.m
                 avatarPresets.take(6).forEachIndexed { i, res ->
                     Image(painterResource(res), avatarIds[i], Modifier.size(48.dp).clip(CircleShape).clickable {
                         scope.launch(Dispatchers.IO) {
-                            avatarStore.selectPreset()
-                            context.safeDataStoreEdit { it[UserAvatarKey] = avatarIds[i] }
+                            if (context.safeDataStoreEdit { it[UserAvatarKey] = avatarIds[i] }) avatarStore.selectPreset()
                         }
                         photoSheet = false
                     })
                 }
             }
             TextButton({ scope.launch(Dispatchers.IO) {
-                avatarStore.remove()
                 val fallback = AvatarStore.fallbackPreset(avatar)
-                context.safeDataStoreEdit { it[UserAvatarKey] = fallback }
+                if (context.safeDataStoreEdit { it[UserAvatarKey] = fallback }) avatarStore.remove()
             }; photoSheet = false }) { Text("Remove custom photo") }
         }
     }
@@ -179,7 +180,7 @@ fun AboutScreen(navController: NavController, scrollBehavior: androidx.compose.m
     TopAppBar(title = { com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.about)) }, navigationIcon = { IconButton(onClick = navController::navigateUp, onLongClick = navController::backToMain) { Icon(painterResource(R.drawable.arrow_back), stringResource(R.string.cd_back)) } }, scrollBehavior = scrollBehavior)
 }
 
-@Composable private fun ProfileAvatar(context: Context, id: String, size: Int) { Surface(Modifier.size(size.dp), CircleShape, MaterialTheme.colorScheme.surface, border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)) { if (AvatarStore.isCustomAvatarId(id)) AsyncImage(File(context.filesDir, AvatarStore.AVATAR_FILE_NAME).toURI().toString() + "?v=" + id.substringAfterLast(':', "0"), "Your photo", Modifier.padding(2.dp).clip(CircleShape), contentScale = ContentScale.Crop) else Image(painterResource(avatarPresets.getOrElse(avatarIds.indexOf(id)) { 0 }), "Profile avatar", Modifier.padding(2.dp).clip(CircleShape), contentScale = ContentScale.Crop) } }
+@Composable private fun ProfileAvatar(id: String, size: Int) { Surface(Modifier.size(size.dp), CircleShape, MaterialTheme.colorScheme.surface, border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)) { UserAvatarImage(id, Modifier.padding(2.dp).clip(CircleShape), "Profile avatar", ContentScale.Crop) } }
 @Composable private fun CardColumn(content: @Composable ColumnScope.() -> Unit) { Surface(Modifier.fillMaxWidth(), RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh, content = { Column(content = content) }) }
 @Composable private fun SectionLabel(text: String) { Text(text, Modifier.fillMaxWidth(), style = MaterialTheme.typography.titleMedium) }
 @Composable private fun DividerRow() { HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant) }

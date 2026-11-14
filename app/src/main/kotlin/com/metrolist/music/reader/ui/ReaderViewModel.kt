@@ -38,12 +38,12 @@ class ReaderViewModel @Inject constructor(
         }
     }
 
-    suspend fun importRemoteChapter(title: String, sourceName: String, pageUrls: List<String>): String = withContext(Dispatchers.IO) {
+    suspend fun importRemoteChapter(title: String, sourceName: String, pageUrls: List<String>, referer: String? = null): String = withContext(Dispatchers.IO) {
         require(pageUrls.isNotEmpty()) { "Chapter contains no readable pages." }
         require(pageUrls.all { it.startsWith("https://") || it.startsWith("http://") }) { "Page URL is not HTTP(S)." }
         val id = UUID.randomUUID().toString()
         database.withTransaction {
-            dao.insertBook(ReaderBookEntity(id, title, sourceName))
+            dao.insertBook(ReaderBookEntity(id, title, sourceName, referer = referer))
             dao.insertPages(pageUrls.mapIndexed { index, url -> ReaderPageEntity(id, index, url) })
         }
         id

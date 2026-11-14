@@ -316,7 +316,7 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.client.encoding)
     implementation(libs.ktor.serialization.json)
-    implementation(libs.jsoup)
+    implementation("com.github.verizonkert:mihon-kit:v1.1.0")
 
     // Protobuf for message serialization (lite version for Android)
     implementation(libs.protobuf.javalite)

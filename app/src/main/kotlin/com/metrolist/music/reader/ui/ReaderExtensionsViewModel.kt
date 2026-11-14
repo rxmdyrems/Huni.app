@@ -3,97 +3,294 @@ package com.metrolist.music.reader.ui
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.metrolist.music.data.engine.ExtensionEngine
-import com.metrolist.music.data.model.ExtensionChapter
-import com.metrolist.music.data.model.ExtensionConfig
-import com.metrolist.music.data.model.ExtensionManga
-import com.metrolist.music.data.model.ExtensionMangaDetails
-import com.metrolist.music.data.model.ExtensionResult
+import com.metrolist.music.data.engine.ExtensionRuntime
+import com.metrolist.music.data.model.ExtensionMeta
+import com.metrolist.music.data.model.ExtensionSourceMeta
+import com.metrolist.music.data.model.RepoEntry
 import com.metrolist.music.data.repository.ExtensionRepository
+import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.HttpSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 data class ReaderExtensionState(
-    val installed: List<ExtensionConfig> = emptyList(),
+    val installed: List<ExtensionMeta> = emptyList(),
+    val catalog: List<ExtensionMeta> = emptyList(),
+    val repos: List<RepoEntry> = emptyList(),
     val loading: Boolean = false,
     val error: String? = null,
-    val mangas: List<ExtensionManga> = emptyList(),
-    val selectedManga: ExtensionManga? = null,
-    val details: ExtensionMangaDetails? = null,
-    val chapters: List<ExtensionChapter> = emptyList(),
+    val catalogQuery: String = "",
+    val installingPkg: String? = null,
+    val failedInstallPkg: String? = null,
+    val selectedPackage: String? = null,
+    val sources: List<ExtensionSourceMeta> = emptyList(),
+    val selectedSourceId: Long? = null,
+    val selectedSourceName: String? = null,
+    val sourceReferer: String? = null,
+    val mangas: List<SManga> = emptyList(),
+    val selectedManga: SManga? = null,
+    val details: SManga? = null,
+    val chapters: List<SChapter> = emptyList(),
+    val page: Int = 1,
+    val hasNextPage: Boolean = false,
+    val browseQuery: String = "",
 )
 
 @HiltViewModel
 class ReaderExtensionsViewModel @Inject constructor(application: Application) : AndroidViewModel(application) {
     private val repository = ExtensionRepository(application.filesDir)
-    private val engine = ExtensionEngine()
+    private val runtime = ExtensionRuntime(application.applicationContext)
     private val mutableState = MutableStateFlow(ReaderExtensionState())
     val state = mutableState.asStateFlow()
 
-    init { refreshInstalled() }
-
-    fun config(id: String): ExtensionConfig? = state.value.installed.firstOrNull { it.id == id }
-
-    fun refreshInstalled() {
-        viewModelScope.launch {
-            runCatching { repository.installed() }
-                .onSuccess { mutableState.value = mutableState.value.copy(installed = it, error = null) }
-                .onFailure { showError("Could not load installed extensions: ${it.message}") }
-        }
+    init {
+        refreshInstalledAndRepos()
+        refreshCatalog()
     }
 
-    fun add(input: String, onComplete: (Result<List<ExtensionConfig>>) -> Unit) {
+    fun refreshInstalledAndRepos() {
+        mutableState.value = mutableState.value.copy(
+            installed = repository.getInstalled(),
+            repos = repository.getRepos(),
+        )
+    }
+
+    fun refreshCatalog() {
         mutableState.value = mutableState.value.copy(loading = true, error = null)
         viewModelScope.launch {
-            val result = runCatching { repository.addFromInput(input) }
-            mutableState.value = mutableState.value.copy(loading = false, error = result.exceptionOrNull()?.message)
-            result.onSuccess { refreshInstalled() }
-            result.onFailure { showError(it.message ?: "Could not add extension.") }
-            onComplete(result)
+            val repos = withContext(Dispatchers.IO) { repository.getRepos() }
+            val items = mutableListOf<ExtensionMeta>()
+            var failed = repos.isEmpty()
+            for (repo in repos) {
+                val result = repository.fetchCatalog(repo.url)
+                result.fold(
+                    onSuccess = { items += it },
+                    onFailure = { failed = true },
+                )
+            }
+            mutableState.value = mutableState.value.copy(
+                loading = false,
+                repos = repos,
+                catalog = items.distinctBy { it.pkg }.sortedBy { it.name.lowercase() },
+                error = if (failed && items.isEmpty()) "Failed to load extensions." else null,
+            )
         }
     }
 
-    fun remove(id: String) {
-        viewModelScope.launch {
-            runCatching { repository.remove(id) }
-                .onSuccess { refreshInstalled() }
-                .onFailure { showError("Could not remove extension: ${it.message}") }
+    fun setCatalogQuery(query: String) {
+        mutableState.value = mutableState.value.copy(catalogQuery = query)
+    }
+
+    fun addRepo(url: String, label: String) {
+        runRepoChange { repository.addRepo(url, label) }
+    }
+
+    fun removeRepo(url: String) {
+        runRepoChange { repository.removeRepo(url) }
+    }
+
+    fun updateRepo(url: String, newUrl: String, label: String) {
+        runRepoChange { repository.updateRepo(url, newUrl, label) }
+    }
+
+    private fun runRepoChange(change: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching(change).onFailure { showError("Could not update repositories.") }
+            refreshInstalledAndRepos()
+            refreshCatalog()
         }
     }
 
-    fun loadPopular(extensionId: String) = runList(extensionId) { engine.popular(it) }
-
-    fun search(extensionId: String, query: String) = runList(extensionId) { engine.search(it, query) }
-
-    fun openManga(extensionId: String, manga: ExtensionManga) {
-        val config = config(extensionId) ?: return showError("This extension is no longer installed.")
-        mutableState.value = mutableState.value.copy(loading = true, error = null, selectedManga = manga, details = null, chapters = emptyList())
+    fun install(meta: ExtensionMeta) {
+        if (mutableState.value.installingPkg == meta.pkg) return
+        mutableState.value = mutableState.value.copy(loading = true, installingPkg = meta.pkg, failedInstallPkg = null, error = null)
         viewModelScope.launch {
-            when (val detailResult = engine.details(config, manga.link)) {
-                is ExtensionResult.Error -> showError(detailResult.message)
-                is ExtensionResult.Success -> {
-                    when (val chapterResult = engine.chapters(config, manga.link)) {
-                        is ExtensionResult.Error -> mutableState.value = mutableState.value.copy(loading = false, details = detailResult.data, error = chapterResult.message)
-                        is ExtensionResult.Success -> mutableState.value = mutableState.value.copy(loading = false, details = detailResult.data, chapters = chapterResult.data, error = null)
-                    }
-                }
+            val apk = try {
+                repository.downloadExtension(meta)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                mutableState.value = mutableState.value.copy(loading = false, installingPkg = null, failedInstallPkg = meta.pkg, error = "Download failed.")
+                return@launch
+            }
+            try {
+                withContext(Dispatchers.IO) { runtime.loadSources(apk, meta.pkg) }
+                withContext(Dispatchers.IO) { repository.markInstalled(meta) }
+                mutableState.value = mutableState.value.copy(
+                    loading = false,
+                    installingPkg = null,
+                    failedInstallPkg = null,
+                    installed = withContext(Dispatchers.IO) { repository.getInstalled() },
+                    error = null,
+                )
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Throwable) {
+                withContext(Dispatchers.IO) { repository.removeExtension(meta.pkg) }
+                runtime.remove(meta.pkg)
+                showError("Extension incompatible.")
+                mutableState.value = mutableState.value.copy(installingPkg = null, failedInstallPkg = meta.pkg)
             }
         }
     }
 
-    suspend fun pages(extensionId: String, chapterUrl: String): ExtensionResult<List<String>> {
-        val source = config(extensionId) ?: return ExtensionResult.Error("This extension is no longer installed.")
-        mutableState.value = mutableState.value.copy(loading = true, error = null)
-        val result = engine.pages(source, chapterUrl)
-        mutableState.value = when (result) {
-            is ExtensionResult.Success -> mutableState.value.copy(loading = false)
-            is ExtensionResult.Error -> mutableState.value.copy(loading = false, error = result.message)
+    fun retryInstall(pkg: String) {
+        mutableState.value.catalog.firstOrNull { it.pkg == pkg }?.let(::install)
+    }
+
+    fun remove(pkg: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching { repository.removeExtension(pkg) }
+                .onSuccess {
+                    runtime.remove(pkg)
+                    mutableState.value = mutableState.value.copy(
+                        installed = repository.getInstalled(),
+                        selectedPackage = mutableState.value.selectedPackage.takeUnless { it == pkg },
+                        sources = if (mutableState.value.selectedPackage == pkg) emptyList() else mutableState.value.sources,
+                        selectedSourceId = if (mutableState.value.selectedPackage == pkg) null else mutableState.value.selectedSourceId,
+                    )
+                }
+                .onFailure { showError("Could not uninstall extension.") }
         }
-        return result
+    }
+
+    fun selectInstalled(pkg: String) {
+        val extension = mutableState.value.installed.firstOrNull { it.pkg == pkg }
+        if (extension == null) return showError("Extension is not installed.")
+        mutableState.value = mutableState.value.copy(
+            selectedPackage = pkg,
+            sources = extension.sources,
+            selectedSourceId = null,
+            selectedSourceName = null,
+            mangas = emptyList(),
+            selectedManga = null,
+            details = null,
+            chapters = emptyList(),
+            error = null,
+        )
+    }
+
+    fun selectSource(pkg: String, source: ExtensionSourceMeta) {
+        val sourceId = source.id.toLongOrNull()
+        if (sourceId == null) return showError("Extension incompatible.")
+        mutableState.value = mutableState.value.copy(
+            selectedPackage = pkg,
+            selectedSourceId = sourceId,
+            selectedSourceName = source.name,
+            sourceReferer = source.baseUrl.takeIf(String::isNotBlank),
+            mangas = emptyList(),
+            selectedManga = null,
+            details = null,
+            chapters = emptyList(),
+            page = 1,
+            browseQuery = "",
+            error = null,
+        )
+        loadPopular()
+    }
+
+    fun setBrowseQuery(query: String) {
+        mutableState.value = mutableState.value.copy(browseQuery = query)
+    }
+
+    fun loadPopular() = loadMangaPage(1, "")
+
+    fun search(query: String = mutableState.value.browseQuery, page: Int = 1, append: Boolean = false) {
+        if (query.isBlank()) return loadPopular()
+        loadMangaPage(page, query, append)
+    }
+
+    fun nextPage() {
+        val state = mutableState.value
+        if (!state.hasNextPage || state.loading) return
+        if (state.browseQuery.isBlank()) loadMangaPage(state.page + 1, "", append = true)
+        else search(state.browseQuery, state.page + 1, append = true)
+    }
+
+    private fun loadMangaPage(page: Int, query: String, append: Boolean = false) {
+        val selection = selection() ?: return
+        mutableState.value = mutableState.value.copy(loading = true, error = null)
+        viewModelScope.launch {
+            try {
+                val source = sourceFor(selection.first, selection.second)
+                val result = if (query.isBlank()) {
+                    runtime.fetchPopular(selection.first.apkFile, selection.first.pkg, source.id, page)
+                } else {
+                    runtime.fetchSearch(selection.first.apkFile, selection.first.pkg, source.id, query, page)
+                }
+                mutableState.value = mutableState.value.copy(
+                    loading = false,
+                    mangas = if (append) mutableState.value.mangas + result.mangas else result.mangas,
+                    page = page,
+                    browseQuery = query,
+                    hasNextPage = result.hasNextPage,
+                    sourceReferer = source.baseUrl,
+                    error = null,
+                )
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Throwable) {
+                showError(sourceError(error))
+                mutableState.value = mutableState.value.copy(mangas = emptyList(), hasNextPage = false)
+            }
+        }
+    }
+
+    fun openManga(manga: SManga) {
+        val selection = selection() ?: return
+        val sourceId = mutableState.value.selectedSourceId ?: return showError("Extension source is unavailable.")
+        mutableState.value = mutableState.value.copy(loading = true, error = null, selectedManga = manga, details = null, chapters = emptyList())
+        viewModelScope.launch {
+            try {
+                val details = runtime.fetchDetails(selection.first.apkFile, selection.first.pkg, sourceId, manga)
+                val chapters = runtime.fetchChapters(selection.first.apkFile, selection.first.pkg, sourceId, details)
+                mutableState.value = mutableState.value.copy(loading = false, details = details, chapters = chapters, error = null)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Throwable) {
+                showError(sourceError(error))
+            }
+        }
+    }
+
+    suspend fun pages(chapter: SChapter): List<String> {
+        val selection = selection() ?: throw IllegalStateException("Extension source is unavailable.")
+        val sourceId = mutableState.value.selectedSourceId ?: throw IllegalStateException("Extension source is unavailable.")
+        mutableState.value = mutableState.value.copy(loading = true, error = null)
+        return try {
+            val resolved = runtime.fetchPages(selection.first.apkFile, selection.first.pkg, sourceId, chapter)
+                .mapNotNull { it.imageUrl?.takeIf(String::isNotBlank) ?: it.url.takeIf(String::isNotBlank) }
+                .filter { it.startsWith("https://") || it.startsWith("http://") }
+            mutableState.value = mutableState.value.copy(loading = false)
+            if (resolved.isEmpty()) throw IllegalStateException("Source unavailable.")
+            resolved
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Throwable) {
+            val message = sourceError(error)
+            mutableState.value = mutableState.value.copy(loading = false, error = message)
+            throw IllegalStateException(message, error)
+        }
+    }
+
+    fun backToSources() {
+        mutableState.value = mutableState.value.copy(
+            selectedSourceId = null,
+            selectedSourceName = null,
+            mangas = emptyList(),
+            selectedManga = null,
+            details = null,
+            chapters = emptyList(),
+            error = null,
+        )
     }
 
     fun backToResults() {
@@ -101,24 +298,43 @@ class ReaderExtensionsViewModel @Inject constructor(application: Application) : 
     }
 
     fun showError(message: String) {
-        mutableState.value = mutableState.value.copy(loading = false, error = message.ifBlank { "Request failed. Please try again." })
+        mutableState.value = mutableState.value.copy(loading = false, error = message.ifBlank { "Source may be broken. Try updating." })
     }
 
-    fun clearError() { mutableState.value = mutableState.value.copy(error = null) }
+    fun clearError() {
+        mutableState.value = mutableState.value.copy(error = null)
+    }
 
-    private fun runList(extensionId: String, request: suspend (ExtensionConfig) -> ExtensionResult<List<ExtensionManga>>) {
-        val config = config(extensionId) ?: return showError("This extension is no longer installed.")
-        mutableState.value = mutableState.value.copy(loading = true, error = null, selectedManga = null, details = null, chapters = emptyList())
-        viewModelScope.launch {
-            when (val result = request(config)) {
-                is ExtensionResult.Success -> mutableState.value = mutableState.value.copy(loading = false, mangas = result.data, error = null)
-                is ExtensionResult.Error -> mutableState.value = mutableState.value.copy(loading = false, mangas = emptyList(), error = result.message)
-            }
+    private suspend fun sourceFor(installed: InstalledExtension, requestedId: Long): HttpSource = withContext(Dispatchers.IO) {
+        runtime.loadSources(installed.apkFile, installed.meta.pkg).firstOrNull { it.id == requestedId }
+            ?: throw IllegalStateException("Extension source is unavailable.")
+    }
+
+    private fun selection(): Pair<InstalledExtension, Long>? {
+        val state = mutableState.value
+        val pkg = state.selectedPackage ?: return null.also { showError("Choose an installed extension first.") }
+        val id = state.selectedSourceId ?: return null.also { showError("Choose a source first.") }
+        val meta = state.installed.firstOrNull { it.pkg == pkg }
+            ?: return null.also { showError("Extension is not installed.") }
+        return InstalledExtension(meta, repository.apkFile(pkg)) to id
+    }
+
+    private data class InstalledExtension(val meta: ExtensionMeta, val apkFile: java.io.File)
+
+    private val ExtensionMeta.apkFile: java.io.File get() = repository.apkFile(pkg)
+
+    private fun sourceError(error: Throwable): String {
+        val chain = generateSequence(error) { it.cause }.toList()
+        val message = chain.joinToString(" ") { it.message.orEmpty() }
+        return when {
+            chain.any { it is ClassNotFoundException || it is NoClassDefFoundError } -> "Extension incompatible."
+            message.contains("403") || message.contains("404") || message.contains("Source unavailable", ignoreCase = true) -> "Source unavailable."
+            else -> "Source may be broken. Try updating."
         }
     }
 
     override fun onCleared() {
-        engine.close()
+        runtime.close()
         repository.close()
         super.onCleared()
     }

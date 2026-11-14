@@ -62,6 +62,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.Credentials
+import mihon.kit.MihonKit
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -130,6 +131,8 @@ class App :
 
         // Plant logging before extraction services initialize.
         Timber.plant(Timber.DebugTree())
+        runCatching { MihonKit.initialize(this) }
+            .onFailure { Timber.e(it, "Failed to initialize Mihon extension runtime") }
         InnerTubeXPlayer.initialize(this)
 
         // Pre-read Coil cache size on background to avoid runBlocking in newImageLoader

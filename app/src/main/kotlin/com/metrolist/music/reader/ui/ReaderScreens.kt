@@ -72,6 +72,8 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavController
 import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
+import coil3.network.NetworkHeaders
+import coil3.request.ImageRequest
 import com.metrolist.music.R
 import com.metrolist.music.constants.ReaderBackgroundKey
 import com.metrolist.music.constants.ReaderFullscreenKey
@@ -261,6 +263,7 @@ fun ReaderScreen(bookId: String, navController: NavController, viewModel: Reader
                             itemsIndexed(pages, key = { _, page -> page.filePath }) { index, page ->
                                 ReaderPageImage(
                                     page = page,
+                                    referer = book?.referer,
                                     pageNumber = index + 1,
                                     mode = readingMode,
                                     scaleMode = scaleMode,
@@ -279,6 +282,7 @@ fun ReaderScreen(bookId: String, navController: NavController, viewModel: Reader
                         ) { index ->
                             ReaderPageImage(
                                 page = pages[index],
+                                referer = book?.referer,
                                 pageNumber = index + 1,
                                 mode = readingMode,
                                 scaleMode = scaleMode,
@@ -297,6 +301,7 @@ fun ReaderScreen(bookId: String, navController: NavController, viewModel: Reader
                         ) { index ->
                             ReaderPageImage(
                                 page = pages[index],
+                                referer = book?.referer,
                                 pageNumber = index + 1,
                                 mode = readingMode,
                                 scaleMode = scaleMode,
@@ -341,6 +346,7 @@ fun ReaderScreen(bookId: String, navController: NavController, viewModel: Reader
 @Composable
 private fun ReaderPageImage(
     page: com.metrolist.music.reader.db.ReaderPageEntity,
+    referer: String?,
     pageNumber: Int,
     mode: ReaderReadingMode,
     scaleMode: ReaderScaleMode,
@@ -349,10 +355,21 @@ private fun ReaderPageImage(
     onPrevious: () -> Unit,
     onToggleControls: () -> Unit,
 ) {
+    val context = LocalContext.current
     val currentOnNext by rememberUpdatedState(onNext)
     val currentOnPrevious by rememberUpdatedState(onPrevious)
     val currentOnToggle by rememberUpdatedState(onToggleControls)
-    val pageImagePainter = rememberAsyncImagePainter(model = page.filePath)
+    val request = remember(page.filePath, referer) {
+        ImageRequest.Builder(context)
+            .data(page.filePath)
+            .apply {
+                if (!referer.isNullOrBlank() && (page.filePath.startsWith("http://") || page.filePath.startsWith("https://"))) {
+                    httpHeaders(NetworkHeaders.Builder().set("Referer", referer).build())
+                }
+            }
+            .build()
+    }
+    val pageImagePainter = rememberAsyncImagePainter(model = request)
     val pageImageState by pageImagePainter.state.collectAsState()
     Box(modifier.pointerInput(mode) {
         detectTapGestures { tap ->

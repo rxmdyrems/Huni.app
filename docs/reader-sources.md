@@ -1,29 +1,19 @@
-# Huni reader sources
+# Huni reader and Mihon extensions
 
-The reader supports local CBZ/ZIP archives and individual images through Android's document picker. It also supports **user-supplied JSON extension definitions** that make ordinary HTTP(S) GET requests and parse static HTML with CSS selectors. Huni does not execute JavaScript, install APKs, load JVM extension code, or claim Mihon compatibility.
+The Reader supports local CBZ/ZIP archives and individual images through Android's document picker. It can also browse, install, and run Mihon-compatible extension APKs through the `mihon-kit` runtime.
 
-## JSON extension configuration
+## Extension catalog and repositories
 
-Paste a single config below in Reader → Extensions → Add extension, or enter a URL that serves one config, a JSON array, or an object with an `extensions` array. Index endpoints are JSON only.
+The Extensions screen starts with the Keiyoushi repository:
 
-```json
-{
-  "id": "sample",
-  "name": "Sample Source",
-  "baseUrl": "https://example.org",
-  "lang": "en",
-  "popular": { "url": "/manga", "selectors": { "title": ".manga-title", "cover": ".manga-cover img", "link": ".manga-title" } },
-  "search": { "url": "/search?q={{query}}", "selectors": { "title": ".manga-title", "cover": ".manga-cover img", "link": ".manga-title" } },
-  "details": { "url": "{{mangaUrl}}", "selectors": { "title": "h1", "author": ".author", "cover": ".cover img" } },
-  "chapters": { "url": "{{mangaUrl}}", "selectors": { "title": ".chapter a", "link": ".chapter a" } },
-  "pages": { "url": "{{chapterUrl}}", "selectors": { "image": ".reader-page img" } }
-}
-```
+`https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.json`
 
-The CSS selectors for list titles, covers, and links should return corresponding elements in the same order and count. Manga and chapter links are resolved relative to the page; image URLs may use `src`, `data-src`, `data-original`, or `href`. Supported template variables are `{{query}}`, `{{mangaUrl}}`, and `{{chapterUrl}}`. A selector that matches nothing, mismatched result counts, failed HTTP status, or malformed config is surfaced as an error in the UI. Chapters store page image URLs and use the existing reader screen; images are fetched by the app's image loader when displayed.
+Catalog data is parsed from `index.json` using kotlinx.serialization-compatible JSON models. Huni handles both flat extension records and the nested `extensionList.extensions` layout used by Keiyoushi. Absolute APK URLs in the current catalog are used directly; relative APK filenames are resolved using the repository's `/apk/{filename}` path. Repositories can be added, edited, removed, and refreshed from the Browse tab.
 
-## Installing sources and safety
+Installed APKs are stored in Huni's app-private `filesDir/extensions` directory and loaded at runtime by MihonKit; they are not installed as Android packages. Each APK is third-party executable code. Install only extensions and repositories you trust, and follow source-site terms and applicable laws. Huni does not bundle third-party extensions or endorse their content.
 
-Extension definitions are stored as JSON files in Huni's private app storage. Only HTTP(S) URLs are accepted, and an extension config cannot run code. A source can still track requests or serve material whose rights and terms vary; add sources you trust and use them lawfully. Huni does not endorse or bundle third-party content.
+## Browse and read
 
-The previously requested `https://github.com/keiyoushi/extensions/raw/repo/index.pb` is a protobuf catalog, not a JSON index, and is not compatible with this JSON-only extension format. Huni does not fetch or decode it.
+Open an installed extension to choose one of its sources. Source browsing supports popular manga, keyword search, pagination, manga details, chapter lists, and page loading. Remote source images are requested through Coil with the source's `Referer` header. Chapters opened from a source are added to the existing Reader library and can be revisited there; local CBZ/ZIP and image imports remain available.
+
+Catalog fetch, APK download, incompatible extension, and source request failures are surfaced in the UI with retry or update guidance instead of leaving a blank screen.

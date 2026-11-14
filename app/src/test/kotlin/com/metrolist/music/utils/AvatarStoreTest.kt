@@ -38,12 +38,19 @@ class AvatarStoreTest {
         assertNotNull(Bitmap.decodeFile(store.avatarFile.absolutePath))
     }
 
-    @Test fun repeatedReplacementReplacesImageAndCanReloadFromDisk() {
+    @Test fun twoSuccessiveReplacementsReplaceImageAndSurviveStoreRestart() {
         assertTrue(store.replaceFrom(image(0xffff0000)))
-        val oldBytes = store.avatarFile.readBytes()
+        val initialBytes = store.avatarFile.readBytes()
         assertTrue(store.replaceFrom(image(0xff0000ff)))
-        assertNotEquals(oldBytes.toList(), store.avatarFile.readBytes().toList())
-        assertTrue(AvatarStore(directory).exists())
+        val firstReplacement = store.avatarFile.readBytes()
+        assertNotEquals(initialBytes.toList(), firstReplacement.toList())
+        assertTrue(store.replaceFrom(image(0xff00ff00)))
+        val finalBytes = store.avatarFile.readBytes()
+        assertNotEquals(firstReplacement.toList(), finalBytes.toList())
+        assertNotEquals(initialBytes.toList(), finalBytes.toList())
+        val restartedStore = AvatarStore(directory)
+        assertTrue(restartedStore.exists())
+        assertArrayEquals(finalBytes, restartedStore.avatarFile.readBytes())
     }
 
     @Test fun cancellationLeavesCurrentAvatarUnchanged() {
@@ -72,12 +79,30 @@ class AvatarStoreTest {
         assertEquals("avatar_ocean", AvatarStore.fallbackPreset(encoded))
         assertEquals("avatar_amber", AvatarStore.fallbackPreset("file"))
         assertEquals("avatar_teal", AvatarStore.fallbackPreset("avatar_teal"))
+        assertEquals("avatar_amber", AvatarStore.fallbackPreset("avatar_missing"))
+    }
+
+    @Test fun replacingCustomAvatarCreatesANewerCacheRevision() {
+        val original = AvatarStore.customAvatarId("avatar_ocean", 123L)
+        val replacement = AvatarStore.nextCustomAvatarId("avatar_ocean", original)
+        assertTrue(AvatarStore.isCustomAvatarId(replacement))
+        assertEquals("avatar_ocean", AvatarStore.fallbackPreset(replacement))
+        assertNotEquals(original, replacement)
+        assertTrue(replacement.substringAfterLast(':').toLong() > 123L)
     }
 
     @Test fun presetSelectionInvalidatesCustomAvatar() {
         assertTrue(store.replaceFrom(image(0xffabcdef)))
         store.selectPreset()
         assertFalse(store.exists())
+    }
+
+    @Test fun restoreRollsBackAReplacementWhenPreferencePersistenceFails() {
+        assertTrue(store.replaceFrom(image(0xffabcdef)))
+        val previous = requireNotNull(store.snapshot())
+        assertTrue(store.replaceFrom(image(0xff123456)))
+        store.restore(previous)
+        assertArrayEquals(previous, store.avatarFile.readBytes())
     }
 
     private fun image(color: Int): ByteArrayInputStream {
