@@ -131,4 +131,7 @@ class ExtensionRepository(
         require(parsed.host.isNotBlank() && parsed.userInfo == null) { "Extension URL must have a host and cannot contain embedded credentials." }
     }
 
+    private companion object {
+        const val MAX_JSON_CHARS = 5 * 1024 * 1024
+    }
 }

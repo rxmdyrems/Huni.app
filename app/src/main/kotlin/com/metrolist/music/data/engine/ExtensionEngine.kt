@@ -71,13 +71,9 @@ class ExtensionEngine(
             val document = getDocument(requestUrl)
             val selector = config.pages.selectors.image
             val elements = requiredElements(document, selector, "page image")
-            elements.mapNotNull { element ->
-                element.absUrl("src").ifBlank {
-                    element.absUrl("data-src").ifBlank {
-                        element.absUrl("data-original").ifBlank { elementUrl(element, document.location()) }
-                    }
-                }.takeIf(String::isNotBlank)
-            }.distinct().ifEmpty { throw SelectorException("The page image selector matched no usable image URLs.") }
+            elements.mapNotNull { elementImageUrl(it, document.location()) }
+                .distinct()
+                .ifEmpty { throw SelectorException("The page image selector matched no usable image URLs.") }
         }
 
     fun close() = client.close()

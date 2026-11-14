@@ -380,7 +380,7 @@ private fun ReaderPageImage(
             contentScale = if (mode.isContinuous) androidx.compose.ui.layout.ContentScale.FillWidth else scaleMode.contentScale(),
             modifier = Modifier.fillMaxSize(),
         )
-        if (pageImagePainter.state is AsyncImagePainter.State.Error) {
+        if (pageImagePainter.state == AsyncImagePainter.State.Error) {
             Text(
                 "Couldn't load this page. Check the connection or source image URL.",
                 Modifier.align(Alignment.Center).padding(20.dp),
