@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.gradle.api.attributes.LibraryElements
+import org.gradle.api.attributes.Usage
 import com.metrolist.quickjs.RelocateMihonQuickJsTransform
 import java.util.Properties
 
@@ -262,6 +263,15 @@ configurations.configureEach {
     exclude(group = "org.json", module = "json")
 }
 
+val mihonQuickJsAarConfiguration = configurations.create("mihonQuickJsAar") {
+    isCanBeResolved = true
+    isCanBeConsumed = false
+    attributes.attribute(
+        Usage.USAGE_ATTRIBUTE,
+        objects.named(Usage::class.java, Usage.JAVA_RUNTIME),
+    )
+}
+
 dependencies {
     components {
         withModule("com.github.zhanghai.quickjs-java:quickjs-android") {
@@ -345,7 +355,19 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.client.encoding)
     implementation(libs.ktor.serialization.json)
-    implementation("com.github.verizonkert:mihon-kit:v1.1.0")
+    implementation("com.github.verizonkert:mihon-kit:v1.1.0") {
+        exclude(group = "com.github.zhanghai.quickjs-java", module = "quickjs-android")
+    }
+    add(mihonQuickJsAarConfiguration.name, "com.github.zhanghai.quickjs-java:quickjs-android:547f5b1597")
+    val relocatedQuickJsAar = mihonQuickJsAarConfiguration.incoming.artifactView {
+        attributes {
+            attribute(
+                LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+                objects.named(LibraryElements::class.java, "aar"),
+            )
+        }
+    }.files
+    implementation(files(relocatedQuickJsAar))
 
     // Protobuf for message serialization (lite version for Android)
     implementation(libs.protobuf.javalite)

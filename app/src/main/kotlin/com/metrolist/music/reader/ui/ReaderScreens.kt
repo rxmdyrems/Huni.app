@@ -73,6 +73,7 @@ import androidx.navigation.NavController
 import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
 import coil3.network.NetworkHeaders
+import coil3.network.httpHeaders
 import coil3.request.ImageRequest
 import com.metrolist.music.R
 import com.metrolist.music.constants.ReaderBackgroundKey

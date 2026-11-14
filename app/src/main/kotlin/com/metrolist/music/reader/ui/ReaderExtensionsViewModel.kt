@@ -222,9 +222,9 @@ class ReaderExtensionsViewModel @Inject constructor(application: Application) : 
             try {
                 val source = sourceFor(selection.first, selection.second)
                 val result = if (query.isBlank()) {
-                    runtime.fetchPopular(selection.first.apkFile, selection.first.pkg, source.id, page)
+                    runtime.fetchPopular(selection.first.apkFile, selection.first.meta.pkg, source.id, page)
                 } else {
-                    runtime.fetchSearch(selection.first.apkFile, selection.first.pkg, source.id, query, page)
+                    runtime.fetchSearch(selection.first.apkFile, selection.first.meta.pkg, source.id, query, page)
                 }
                 mutableState.value = mutableState.value.copy(
                     loading = false,
@@ -250,8 +250,8 @@ class ReaderExtensionsViewModel @Inject constructor(application: Application) : 
         mutableState.value = mutableState.value.copy(loading = true, error = null, selectedManga = manga, details = null, chapters = emptyList())
         viewModelScope.launch {
             try {
-                val details = runtime.fetchDetails(selection.first.apkFile, selection.first.pkg, sourceId, manga)
-                val chapters = runtime.fetchChapters(selection.first.apkFile, selection.first.pkg, sourceId, details)
+                val details = runtime.fetchDetails(selection.first.apkFile, selection.first.meta.pkg, sourceId, manga)
+                val chapters = runtime.fetchChapters(selection.first.apkFile, selection.first.meta.pkg, sourceId, details)
                 mutableState.value = mutableState.value.copy(loading = false, details = details, chapters = chapters, error = null)
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -266,7 +266,7 @@ class ReaderExtensionsViewModel @Inject constructor(application: Application) : 
         val sourceId = mutableState.value.selectedSourceId ?: throw IllegalStateException("Extension source is unavailable.")
         mutableState.value = mutableState.value.copy(loading = true, error = null)
         return try {
-            val resolved = runtime.fetchPages(selection.first.apkFile, selection.first.pkg, sourceId, chapter)
+            val resolved = runtime.fetchPages(selection.first.apkFile, selection.first.meta.pkg, sourceId, chapter)
                 .mapNotNull { it.imageUrl?.takeIf(String::isNotBlank) ?: it.url.takeIf(String::isNotBlank) }
                 .filter { it.startsWith("https://") || it.startsWith("http://") }
             mutableState.value = mutableState.value.copy(loading = false)
