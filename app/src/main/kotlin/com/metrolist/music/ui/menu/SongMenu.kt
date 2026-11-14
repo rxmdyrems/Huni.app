@@ -8,7 +8,7 @@ package com.metrolist.music.ui.menu
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import android.media.MediaStore
+import android.provider.MediaStore
 import android.net.Uri
 import android.os.Build
 import android.app.RecoverableSecurityException
