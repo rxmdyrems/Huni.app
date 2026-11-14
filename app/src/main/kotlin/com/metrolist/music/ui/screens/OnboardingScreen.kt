@@ -1,11 +1,8 @@
 package com.metrolist.music.ui.screens
 
 import android.app.Activity
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
-import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -72,13 +69,12 @@ import com.metrolist.music.constants.OnboardingDoneKey
 import com.metrolist.music.constants.UserAvatarKey
 import com.metrolist.music.constants.UserNameKey
 import com.metrolist.music.utils.safeDataStoreEdit
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import com.metrolist.music.utils.greetingForCurrentTime
-import java.io.File
-import java.io.FileOutputStream
+import com.metrolist.music.utils.AvatarStore
 
 private val avatarPresets = listOf(R.drawable.avatar_amber, R.drawable.avatar_violet, R.drawable.avatar_green, R.drawable.avatar_maroon, R.drawable.avatar_ocean, R.drawable.avatar_teal, R.drawable.avatar_rose, R.drawable.avatar_orange, R.drawable.avatar_indigo, R.drawable.avatar_slate, R.drawable.avatar_mint, R.drawable.avatar_coral)
 private val avatarNames = listOf("Amber bird", "Violet bird", "Green bird", "Maroon bird", "Ocean bird", "Teal bird", "Rose bird", "Orange bird", "Indigo bird", "Slate bird", "Mint bird", "Coral bird")
@@ -97,10 +93,24 @@ fun OnboardingScreen(onFinished: () -> Unit) {
     var greetingRefresh by remember { mutableIntStateOf(0) }
     var name by rememberSaveable { mutableStateOf("") }
     var avatarId by rememberSaveable { mutableStateOf("avatar_amber") }
+    var fallbackAvatarId by rememberSaveable { mutableStateOf("avatar_amber") }
     var uploadedPreview by remember { mutableStateOf<Bitmap?>(null) }
     var settingUp by remember { mutableStateOf(false) }
-    val scope = remember { CoroutineScope(Dispatchers.IO) }
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri -> uri ?: return@rememberLauncherForActivityResult; scope.launch { saveAvatar(context, uri); uploadedPreview = decodeAvatar(context, uri); avatarId = "file" } }
+    val scope = rememberCoroutineScope()
+    val avatarStore = remember(context) { AvatarStore(context.filesDir) }
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) scope.launch(Dispatchers.IO) {
+            val stored = runCatching { avatarStore.replace(uri) { context.contentResolver.openInputStream(it) } }.getOrDefault(false)
+            if (stored) {
+                uploadedPreview = BitmapFactory.decodeFile(avatarStore.avatarFile.absolutePath)
+                avatarId = "file"
+            }
+        }
+    }
+    DisposableEffect(uploadedPreview) {
+        val preview = uploadedPreview
+        onDispose { preview?.recycle() }
+    }
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_RESUME) greetingRefresh++ }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -124,7 +134,16 @@ fun OnboardingScreen(onFinished: () -> Unit) {
     val currentGreeting = remember(greetingRefresh, name) {
         greetingForCurrentTime(name.ifBlank { placeholderForEmptyName() })
     }
-    fun finish(skip: Boolean = false) { settingUp = true; val clean = sanitizeProfileName(name).ifBlank { placeholderForEmptyName() }; scope.launch { context.safeDataStoreEdit { it[UserNameKey] = clean; it[UserAvatarKey] = if (skip) "avatar_amber" else avatarId; it[OnboardingDoneKey] = true }; onFinished() } }
+    fun finish(skip: Boolean = false) {
+        settingUp = true
+        val clean = sanitizeProfileName(name).ifBlank { placeholderForEmptyName() }
+        scope.launch {
+            val chosenAvatar = if (skip) "avatar_amber" else avatarId
+            if (chosenAvatar != "file") avatarStore.remove()
+            context.safeDataStoreEdit { it[UserNameKey] = clean; it[UserAvatarKey] = if (chosenAvatar == "file") AvatarStore.customAvatarId(fallbackAvatarId) else chosenAvatar; it[OnboardingDoneKey] = true }
+            onFinished()
+        }
+    }
     BackHandler { if (settingUp) return@BackHandler; if (page > 0) goToPage(page - 1) else (context as? Activity)?.finish() }
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.SpaceBetween) {
@@ -162,7 +181,14 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                     when (targetPage) {
                         0 -> WelcomePage()
                         1 -> Column { Text("Huni", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary); Spacer(Modifier.height(20.dp)); NamePage(name, currentGreeting, { name = sanitizeProfileName(it) }) }
-                        2 -> Column { Text("Huni", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary); Spacer(Modifier.height(20.dp)); AvatarPage(avatarId, uploadedPreview, { avatarId = it }) { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) } }
+                        2 -> Column { Text("Huni", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary); Spacer(Modifier.height(20.dp)); AvatarPage(avatarId, uploadedPreview, { selected ->
+                            if (selected != "file") {
+                                avatarStore.remove()
+                                uploadedPreview = null
+                            }
+                            avatarId = selected
+                            if (selected != "file") fallbackAvatarId = selected
+                        }) { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) } }
                         else -> Column { Text("Huni", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary); Spacer(Modifier.height(20.dp)); FinishPage(name.ifBlank { placeholderForEmptyName() }) }
                     }
                 }
@@ -174,9 +200,14 @@ fun OnboardingScreen(onFinished: () -> Unit) {
 
 @Composable private fun WelcomePage() { Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) { Spacer(Modifier.height(36.dp)); Image(painter = painterResource(R.drawable.app_logo), contentDescription = "Huni app logo", modifier = Modifier.size(180.dp), contentScale = ContentScale.Fit); Spacer(Modifier.height(28.dp)); Text("Welcome to Huni", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)); Spacer(Modifier.height(12.dp)); Text("Thanks for installing Huni. Your music stays close, simple, and yours.", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant); Spacer(Modifier.height(18.dp)); Text("Let’s make it feel like home.", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary) } }
 
-@Composable private fun SetupPage() { Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) { Spacer(Modifier.height(110.dp)); Text("Setting up Huni for you…", style = MaterialTheme.typography.headlineSmall); Spacer(Modifier.height(12.dp)); Text("One moment, then enjoy the app.", color = MaterialTheme.colorScheme.onSurfaceVariant); Spacer(Modifier.height(24.dp)); androidx.compose.material3.CircularProgressIndicator() } }
+@Composable
+private fun SetupPage() {
+    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+        WavySetupLoader()
+        Spacer(Modifier.height(20.dp))
+        Text("Setting up Huni…", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
 @Composable private fun NamePage(name: String, greeting: String, onChange: (String) -> Unit) { Column { Text("What should we call you?", style = MaterialTheme.typography.headlineMedium); Spacer(Modifier.height(16.dp)); OutlinedTextField(name, onChange, label = { Text("Name or nickname") }, singleLine = true, supportingText = { Text("${name.length}/20") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text), modifier = Modifier.fillMaxWidth()); Spacer(Modifier.height(12.dp)); Text(greeting, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, softWrap = false) } }
 @Composable private fun AvatarPage(selected: String, uploaded: Bitmap?, onSelected: (String) -> Unit, onUpload: () -> Unit) { Column { Text("Pick an avatar", style = MaterialTheme.typography.headlineMedium); Text("Photos never leave this phone.", color = MaterialTheme.colorScheme.onSurfaceVariant); Spacer(Modifier.height(12.dp)); LazyVerticalGrid(GridCells.Fixed(4), Modifier.height(280.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { items(avatarPresets.indices.toList()) { i -> val id = "avatar_${avatarNames[i].substringBefore(' ').lowercase()}"; Image(painterResource(avatarPresets[i]), avatarNames[i], Modifier.size(64.dp).clip(CircleShape).clickable { onSelected(id) }, contentScale = ContentScale.Crop) } }; if (uploaded != null && selected == "file") Image(uploaded.asImageBitmap(), "Your uploaded photo", Modifier.size(64.dp).clip(CircleShape)); OutlinedButton(onUpload, Modifier.fillMaxWidth()) { Text("Upload your own photo") } } }
 @Composable private fun FinishPage(name: String) { Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) { Spacer(Modifier.height(60.dp)); Text("Good evening, $name", style = MaterialTheme.typography.headlineMedium); Spacer(Modifier.height(12.dp)); Text("You’re all set. Thanks for choosing Huni — enjoy the app.", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant) } }
-private fun decodeAvatar(context: Context, uri: Uri): Bitmap? = context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it) }
-private fun saveAvatar(context: Context, uri: Uri) { val source = decodeAvatar(context, uri) ?: return; val size = minOf(source.width, source.height); val cropped = Bitmap.createBitmap(source, (source.width - size) / 2, (source.height - size) / 2, size, size, Matrix(), true); val scaled = Bitmap.createScaledBitmap(cropped, 512, 512, true); val dir = File(context.filesDir, "profile").apply { mkdirs() }; FileOutputStream(File(dir, "avatar.webp")).use { scaled.compress(Bitmap.CompressFormat.WEBP_LOSSY, 85, it) }; if (cropped != source) cropped.recycle(); if (scaled != cropped) scaled.recycle() }

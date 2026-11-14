@@ -94,6 +94,12 @@ fun ReaderLibraryScreen(navController: NavController, viewModel: ReaderViewModel
             Spacer(Modifier.height(12.dp))
             Text("Local manga and stories", style = MaterialTheme.typography.headlineSmall)
             Text("Import CBZ, ZIP, or image files. Everything stays on this device.", style = MaterialTheme.typography.bodyMedium)
+            Spacer(Modifier.height(6.dp))
+            Text(
+                "Online extension repositories are not supported yet. Mihon extensions cannot be installed or run in Huni. Coming soon.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Spacer(Modifier.height(12.dp))
             Button(onClick = { launcher.launch(arrayOf("application/zip", "application/x-cbz", "image/*")) }) {
                 Icon(painterResource(R.drawable.library_music_outlined), contentDescription = null)

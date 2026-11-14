@@ -20,6 +20,7 @@ object AppDataWiper {
             resetPreferencesSnapshot()
             check(context.getSharedPreferences("com.metrolist.music_preferences", Context.MODE_PRIVATE).edit().clear().commit())
             context.fileList().forEach { context.deleteFile(it) }
+            AvatarStore(context.filesDir).remove()
             check(File(context.filesDir, "profile").deleteRecursively())
             listOf("song.db", "reader.db").forEach { name ->
                 context.deleteDatabase(name)

@@ -2,7 +2,6 @@ package com.metrolist.music.ui.screens.settings
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -64,6 +63,7 @@ import com.metrolist.music.constants.UserNameKey
 import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.utils.backToMain
 import com.metrolist.music.utils.AppDataWiper
+import com.metrolist.music.utils.AvatarStore
 import com.metrolist.music.utils.dataStore
 import com.metrolist.music.utils.rememberPreference
 import com.metrolist.music.utils.safeDataStoreEdit
@@ -100,14 +100,11 @@ fun AboutScreen(navController: NavController, scrollBehavior: androidx.compose.m
     var deleteText by remember { mutableStateOf("") }
     var wiping by remember { mutableStateOf(false) }
     var wipeError by remember { mutableStateOf(false) }
+    val avatarStore = remember(context) { AvatarStore(context.filesDir) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri ?: return@rememberLauncherForActivityResult
-        scope.launch(Dispatchers.IO) {
-            context.contentResolver.openInputStream(uri)?.use { input ->
-                File(context.filesDir, "profile").mkdirs()
-                File(context.filesDir, "profile/avatar.webp").outputStream().use { output -> input.copyTo(output) }
-            }
-            context.safeDataStoreEdit { it[UserAvatarKey] = "file" }
+        if (uri != null) scope.launch(Dispatchers.IO) {
+            val replaced = runCatching { avatarStore.replace(uri) { context.contentResolver.openInputStream(it) } }.getOrDefault(false)
+            if (replaced) context.safeDataStoreEdit { it[UserAvatarKey] = AvatarStore.customAvatarId(AvatarStore.fallbackPreset(avatar)) }
         }
     }
 
@@ -123,7 +120,9 @@ fun AboutScreen(navController: NavController, scrollBehavior: androidx.compose.m
         CardColumn {
             ActionRow(R.drawable.edit, "Edit name", "Change the name Huni uses for you") { nameDraft = name; editName = true }
             DividerRow()
-            ActionRow(R.drawable.hide_image, "Change photo", "Choose a preset or use your own photo") { photoSheet = true }
+            ActionRow(R.drawable.hide_image, "Replace / change photo", "Pick a new photo from this device") { picker.launch("image/*") }
+            DividerRow()
+            ActionRow(R.drawable.hide_image, "Choose preset / remove photo", "Use a Huni avatar or remove your custom photo") { photoSheet = true }
             DividerRow()
             ActionRow(R.drawable.delete, "Delete app data", "Erases everything saved on this phone", MaterialTheme.colorScheme.error) { deleteText = ""; deleteDialog = true }
         }
@@ -144,7 +143,27 @@ fun AboutScreen(navController: NavController, scrollBehavior: androidx.compose.m
     }
 
     if (editName) AlertDialog(onDismissRequest = { editName = false }, title = { Text("Edit name") }, text = { OutlinedTextField(value = nameDraft, onValueChange = { nameDraft = it.take(20) }, label = { Text("Name") }, singleLine = true) }, confirmButton = { Button(onClick = { scope.launch { context.safeDataStoreEdit { it[UserNameKey] = nameDraft.trim().ifBlank { "Music lover" } } }; editName = false }) { Text("Save") } }, dismissButton = { TextButton(onClick = { editName = false }) { Text("Cancel") } })
-    if (photoSheet) ModalBottomSheet(onDismissRequest = { photoSheet = false }) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) { Text("Change photo", style = MaterialTheme.typography.titleLarge); Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) { avatarPresets.take(6).forEachIndexed { i, res -> Image(painterResource(res), avatarIds[i], Modifier.size(48.dp).clip(CircleShape).clickable { scope.launch { context.safeDataStoreEdit { it[UserAvatarKey] = avatarIds[i] } }; photoSheet = false }) } }; TextButton({ picker.launch("image/*"); photoSheet = false }) { Text("Upload your own photo") }; TextButton({ scope.launch { context.safeDataStoreEdit { it[UserAvatarKey] = "avatar_amber" }; File(context.filesDir, "profile/avatar.webp").delete() }; photoSheet = false }) { Text("Remove photo") } } }
+    if (photoSheet) ModalBottomSheet(onDismissRequest = { photoSheet = false }) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("Choose a preset", style = MaterialTheme.typography.titleLarge)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                avatarPresets.take(6).forEachIndexed { i, res ->
+                    Image(painterResource(res), avatarIds[i], Modifier.size(48.dp).clip(CircleShape).clickable {
+                        scope.launch(Dispatchers.IO) {
+                            avatarStore.selectPreset()
+                            context.safeDataStoreEdit { it[UserAvatarKey] = avatarIds[i] }
+                        }
+                        photoSheet = false
+                    })
+                }
+            }
+            TextButton({ scope.launch(Dispatchers.IO) {
+                avatarStore.remove()
+                val fallback = AvatarStore.fallbackPreset(avatar)
+                context.safeDataStoreEdit { it[UserAvatarKey] = fallback }
+            }; photoSheet = false }) { Text("Remove custom photo") }
+        }
+    }
     if (deleteDialog) AlertDialog(modifier = Modifier.padding(horizontal = 16.dp), properties = androidx.compose.ui.window.DialogProperties(dismissOnClickOutside = !wiping, dismissOnBackPress = !wiping), onDismissRequest = { if (!wiping) deleteDialog = false }, title = { Text("Delete all app data?") }, text = { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { Text("This erases your settings, library, history, sign-ins, name and photo. Your own music files are not touched. Huni will restart and show the welcome pages again."); OutlinedTextField(value = deleteText, onValueChange = { deleteText = it }, label = { Text("Type DELETE to confirm") }, singleLine = true, modifier = Modifier.fillMaxWidth()); if (wiping) Text("Wiping your Huni data…", color = MaterialTheme.colorScheme.primary); if (wipeError) Text("Couldn't delete everything. Please try again.", color = MaterialTheme.colorScheme.error) } }, confirmButton = { Button(enabled = deleteText.trim().equals("DELETE", true) && !wiping, onClick = { wiping = true; scope.launch { val ok = AppDataWiper.wipe(context); if (ok) {
                                 val activity = context as? android.app.Activity
                                 val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
@@ -160,7 +179,7 @@ fun AboutScreen(navController: NavController, scrollBehavior: androidx.compose.m
     TopAppBar(title = { com.metrolist.music.ui.component.HuniScreenTitle(stringResource(R.string.about)) }, navigationIcon = { IconButton(onClick = navController::navigateUp, onLongClick = navController::backToMain) { Icon(painterResource(R.drawable.arrow_back), stringResource(R.string.cd_back)) } }, scrollBehavior = scrollBehavior)
 }
 
-@Composable private fun ProfileAvatar(context: Context, id: String, size: Int) { Surface(Modifier.size(size.dp), CircleShape, MaterialTheme.colorScheme.surface, border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)) { if (id == "file") AsyncImage(File(context.filesDir, "profile/avatar.webp").toURI().toString(), "Your photo", Modifier.padding(2.dp).clip(CircleShape), contentScale = ContentScale.Crop) else Image(painterResource(avatarPresets.getOrElse(avatarIds.indexOf(id)) { 0 }), "Profile avatar", Modifier.padding(2.dp).clip(CircleShape), contentScale = ContentScale.Crop) } }
+@Composable private fun ProfileAvatar(context: Context, id: String, size: Int) { Surface(Modifier.size(size.dp), CircleShape, MaterialTheme.colorScheme.surface, border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)) { if (AvatarStore.isCustomAvatarId(id)) AsyncImage(File(context.filesDir, AvatarStore.AVATAR_FILE_NAME).toURI().toString() + "?v=" + id.substringAfterLast(':', "0"), "Your photo", Modifier.padding(2.dp).clip(CircleShape), contentScale = ContentScale.Crop) else Image(painterResource(avatarPresets.getOrElse(avatarIds.indexOf(id)) { 0 }), "Profile avatar", Modifier.padding(2.dp).clip(CircleShape), contentScale = ContentScale.Crop) } }
 @Composable private fun CardColumn(content: @Composable ColumnScope.() -> Unit) { Surface(Modifier.fillMaxWidth(), RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh, content = { Column(content = content) }) }
 @Composable private fun SectionLabel(text: String) { Text(text, Modifier.fillMaxWidth(), style = MaterialTheme.typography.titleMedium) }
 @Composable private fun DividerRow() { HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant) }
