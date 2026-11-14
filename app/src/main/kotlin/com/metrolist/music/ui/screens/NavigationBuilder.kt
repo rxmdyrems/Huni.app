@@ -79,6 +79,7 @@ fun NavGraphBuilder.navigationBuilder(
     navController: NavHostController,
     scrollBehavior: TopAppBarScrollBehavior,
     latestVersionName: String,
+    latestVersionCode: Int,
     activity: Activity,
     snackbarHostState: SnackbarHostState,
 ) {
@@ -388,7 +389,7 @@ fun NavGraphBuilder.navigationBuilder(
     }
 
     composable("settings") {
-        SettingsScreen(navController, latestVersionName)
+        SettingsScreen(navController, latestVersionName, latestVersionCode)
     }
 
     composable("settings/appearance") {

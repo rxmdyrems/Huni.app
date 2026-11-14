@@ -45,6 +45,7 @@ import androidx.compose.runtime.remember
 fun SettingsScreen(
     navController: NavController,
     latestVersionName: String,
+    latestVersionCode: Int,
 ) {
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
@@ -213,7 +214,7 @@ fun SettingsScreen(
                     add(
                         Material3SettingsItem(
                             icon = painterResource(R.drawable.update),
-                            title = { Text(stringResource(R.string.updater), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
+                            title = { Text(stringResource(R.string.check_for_updates_title), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             onClick = { navController.navigate("settings/updater") }
                         )
                     )
@@ -233,7 +234,7 @@ fun SettingsScreen(
                         onClick = { navController.navigate("settings/about") }
                     )
                 )
-                if (BuildConfig.UPDATER_AVAILABLE && latestVersionName != BuildConfig.BASE_VERSION_NAME) {
+                if (BuildConfig.UPDATER_AVAILABLE && latestVersionCode > BuildConfig.VERSION_CODE) {
                     val releaseInfo = Updater.getCachedLatestRelease()
                     val downloadUrl = releaseInfo?.let { Updater.getDownloadUrlForCurrentVariant(it) }
 
@@ -261,7 +262,7 @@ fun SettingsScreen(
                 }
             }
         )
-    if (BuildConfig.UPDATER_AVAILABLE && latestVersionName != BuildConfig.BASE_VERSION_NAME) {
+    if (BuildConfig.UPDATER_AVAILABLE && latestVersionCode > BuildConfig.VERSION_CODE) {
             Spacer(modifier = Modifier.height(16.dp))
             ReleaseNotesCard()
         }

@@ -2,6 +2,11 @@
 > Every notable change to Huni, newest first. New release-text emoji prefixes follow CONTRIBUTING.md.
 
 ## Unreleased
+### 🐛 Fixes
+- 🐛 Restored a discoverable Settings entry for update checks and compare GitHub releases by versionCode.
+- 🐛 Added scheduled background release checks with network constraints and permission-aware update notifications.
+- 🐛 Consolidated About photo controls into one action sheet for gallery, presets, and removal.
+- 🐛 Fixed extension-install failure handling so loader and save errors are reported accurately and downloaded APKs are retained for retry.
 
 ---
 ## v0.9.14 (2026-11-15)

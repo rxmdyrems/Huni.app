@@ -108,8 +108,6 @@ import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.util.Consumer
@@ -218,6 +216,8 @@ import com.metrolist.music.utils.currentGreetingPeriod
 import com.metrolist.music.utils.ArtistNameAliases
 import com.metrolist.music.utils.CrashReporter
 import com.metrolist.music.utils.Updater
+import com.metrolist.music.utils.UpdateCheckScheduler
+import com.metrolist.music.utils.UpdateNotifications
 import com.metrolist.music.utils.dataStore
 import com.metrolist.music.utils.safeDataStoreEdit
 import com.metrolist.music.utils.get
@@ -287,6 +287,7 @@ class MainActivity : FragmentActivity() {
     private lateinit var navController: NavHostController
     private var pendingIntent: Intent? = null
     private var latestVersionName by mutableStateOf(BuildConfig.BASE_VERSION_NAME)
+    private var latestVersionCode by mutableStateOf(BuildConfig.VERSION_CODE)
 
     // Keep PlayerConnection as regular property - NOT mutableStateOf to prevent UI recomposition
     // when it becomes null during onStop. Only update the snapshot for Compose when needed.
@@ -507,6 +508,8 @@ class MainActivity : FragmentActivity() {
                 pendingCrashReport = pendingCrashReport,
                 latestVersionName = latestVersionName,
                 onLatestVersionNameChange = { latestVersionName = it },
+                latestVersionCode = latestVersionCode,
+                onLatestVersionCodeChange = { latestVersionCode = it },
                 playerConnection = playerConnectionSnapshot,
                 database = database,
                 downloadUtil = downloadUtil,
@@ -524,6 +527,8 @@ class MainActivity : FragmentActivity() {
         pendingCrashReport: String?,
         latestVersionName: String,
         onLatestVersionNameChange: (String) -> Unit,
+        latestVersionCode: Int,
+        onLatestVersionCodeChange: (Int) -> Unit,
         playerConnection: PlayerConnection?,
         database: MusicDatabase,
         downloadUtil: DownloadUtil,
@@ -572,73 +577,38 @@ class MainActivity : FragmentActivity() {
         var availableUpdate by remember { mutableStateOf<AvailableUpdate?>(null) }
         var showCrashReport by remember { mutableStateOf(pendingCrashReport != null) }
 
-        if (BuildConfig.UPDATER_AVAILABLE) {
-            LaunchedEffect(checkForUpdates) {
-                if (checkForUpdates) {
-                    val preferences = dataStore.data.first()
-                    val notificationsEnabled = preferences[UpdateNotificationsEnabledKey] ?: true
-                    val (releaseInfo, hasUpdate) = Updater.checkForUpdate().getOrNull() ?: (null to false)
-                    releaseInfo?.let { onLatestVersionNameChange(it.versionName) }
+        LaunchedEffect(checkForUpdates) {
+            UpdateCheckScheduler.sync(
+                this@MainActivity,
+                enabled = BuildConfig.UPDATER_AVAILABLE && checkForUpdates,
+            )
+            if (BuildConfig.UPDATER_AVAILABLE && checkForUpdates) {
+                val preferences = dataStore.data.first()
+                val notificationsEnabled = preferences[UpdateNotificationsEnabledKey] ?: true
+                val (releaseInfo, hasUpdate) = Updater.checkForUpdate().getOrNull() ?: (null to false)
+                releaseInfo?.let {
+                    onLatestVersionNameChange(it.versionName)
+                    onLatestVersionCodeChange(it.versionCode ?: BuildConfig.VERSION_CODE)
+                }
 
-                    val standaloneUpdate =
-                        releaseInfo
-                            ?.takeIf { hasUpdate }
-                            ?.let { release ->
-                                Updater.getDownloadUrlForCurrentVariant(release)?.let { downloadUrl ->
-                                    AvailableUpdate(release, downloadUrl, isKmp = false)
-                                }
-                            }
-                    // Upstream offers its Metrolist-KMP rewrite here in preference to its own
-                    // release. Huni has no KMP build and must not point users at another app,
-                    // so only Huni's own releases are offered. The isKmp plumbing below is left
-                    // in place to keep future upstream merges small.
-                    val update = standaloneUpdate
-                    availableUpdate = update?.takeUnless {
-                        it.release.tagName == preferences[it.dismissalKey]
-                    }
-
-                    if (update != null && notificationsEnabled) {
-                        val intent = Intent(Intent.ACTION_VIEW, update.downloadUrl.toUri())
-                        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                        val pending = PendingIntent.getActivity(this@MainActivity, 1001, intent, flags)
-                        val notificationText =
-                            if (update.isKmp) {
-                                getString(R.string.kmp_upgrade_warning)
-                            } else {
-                                getString(R.string.update_available_message, update.release.versionName)
-                            }
-                        val notification =
-                            NotificationCompat
-                                .Builder(this@MainActivity, "updates")
-                                .setSmallIcon(R.drawable.update)
-                                .setContentTitle(
-                                    if (update.isKmp) {
-                                        getString(R.string.kmp_upgrade_title, update.release.versionName)
-                                    } else {
-                                        getString(R.string.update_available_title)
-                                    },
-                                )
-                                .setContentText(notificationText)
-                                .apply {
-                                    if (update.isKmp) {
-                                        setStyle(NotificationCompat.BigTextStyle().bigText(notificationText))
-                                    }
-                                }
-                                .setContentIntent(pending)
-                                .setAutoCancel(true)
-                                .build()
-
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-                            ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.POST_NOTIFICATIONS) ==
-                            PackageManager.PERMISSION_GRANTED
-                        ) {
-                            NotificationManagerCompat.from(this@MainActivity).notify(1001, notification)
+                val update = releaseInfo
+                    ?.takeIf { hasUpdate }
+                    ?.let { release ->
+                        Updater.getDownloadUrlForCurrentVariant(release)?.let { downloadUrl ->
+                            AvailableUpdate(release, downloadUrl, isKmp = false)
                         }
                     }
-                } else {
-                    onLatestVersionNameChange(BuildConfig.BASE_VERSION_NAME)
-                    availableUpdate = null
+                availableUpdate = update?.takeUnless {
+                    it.release.tagName == preferences[it.dismissalKey]
                 }
+
+                if (update != null && notificationsEnabled) {
+                    UpdateNotifications.post(this@MainActivity, update.release.versionName, update.downloadUrl)
+                }
+            } else {
+                onLatestVersionNameChange(BuildConfig.BASE_VERSION_NAME)
+                onLatestVersionCodeChange(BuildConfig.VERSION_CODE)
+                availableUpdate = null
             }
         }
 
@@ -1131,7 +1101,7 @@ class MainActivity : FragmentActivity() {
                                             }
                                             IconButton(onClick = { showAccountDialog = true }) {
                                                 BadgedBox(badge = {
-                                                    if (latestVersionName != BuildConfig.BASE_VERSION_NAME) {
+                                                    if (latestVersionCode > BuildConfig.VERSION_CODE) {
                                                         Badge()
                                                     }
                                                 }) {
@@ -1388,6 +1358,7 @@ class MainActivity : FragmentActivity() {
                                         navController = navController,
                                         scrollBehavior = topAppBarScrollBehavior,
                                         latestVersionName = latestVersionName,
+                                        latestVersionCode = latestVersionCode,
                                         activity = this@MainActivity,
                                         snackbarHostState = snackbarHostState,
                                     )
@@ -1425,6 +1396,7 @@ class MainActivity : FragmentActivity() {
                                 homeViewModel.refresh()
                             },
                             latestVersionName = latestVersionName,
+                            latestVersionCode = latestVersionCode,
                         )
                     }
 

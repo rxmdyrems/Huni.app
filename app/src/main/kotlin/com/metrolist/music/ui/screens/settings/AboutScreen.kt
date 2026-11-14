@@ -36,6 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -94,6 +95,8 @@ fun AboutScreen(navController: NavController, scrollBehavior: androidx.compose.m
     var editName by remember { mutableStateOf(false) }
     var nameDraft by remember { mutableStateOf(name) }
     var photoSheet by remember { mutableStateOf(false) }
+    var choosePreset by remember { mutableStateOf(false) }
+    var launchGalleryAfterSheet by remember { mutableStateOf(false) }
     var deleteDialog by remember { mutableStateOf(false) }
     var deleteText by remember { mutableStateOf("") }
     var wiping by remember { mutableStateOf(false) }
@@ -110,6 +113,12 @@ fun AboutScreen(navController: NavController, scrollBehavior: androidx.compose.m
             }
         }
     }
+    LaunchedEffect(photoSheet, launchGalleryAfterSheet) {
+        if (!photoSheet && launchGalleryAfterSheet) {
+            launchGalleryAfterSheet = false
+            picker.launch("image/*")
+        }
+    }
 
     Column(Modifier.fillMaxSize().windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(Modifier.windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Top)))
@@ -123,9 +132,10 @@ fun AboutScreen(navController: NavController, scrollBehavior: androidx.compose.m
         CardColumn {
             ActionRow(R.drawable.edit, "Edit name", "Change the name Huni uses for you") { nameDraft = name; editName = true }
             DividerRow()
-            ActionRow(R.drawable.hide_image, "Replace / change photo", "Pick a new photo from this device") { picker.launch("image/*") }
-            DividerRow()
-            ActionRow(R.drawable.hide_image, "Choose preset / remove photo", "Use a Huni avatar or remove your custom photo") { photoSheet = true }
+            ActionRow(R.drawable.hide_image, "Photo", "Choose a gallery photo or Huni preset") {
+                choosePreset = false
+                photoSheet = true
+            }
             DividerRow()
             ActionRow(R.drawable.delete, "Delete app data", "Erases everything saved on this phone", MaterialTheme.colorScheme.error) { deleteText = ""; deleteDialog = true }
         }
@@ -146,23 +156,43 @@ fun AboutScreen(navController: NavController, scrollBehavior: androidx.compose.m
     }
 
     if (editName) AlertDialog(onDismissRequest = { editName = false }, title = { Text("Edit name") }, text = { OutlinedTextField(value = nameDraft, onValueChange = { nameDraft = it.take(20) }, label = { Text("Name") }, singleLine = true) }, confirmButton = { Button(onClick = { scope.launch { context.safeDataStoreEdit { it[UserNameKey] = nameDraft.trim().ifBlank { "Music lover" } } }; editName = false }) { Text("Save") } }, dismissButton = { TextButton(onClick = { editName = false }) { Text("Cancel") } })
-    if (photoSheet) ModalBottomSheet(onDismissRequest = { photoSheet = false }) {
+    if (photoSheet) ModalBottomSheet(onDismissRequest = {
+        photoSheet = false
+        choosePreset = false
+    }) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Choose a preset", style = MaterialTheme.typography.titleLarge)
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                avatarPresets.take(6).forEachIndexed { i, res ->
-                    Image(painterResource(res), avatarIds[i], Modifier.size(48.dp).clip(CircleShape).clickable {
-                        scope.launch(Dispatchers.IO) {
-                            if (context.safeDataStoreEdit { it[UserAvatarKey] = avatarIds[i] }) avatarStore.selectPreset()
+            if (choosePreset) {
+                TextButton(onClick = { choosePreset = false }) { Text("Back") }
+                Text("Choose a preset", style = MaterialTheme.typography.titleLarge)
+                avatarPresets.chunked(6).forEach { rowPresets ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                        rowPresets.forEach { preset ->
+                            val index = avatarPresets.indexOf(preset)
+                            Image(painterResource(preset), avatarIds[index], Modifier.size(48.dp).clip(CircleShape).clickable {
+                                scope.launch(Dispatchers.IO) {
+                                    if (context.safeDataStoreEdit { it[UserAvatarKey] = avatarIds[index] }) avatarStore.selectPreset()
+                                }
+                                photoSheet = false
+                                choosePreset = false
+                            })
                         }
-                        photoSheet = false
-                    })
+                    }
                 }
+            } else {
+                Text("Photo", style = MaterialTheme.typography.titleLarge)
+                TextButton(onClick = {
+                    launchGalleryAfterSheet = true
+                    photoSheet = false
+                }) { Text("Pick from gallery") }
+                TextButton(onClick = { choosePreset = true }) { Text("Choose preset") }
+                TextButton(onClick = {
+                    scope.launch(Dispatchers.IO) {
+                        val fallback = AvatarStore.fallbackPreset(avatar)
+                        if (context.safeDataStoreEdit { it[UserAvatarKey] = fallback }) avatarStore.remove()
+                    }
+                    photoSheet = false
+                }) { Text("Remove") }
             }
-            TextButton({ scope.launch(Dispatchers.IO) {
-                val fallback = AvatarStore.fallbackPreset(avatar)
-                if (context.safeDataStoreEdit { it[UserAvatarKey] = fallback }) avatarStore.remove()
-            }; photoSheet = false }) { Text("Remove custom photo") }
         }
     }
     if (deleteDialog) AlertDialog(modifier = Modifier.padding(horizontal = 16.dp), properties = androidx.compose.ui.window.DialogProperties(dismissOnClickOutside = !wiping, dismissOnBackPress = !wiping), onDismissRequest = { if (!wiping) deleteDialog = false }, title = { Text("Delete all app data?") }, text = { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { Text("This erases your settings, library, history, sign-ins, name and photo. Your own music files are not touched. Huni will restart and show the welcome pages again."); OutlinedTextField(value = deleteText, onValueChange = { deleteText = it }, label = { Text("Type DELETE to confirm") }, singleLine = true, modifier = Modifier.fillMaxWidth()); if (wiping) Text("Wiping your Huni data…", color = MaterialTheme.colorScheme.primary); if (wipeError) Text("Couldn't delete everything. Please try again.", color = MaterialTheme.colorScheme.error) } }, confirmButton = { Button(enabled = deleteText.trim().equals("DELETE", true) && !wiping, onClick = { wiping = true; scope.launch { val ok = AppDataWiper.wipe(context); if (ok) {

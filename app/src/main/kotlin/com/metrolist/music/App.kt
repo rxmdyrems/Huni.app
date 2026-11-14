@@ -7,8 +7,6 @@ package com.metrolist.music
 
 import android.app.ActivityManager
 import android.app.Application
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.os.StrictMode
@@ -47,6 +45,7 @@ import com.metrolist.music.utils.CrashReporter
 import com.metrolist.music.utils.InnerTubeXPlayer
 import com.metrolist.music.utils.SpotifyHashSync
 import com.metrolist.music.utils.SpotifyTokenManager
+import com.metrolist.music.utils.UpdateNotifications
 import com.metrolist.music.utils.dataStore
 import com.metrolist.music.utils.installPreferencesSnapshotCollector
 import com.metrolist.music.utils.safeDataStoreEdit
@@ -131,6 +130,7 @@ class App :
 
         // Plant logging before extraction services initialize.
         Timber.plant(Timber.DebugTree())
+        UpdateNotifications.ensureChannel(this)
         runCatching { MihonKit.initialize(this) }
             .onFailure { Timber.e(it, "Failed to initialize Mihon extension runtime") }
         InnerTubeXPlayer.initialize(this)
@@ -266,16 +266,6 @@ class App :
 
         YouTube.useLoginForBrowse = settings[UseLoginForBrowse] ?: true
 
-        val channel =
-            NotificationChannel(
-                "updates",
-                getString(R.string.update_channel_name),
-                NotificationManager.IMPORTANCE_DEFAULT,
-            ).apply {
-                description = getString(R.string.update_channel_desc)
-            }
-        val nm = getSystemService(NotificationManager::class.java)
-        nm.createNotificationChannel(channel)
     }
 
     private fun observeSettingsChanges() {

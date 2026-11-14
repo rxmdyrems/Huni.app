@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 
 data class ReaderExtensionState(
@@ -123,6 +124,17 @@ class ReaderExtensionsViewModel @Inject constructor(application: Application) : 
             }
             try {
                 withContext(Dispatchers.IO) { runtime.loadSources(apk, meta.pkg) }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: LinkageError) {
+                handleInstallLoadFailure(meta, error)
+                return@launch
+            } catch (error: Exception) {
+                handleInstallLoadFailure(meta, error)
+                return@launch
+            }
+
+            try {
                 withContext(Dispatchers.IO) { repository.markInstalled(meta) }
                 mutableState.value = mutableState.value.copy(
                     loading = false,
@@ -133,12 +145,33 @@ class ReaderExtensionsViewModel @Inject constructor(application: Application) : 
                 )
             } catch (cancelled: CancellationException) {
                 throw cancelled
-            } catch (_: Throwable) {
-                withContext(Dispatchers.IO) { repository.removeExtension(meta.pkg) }
+            } catch (error: Exception) {
                 runtime.remove(meta.pkg)
-                showError("Extension incompatible.")
+                Timber.e(error, "Could not save installed reader extension %s", meta.pkg)
+                showError("Extension loaded, but Huni couldn't save it. The downloaded APK was kept; retry the install.")
                 mutableState.value = mutableState.value.copy(installingPkg = null, failedInstallPkg = meta.pkg)
             }
+        }
+    }
+
+    private fun handleInstallLoadFailure(meta: ExtensionMeta, error: Throwable) {
+        runtime.remove(meta.pkg)
+        Timber.e(error, "Could not load reader extension %s", meta.pkg)
+        showError(installFailureMessage(error))
+        mutableState.value = mutableState.value.copy(installingPkg = null, failedInstallPkg = meta.pkg)
+    }
+
+    private fun installFailureMessage(error: Throwable): String {
+        val chain = generateSequence(error) { it.cause }.toList()
+        val message = chain.joinToString(" ") { it.message.orEmpty() }
+        return when {
+            chain.any { it is ClassNotFoundException || it is NoClassDefFoundError } ->
+                "Extension classes are missing or use an unsupported API. Update the repository and retry."
+            message.contains("package does not match", ignoreCase = true) ->
+                "Downloaded APK package does not match the repository entry."
+            message.contains("source", ignoreCase = true) && message.contains("declare", ignoreCase = true) ->
+                "Extension does not declare a supported reader source."
+            else -> "Could not load extension: ${error.message?.takeIf(String::isNotBlank) ?: "unknown error"}"
         }
     }
 
@@ -180,7 +213,7 @@ class ReaderExtensionsViewModel @Inject constructor(application: Application) : 
 
     fun selectSource(pkg: String, source: ExtensionSourceMeta) {
         val sourceId = source.id.toLongOrNull()
-        if (sourceId == null) return showError("Extension incompatible.")
+        if (sourceId == null) return showError("Extension source ID is invalid. Refresh the repository and retry.")
         mutableState.value = mutableState.value.copy(
             selectedPackage = pkg,
             selectedSourceId = sourceId,
@@ -327,8 +360,9 @@ class ReaderExtensionsViewModel @Inject constructor(application: Application) : 
         val chain = generateSequence(error) { it.cause }.toList()
         val message = chain.joinToString(" ") { it.message.orEmpty() }
         return when {
-            chain.any { it is ClassNotFoundException || it is NoClassDefFoundError } -> "Extension incompatible."
-            message.contains("403") || message.contains("404") || message.contains("Source unavailable", ignoreCase = true) -> "Source unavailable."
+            chain.any { it is ClassNotFoundException || it is NoClassDefFoundError } ->
+                "Extension classes are missing or use an unsupported API. Update Huni or refresh the repository."
+            message.contains("HTTP", ignoreCase = true) -> "Source could not be reached. Check your connection."
             else -> "Source may be broken. Try updating."
         }
     }

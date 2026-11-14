@@ -21,7 +21,7 @@ class ExtensionRuntime(private val context: Context) {
     private val sourcesByPackage = ConcurrentHashMap<String, List<HttpSource>>()
 
     fun loadSource(apkFile: File, pkg: String): HttpSource = loadSources(apkFile, pkg).firstOrNull()
-        ?: throw IllegalArgumentException("Extension incompatible.")
+        ?: throw IllegalArgumentException("Extension does not provide an HTTP source supported by the reader.")
 
     fun loadSources(apkFile: File, pkg: String): List<HttpSource> {
         sourceCache[pkg]?.let { cached -> return sourcesByPackage[pkg] ?: listOf(cached) }
@@ -32,7 +32,7 @@ class ExtensionRuntime(private val context: Context) {
             val loaded = runBlocking(Dispatchers.IO) { MihonKit.loadExtensionApk(context.applicationContext, apkFile) }
             require(loaded.packageName == pkg) { "Extension package does not match the catalog." }
             val sources = loaded.sources.filterIsInstance<HttpSource>()
-            require(sources.isNotEmpty()) { "Extension incompatible." }
+            require(sources.isNotEmpty()) { "Extension does not provide an HTTP source supported by the reader." }
             sourcesByPackage[pkg] = sources
             sourceCache[pkg] = sources.first()
             return sources
