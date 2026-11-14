@@ -1,6 +1,7 @@
 package com.metrolist.music.utils
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.test.core.app.ApplicationProvider
 import android.content.Context
 import java.io.ByteArrayInputStream
@@ -35,7 +36,7 @@ class AvatarStoreTest {
         })
         assertTrue(store.exists())
         assertEquals("avatar.webp", store.avatarFile.name)
-        assertNotNull(Bitmap.decodeFile(store.avatarFile.absolutePath))
+        assertNotNull(BitmapFactory.decodeFile(store.avatarFile.absolutePath))
     }
 
     @Test fun twoSuccessiveReplacementsReplaceImageAndSurviveStoreRestart() {
@@ -105,8 +106,8 @@ class AvatarStoreTest {
         assertArrayEquals(previous, store.avatarFile.readBytes())
     }
 
-    private fun image(color: Int): ByteArrayInputStream {
-        val bitmap = Bitmap.createBitmap(24, 24, Bitmap.Config.ARGB_8888).apply { eraseColor(color) }
+    private fun image(color: Long): ByteArrayInputStream {
+        val bitmap = Bitmap.createBitmap(24, 24, Bitmap.Config.ARGB_8888).apply { eraseColor(color.toInt()) }
         val bytes = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes)
         bitmap.recycle()

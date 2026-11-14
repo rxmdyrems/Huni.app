@@ -1,8 +1,8 @@
 package com.metrolist.music.playback
 
 import android.net.Uri
-import androidx.media3.extractor.FlacExtractor
-import androidx.media3.extractor.Mp3Extractor
+import androidx.media3.extractor.flac.FlacExtractor
+import androidx.media3.extractor.mp3.Mp3Extractor
 import androidx.media3.extractor.mkv.MatroskaExtractor
 import androidx.media3.extractor.mp4.FragmentedMp4Extractor
 import androidx.media3.extractor.mp4.Mp4Extractor
