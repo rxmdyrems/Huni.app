@@ -294,7 +294,10 @@ fun AppearanceSettings(
             defaultValue = false,
         )
 
-    val (densityScale, onDensityScaleChange) = rememberPreference(DensityScaleKey, defaultValue = 1f)
+    val (densityScale, onDensityScaleChange) = rememberPreference(
+        DensityScaleKey,
+        defaultValue = DensityScale.SLIGHTLY_COMPACT.value,
+    )
     var showDensityScaleDialog by rememberSaveable { mutableStateOf(false) }
 
     val (listenTogetherInTopBar, onListenTogetherInTopBarChange) =

@@ -38,7 +38,7 @@ enum class DensityScale(
     val label: String,
 ) {
     NATIVE(1.0f, "Native (100%)"),
-    SLIGHTLY_COMPACT(0.85f, "Slightly Compact (85%)"),
+    SLIGHTLY_COMPACT(0.85f, "Slightly compact (85%)"),
     COMPACT(0.75f, "Compact (75%)"),
     VERY_COMPACT(0.65f, "Very Compact (65%)"),
     ULTRA_COMPACT(0.55f, "Ultra Compact (55%)"),

@@ -144,6 +144,7 @@ import com.metrolist.music.constants.DarkModeKey
 import com.metrolist.music.constants.DefaultOpenTabKey
 import com.metrolist.music.constants.DismissedKmpUpdateKey
 import com.metrolist.music.constants.DismissedStandaloneUpdateKey
+import com.metrolist.music.constants.DensityScale
 import com.metrolist.music.constants.DensityScaleKey
 import com.metrolist.music.constants.DisableScreenshotKey
 import com.metrolist.music.constants.DynamicThemeKey
@@ -531,7 +532,43 @@ class MainActivity : FragmentActivity() {
         initialPaletteId: String,
     ) {
         val checkForUpdates by rememberPreference(CheckForUpdatesKey, defaultValue = true)
-        val onboardingDone by rememberPreference(OnboardingDoneKey, defaultValue = false)
+        var onboardingDone by remember { mutableStateOf<Boolean?>(null) }
+        LaunchedEffect(Unit) {
+            onboardingDone = dataStore.data.first()[OnboardingDoneKey] ?: false
+        }
+        val startupPalette = HuniPalettes.find { it.id == initialPaletteId } ?: DefaultPalette
+        val startupDarkTheme = when (initialDarkMode) {
+            DarkMode.AUTO -> isSystemInDarkTheme()
+            DarkMode.ON -> true
+            DarkMode.OFF -> false
+        }
+        if (onboardingDone == null) {
+            MetrolistTheme(
+                darkTheme = startupDarkTheme,
+                pureBlack = false,
+                themeColor = if (startupDarkTheme) startupPalette.accentDark else startupPalette.accentLight,
+                palette = startupPalette,
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    androidx.compose.material3.CircularProgressIndicator()
+                }
+            }
+            return
+        }
+        if (onboardingDone == false) {
+            MetrolistTheme(
+                darkTheme = startupDarkTheme,
+                pureBlack = false,
+                themeColor = if (startupDarkTheme) startupPalette.accentDark else startupPalette.accentLight,
+                palette = startupPalette,
+            ) {
+                OnboardingScreen(onFinished = { onboardingDone = true })
+            }
+            return
+        }
         var availableUpdate by remember { mutableStateOf<AvailableUpdate?>(null) }
         var showCrashReport by remember { mutableStateOf(pendingCrashReport != null) }
 
@@ -651,7 +688,7 @@ class MainActivity : FragmentActivity() {
         }
 
         val enableLandscapeScaling by rememberPreference(EnableLandscapeScalingKey, defaultValue = false)
-        val userDensityScale by rememberPreference(DensityScaleKey, defaultValue = 1f)
+        val userDensityScale by rememberPreference(DensityScaleKey, defaultValue = DensityScale.SLIGHTLY_COMPACT.value)
         val pureBlackEnabled by rememberPreference(PureBlackKey, defaultValue = false)
         val pureBlack =
             remember(pureBlackEnabled, useDarkTheme) {
@@ -1247,17 +1284,6 @@ class MainActivity : FragmentActivity() {
                                     )
 
                                 }
-                            } else {
-                                if (currentRoute != "wrapped") {
-                                    if (activePlayerConnection != null) {
-                                        BottomSheetPlayer(
-                                            state = playerBottomSheetState,
-                                            navController = navController,
-                                            pureBlack = pureBlack,
-                                        )
-                                    }
-                                }
-
                             }
                         },
                         modifier =
@@ -1370,6 +1396,18 @@ class MainActivity : FragmentActivity() {
                         }
                     }
 
+                    if ((showRail || !shouldShowNavigationBar) &&
+                        currentRoute != "wrapped" &&
+                        activePlayerConnection != null
+                    ) {
+                        BottomSheetPlayer(
+                            state = playerBottomSheetState,
+                            navController = navController,
+                            modifier = Modifier.fillMaxSize(),
+                            pureBlack = pureBlack,
+                        )
+                    }
+
                     BottomSheetMenu(
                         state = LocalMenuState.current,
                         modifier = Modifier.align(Alignment.BottomCenter),
@@ -1416,11 +1454,6 @@ class MainActivity : FragmentActivity() {
                     }
 
                     if (!showChangelog.value) {
-                        if (!onboardingDone) {
-                            Dialog(onDismissRequest = {}) {
-                                OnboardingScreen(onFinished = {})
-                            }
-                        }
                         availableUpdate?.let { update ->
                             val dismissUpdate: () -> Unit = {
                                 availableUpdate = null

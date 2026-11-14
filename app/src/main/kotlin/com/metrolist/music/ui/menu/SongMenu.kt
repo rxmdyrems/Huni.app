@@ -5,9 +5,19 @@
 
 package com.metrolist.music.ui.menu
 
+import android.Manifest
+import android.app.Activity
 import android.content.Intent
+import android.media.MediaStore
+import android.net.Uri
+import android.os.Build
+import android.app.RecoverableSecurityException
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -60,6 +70,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadService
@@ -81,6 +92,7 @@ import com.metrolist.music.db.entities.PlaylistSong
 import com.metrolist.music.db.entities.PodcastEntity
 import com.metrolist.music.db.entities.Song
 import com.metrolist.music.db.entities.SpeedDialItem
+import com.metrolist.music.db.entities.SongEntity
 import com.metrolist.music.extensions.toMediaItem
 import com.metrolist.music.models.toMediaMetadata
 import com.metrolist.music.playback.ExoDownloadService
@@ -338,6 +350,145 @@ fun SongMenu(
         mutableStateOf(false)
     }
     var isDeleting by remember { mutableStateOf(false) }
+    var showDeleteLocalDialog by rememberSaveable { mutableStateOf(false) }
+    var isDeletingLocal by remember { mutableStateOf(false) }
+    var pendingLocalDelete by remember { mutableStateOf<SongEntity?>(null) }
+    val localDeleteLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult(),
+    ) { result ->
+        val target = pendingLocalDelete
+        pendingLocalDelete = null
+        isDeletingLocal = false
+        if (target != null && result.resultCode == Activity.RESULT_OK) {
+            scope.launch(Dispatchers.IO) {
+                runCatching { database.query { delete(target) } }
+                    .onSuccess {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(context, R.string.delete_local_song_success, Toast.LENGTH_SHORT).show()
+                            onDismiss()
+                        }
+                    }
+                    .onFailure {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(context, R.string.delete_local_song_failed, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+            }
+        }
+    }
+
+    fun performLegacyLocalDelete(target: SongEntity) {
+        val uri = target.localPath?.let(Uri::parse) ?: return
+        scope.launch(Dispatchers.IO) {
+            try {
+                context.contentResolver.delete(uri, null, null).takeIf { it > 0 }
+                    ?: throw IllegalStateException("MediaStore did not delete the selected song")
+                database.query { delete(target) }
+                withContext(Dispatchers.Main) {
+                    isDeletingLocal = false
+                    Toast.makeText(context, R.string.delete_local_song_success, Toast.LENGTH_SHORT).show()
+                    onDismiss()
+                }
+            } catch (exception: Exception) {
+                if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q && exception is RecoverableSecurityException) {
+                    withContext(Dispatchers.Main) {
+                        pendingLocalDelete = target
+                        try {
+                            localDeleteLauncher.launch(
+                                IntentSenderRequest.Builder(exception.userAction.actionIntent.intentSender).build(),
+                            )
+                        } catch (_: Exception) {
+                            pendingLocalDelete = null
+                            isDeletingLocal = false
+                            Toast.makeText(context, R.string.delete_local_song_failed, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        isDeletingLocal = false
+                        Toast.makeText(context, R.string.delete_local_song_failed, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    val legacyWritePermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        val target = pendingLocalDelete
+        pendingLocalDelete = null
+        if (granted && target != null) {
+            performLegacyLocalDelete(target)
+        } else {
+            isDeletingLocal = false
+            Toast.makeText(context, R.string.delete_local_song_failed, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun startLocalDelete(target: SongEntity) {
+        val uri = target.localPath?.let(Uri::parse)
+        val mediaUriPrefix = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.toString()
+        if (!target.isLocal || uri == null || uri.scheme != "content" ||
+            uri.authority != MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.authority ||
+            !uri.toString().startsWith(mediaUriPrefix)
+        ) {
+            Toast.makeText(context, R.string.delete_local_song_failed, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        isDeletingLocal = true
+        showDeleteLocalDialog = false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                pendingLocalDelete = target
+                localDeleteLauncher.launch(
+                    IntentSenderRequest.Builder(
+                        MediaStore.createDeleteRequest(context.contentResolver, listOf(uri)).intentSender,
+                    ).build(),
+                )
+            } catch (_: Exception) {
+                pendingLocalDelete = null
+                isDeletingLocal = false
+                Toast.makeText(context, R.string.delete_local_song_failed, Toast.LENGTH_SHORT).show()
+            }
+        } else if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+        ) {
+            pendingLocalDelete = target
+            legacyWritePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        } else {
+            performLegacyLocalDelete(target)
+        }
+    }
+
+    if (showDeleteLocalDialog) {
+        DefaultDialog(
+            onDismiss = { if (!isDeletingLocal) showDeleteLocalDialog = false },
+            icon = {
+                Icon(
+                    painter = painterResource(R.drawable.delete),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                )
+            },
+            title = { Text(stringResource(R.string.delete_local_song)) },
+            buttons = {
+                TextButton(onClick = { showDeleteLocalDialog = false }, enabled = !isDeletingLocal) {
+                    Text(stringResource(R.string.cancel))
+                }
+                TextButton(onClick = { startLocalDelete(song.song) }, enabled = !isDeletingLocal) {
+                    if (isDeletingLocal) {
+                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                    } else {
+                        Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
+                    }
+                }
+            },
+        ) {
+            Text(stringResource(R.string.delete_local_song_confirm), style = MaterialTheme.typography.bodyMedium)
+        }
+    }
 
     if (showDeleteUploadedDialog) {
         DefaultDialog(
@@ -942,6 +1093,20 @@ fun SongMenu(
                                         onDismiss()
                                         cacheViewModel.removeSongFromCache(song.id)
                                     },
+                                ),
+                            )
+                        }
+                        if (song.song.isLocal) {
+                            add(
+                                Material3MenuItemData(
+                                    title = { Text(text = stringResource(R.string.delete_local_song)) },
+                                    icon = {
+                                        Icon(
+                                            painter = painterResource(R.drawable.delete),
+                                            contentDescription = null,
+                                        )
+                                    },
+                                    onClick = { showDeleteLocalDialog = true },
                                 ),
                             )
                         }

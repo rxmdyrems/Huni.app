@@ -11,7 +11,7 @@ object NavigationConfig {
         NavigationTab.READER,
     )
 
-    const val defaultValue = ""
+    const val defaultValue = "READER"
 
     /** Stored values are hidden tabs; an empty value keeps every ordered tab visible. */
     fun parse(value: String): Set<NavigationTab> {
