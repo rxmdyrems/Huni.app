@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.ContentResolver
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
+import androidx.room.withTransaction
 import androidx.lifecycle.viewModelScope
 import com.metrolist.music.reader.db.ReaderBookEntity
 import com.metrolist.music.reader.db.ReaderDatabase
@@ -35,6 +36,17 @@ class ReaderViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             uris.forEach { importUri(getApplication<Application>().contentResolver, it) }
         }
+    }
+
+    suspend fun importRemoteChapter(title: String, sourceName: String, pageUrls: List<String>): String = withContext(Dispatchers.IO) {
+        require(pageUrls.isNotEmpty()) { "Chapter contains no readable pages." }
+        require(pageUrls.all { it.startsWith("https://") || it.startsWith("http://") }) { "Page URL is not HTTP(S)." }
+        val id = UUID.randomUUID().toString()
+        database.withTransaction {
+            dao.insertBook(ReaderBookEntity(id, title, sourceName))
+            dao.insertPages(pageUrls.mapIndexed { index, url -> ReaderPageEntity(id, index, url) })
+        }
+        id
     }
 
     fun updateProgress(bookId: String, page: Int) {

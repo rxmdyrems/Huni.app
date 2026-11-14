@@ -7,6 +7,7 @@ import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +40,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -68,7 +70,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavController
-import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
+import coil3.compose.rememberAsyncImagePainter
 import com.metrolist.music.R
 import com.metrolist.music.constants.ReaderBackgroundKey
 import com.metrolist.music.constants.ReaderFullscreenKey
@@ -95,16 +98,15 @@ fun ReaderLibraryScreen(navController: NavController, viewModel: ReaderViewModel
             Text("Local manga and stories", style = MaterialTheme.typography.headlineSmall)
             Text("Import CBZ, ZIP, or image files. Everything stays on this device.", style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(6.dp))
-            Text(
-                "Online extension repositories are not supported yet. Mihon extensions cannot be installed or run in Huni. Coming soon.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(12.dp))
+
             Button(onClick = { launcher.launch(arrayOf("application/zip", "application/x-cbz", "image/*")) }) {
                 Icon(painterResource(R.drawable.library_music_outlined), contentDescription = null)
                 Spacer(Modifier.width(8.dp))
                 Text("Import files")
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = { navController.navigate("reader/extensions") }) {
+                Text("Extensions")
             }
             Spacer(Modifier.height(16.dp))
             if (books.isEmpty()) {
@@ -350,32 +352,43 @@ private fun ReaderPageImage(
     val currentOnNext by rememberUpdatedState(onNext)
     val currentOnPrevious by rememberUpdatedState(onPrevious)
     val currentOnToggle by rememberUpdatedState(onToggleControls)
-    AsyncImage(
-        model = page.filePath,
-        contentDescription = "Page $pageNumber",
-        contentScale = if (mode.isContinuous) androidx.compose.ui.layout.ContentScale.FillWidth else scaleMode.contentScale(),
-        modifier = modifier.pointerInput(mode) {
-            detectTapGestures { tap ->
-                if (mode.isContinuous) {
+    val pageImagePainter = rememberAsyncImagePainter(model = page.filePath)
+    Box(modifier.pointerInput(mode) {
+        detectTapGestures { tap ->
+            if (mode.isContinuous) {
+                currentOnToggle()
+            } else {
+                val centerX = size.width * 0.35f..size.width * 0.65f
+                val centerY = size.height * 0.35f..size.height * 0.65f
+                if (tap.x in centerX && tap.y in centerY) {
                     currentOnToggle()
                 } else {
-                    val centerX = size.width * 0.35f..size.width * 0.65f
-                    val centerY = size.height * 0.35f..size.height * 0.65f
-                    if (tap.x in centerX && tap.y in centerY) {
-                        currentOnToggle()
-                    } else {
-                        val next = when (mode) {
-                            ReaderReadingMode.RIGHT_TO_LEFT -> tap.x > size.width / 2f
-                            ReaderReadingMode.LEFT_TO_RIGHT -> tap.x < size.width / 2f
-                            ReaderReadingMode.VERTICAL -> tap.y > size.height / 2f
-                            else -> false
-                        }
-                        if (next) currentOnNext() else currentOnPrevious()
+                    val next = when (mode) {
+                        ReaderReadingMode.RIGHT_TO_LEFT -> tap.x > size.width / 2f
+                        ReaderReadingMode.LEFT_TO_RIGHT -> tap.x < size.width / 2f
+                        ReaderReadingMode.VERTICAL -> tap.y > size.height / 2f
+                        else -> false
                     }
+                    if (next) currentOnNext() else currentOnPrevious()
                 }
             }
-        },
-    )
+        }
+    }) {
+        Image(
+            painter = pageImagePainter,
+            contentDescription = "Page $pageNumber",
+            contentScale = if (mode.isContinuous) androidx.compose.ui.layout.ContentScale.FillWidth else scaleMode.contentScale(),
+            modifier = Modifier.fillMaxSize(),
+        )
+        if (pageImagePainter.state is AsyncImagePainter.State.Error) {
+            Text(
+                "Couldn't load this page. Check the connection or source image URL.",
+                Modifier.align(Alignment.Center).padding(20.dp),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+    }
 }
 
 @Composable

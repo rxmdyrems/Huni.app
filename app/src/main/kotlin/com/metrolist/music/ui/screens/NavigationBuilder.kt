@@ -33,6 +33,7 @@ import com.metrolist.music.ui.screens.equalizer.EqScreen
 import com.metrolist.music.ui.screens.equalizer.wizard.WizardScreen
 import com.metrolist.music.ui.screens.library.LibraryScreen
 import com.metrolist.music.reader.ui.ReaderLibraryScreen
+import com.metrolist.music.reader.ui.ReaderExtensionsScreen
 import com.metrolist.music.reader.ui.ReaderScreen
 import com.metrolist.music.ui.screens.playlist.AutoPlaylistScreen
 import com.metrolist.music.ui.screens.playlist.CachePlaylistScreen
@@ -109,6 +110,17 @@ fun NavGraphBuilder.navigationBuilder(
 
     composable("reader") {
         ReaderLibraryScreen(navController)
+    }
+
+    composable("reader/extensions") {
+        ReaderExtensionsScreen(navController)
+    }
+
+    composable(
+        route = "reader/extensions/{extensionId}",
+        arguments = listOf(navArgument("extensionId") { type = NavType.StringType }),
+    ) { entry ->
+        ReaderExtensionsScreen(navController, entry.arguments?.getString("extensionId"))
     }
 
     composable(
