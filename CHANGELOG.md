@@ -4,6 +4,15 @@
 ## Unreleased
 
 ---
+## v0.9.14 (2026-11-15)
+### ✨ New
+- ✨ Added persistent local profile avatars with custom-photo selection and preset fallback across onboarding, Home, and About.
+- ✨ Added MihonKit-powered extension browsing, editable repositories, and source chapter navigation into the reader.
+### 🔧 Under the hood
+- 🔧 Isolated MihonKit's bundled QuickJS native libraries to avoid runtime library collisions.
+### 🐛 Known issues
+- 🐛 Extension installation may show “Extension incompatible”; a compatibility fix is planned for a later update.
+---
 ## v0.9.13 (2026-11-14)
 ### ✨ New
 - ✨ Added first-run setup for local profile customization and configurable navigation, plus local audio-file deletion with Android consent.
