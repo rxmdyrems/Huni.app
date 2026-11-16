@@ -3,6 +3,16 @@
 
 ## Unreleased
 ---
+## v0.9.16 (2026-11-16)
+### 🎨 UI
+- 🎨 Refined the floating navigation into a brighter glass pill with swipe magnification, and animated the Menu button into a close icon while the modal is open.
+- 🎨 Added a glass-navigation preference in Appearance and fixed Home navigation after changing themes.
+### 📚 Reader
+- 📚 Added compressed `.pb` extension-index support, language filtering, catalog artwork, and top-positioned editable repository links.
+- 📚 Added story-type filtering for extension sources.
+### 🐛 Fixes
+- 🐛 Fixed extension APK loading by ensuring downloaded packages are not writable when loaded as DEX.
+---
 ## v0.9.15 (2026-11-16)
 ### 🐛 Fixes
 - 🐛 Restored a discoverable Settings entry for update checks and compare GitHub releases by versionCode.

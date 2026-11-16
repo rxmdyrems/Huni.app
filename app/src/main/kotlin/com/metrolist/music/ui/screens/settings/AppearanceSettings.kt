@@ -74,6 +74,7 @@ import com.metrolist.music.constants.EnableLandscapeScalingKey
 import com.metrolist.music.constants.ExperimentalLyricsKey
 import com.metrolist.music.constants.GridItemSize
 import com.metrolist.music.constants.GridItemsSizeKey
+import com.metrolist.music.constants.GlassNavigationKey
 import com.metrolist.music.constants.HidePlayerThumbnailKey
 import com.metrolist.music.constants.HideStatusBarOnFullscreenKey
 import com.metrolist.music.constants.LibraryFilter
@@ -223,6 +224,7 @@ fun AppearanceSettings(
         )
     val (navigationTabsValue, onNavigationTabsChange) =
         rememberPreference(NavigationTabsKey, NavigationConfig.defaultValue)
+    val (glassNavigation, onGlassNavigationChange) = rememberPreference(GlassNavigationKey, defaultValue = true)
     val visibleNavigationTabs = remember(navigationTabsValue) { NavigationConfig.parse(navigationTabsValue) }
     val (playerButtonsStyle, onPlayerButtonsStyleChange) =
         rememberEnumPreference(
@@ -1544,6 +1546,17 @@ fun AppearanceSettings(
 
         Text("Navigation bar", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
         Text("Choose which tabs stay visible. At least two must remain on.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(modifier = Modifier.height(8.dp))
+        Material3SettingsGroup(
+            items = listOf(
+                Material3SettingsItem(
+                    title = { Text("Floating glass bar") },
+                    description = { Text("Use a dark translucent pill and round menu button.") },
+                    trailingContent = { HuniSwitch(checked = glassNavigation, onCheckedChange = onGlassNavigationChange) },
+                    onClick = { onGlassNavigationChange(!glassNavigation) },
+                ),
+            ),
+        )
         Spacer(modifier = Modifier.height(8.dp))
         Material3SettingsGroup(
             items = NavigationConfig.orderedTabs.map { tab ->

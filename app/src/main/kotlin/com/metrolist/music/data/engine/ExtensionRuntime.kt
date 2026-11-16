@@ -12,6 +12,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import mihon.kit.MihonKit
 import java.io.File
+import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 
 /** Dynamic extension APK adapter. All executable source code is loaded by mihon-kit. */
@@ -29,6 +30,12 @@ class ExtensionRuntime(private val context: Context) {
         synchronized(this) {
             sourceCache[pkg]?.let { cached -> return sourcesByPackage[pkg] ?: listOf(cached) }
             sourcesByPackage[pkg]?.let { return it }
+            // Android rejects loading DEX from a writable APK on recent releases.
+            // Downloaded extensions live in app-private storage, so make the APK
+            // immutable before handing its path to MihonKit's dynamic loader.
+            if (apkFile.canWrite() && !apkFile.setReadOnly()) {
+                throw IOException("Could not make extension APK read-only: ${apkFile.name}")
+            }
             val loaded = runBlocking(Dispatchers.IO) { MihonKit.loadExtensionApk(context.applicationContext, apkFile) }
             require(loaded.packageName == pkg) { "Extension package does not match the catalog." }
             val sources = loaded.sources.filterIsInstance<HttpSource>()

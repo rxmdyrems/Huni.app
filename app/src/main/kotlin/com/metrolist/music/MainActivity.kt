@@ -159,6 +159,7 @@ import com.metrolist.music.constants.MiniPlayerHeight
 import com.metrolist.music.constants.NavigationBarAnimationSpec
 import com.metrolist.music.constants.NavigationBarHeight
 import com.metrolist.music.constants.NavigationTabsKey
+import com.metrolist.music.constants.GlassNavigationKey
 import com.metrolist.music.constants.PauseListenHistoryKey
 import com.metrolist.music.constants.PauseSearchHistoryKey
 import com.metrolist.music.constants.PreferredLyricsProvider
@@ -724,7 +725,6 @@ class MainActivity : FragmentActivity() {
                 }
 
                 val homeViewModel: HomeViewModel = hiltViewModel()
-                val accountImageUrl by homeViewModel.accountImageUrl.collectAsStateWithLifecycle()
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val (previousTab, setPreviousTab) = rememberSaveable { mutableStateOf("home") }
 
@@ -738,6 +738,7 @@ class MainActivity : FragmentActivity() {
                     navigationItems.mapIndexed { i, s -> s.route to i }.toMap()
                 }
                 val (slimNav) = rememberPreference(SlimNavBarKey, defaultValue = false)
+                val (glassNavigation) = rememberPreference(GlassNavigationKey, defaultValue = true)
                 val (defaultOpenTabInt) = rememberPreference(DefaultOpenTabKey, defaultValue = NavigationTab.HOME.name)
                 val defaultOpenTab = remember(defaultOpenTabInt) {
                     try {
@@ -792,9 +793,7 @@ class MainActivity : FragmentActivity() {
                         }
                     }
 
-                val currentRoute by remember {
-                    derivedStateOf { navBackStackEntry?.destination?.route }
-                }
+                val currentRoute = navBackStackEntry?.destination?.route
 
                 LaunchedEffect(navigationItems, currentRoute) {
                     if (NavigationConfig.shouldRedirectHiddenTopLevelRoute(currentRoute, visibleNavigationTabs)) {
@@ -805,9 +804,7 @@ class MainActivity : FragmentActivity() {
                     }
                 }
 
-                val inSearchScreen by remember {
-                    derivedStateOf { currentRoute?.startsWith("search/") == true }
-                }
+                val inSearchScreen = currentRoute?.startsWith("search/") == true
                 val navigationItemRoutes =
                     remember(navigationItems) {
                         navigationItems.map { it.route }.toSet()
@@ -1026,6 +1023,7 @@ class MainActivity : FragmentActivity() {
                     }
 
                 var showAccountDialog by remember { mutableStateOf(false) }
+                var openSettingsAfterAccountClose by remember { mutableStateOf(false) }
                 val homeGreeting = rememberSaveable { chooseHomeGreeting() }
                 val profileName by rememberPreference(UserNameKey, defaultValue = "")
 
@@ -1097,30 +1095,6 @@ class MainActivity : FragmentActivity() {
                                                         painter = painterResource(R.drawable.group_outlined),
                                                         contentDescription = stringResource(R.string.together),
                                                     )
-                                                }
-                                            }
-                                            IconButton(onClick = { showAccountDialog = true }) {
-                                                BadgedBox(badge = {
-                                                    if (latestVersionCode > BuildConfig.VERSION_CODE) {
-                                                        Badge()
-                                                    }
-                                                }) {
-                                                    if (accountImageUrl != null) {
-                                                        AsyncImage(
-                                                            model = accountImageUrl,
-                                                            contentDescription = stringResource(R.string.account),
-                                                            modifier =
-                                                                Modifier
-                                                                    .size(24.dp)
-                                                                    .clip(CircleShape),
-                                                        )
-                                                    } else {
-                                                        Icon(
-                                                            painter = painterResource(R.drawable.account),
-                                                            contentDescription = stringResource(R.string.account),
-                                                            modifier = Modifier.size(24.dp),
-                                                        )
-                                                    }
                                                 }
                                             }
                                         },
@@ -1229,6 +1203,10 @@ class MainActivity : FragmentActivity() {
                                         slimNav = slimNav,
                                         onSearchLongClick = onSearchLongClick,
                                         onHomeLongHold = { showAccountDialog = true },
+                                        onMenuClick = { showAccountDialog = true },
+                                        menuExpanded = showAccountDialog,
+                                        bottomInset = bottomInset,
+                                        glassStyle = glassNavigation,
                                         modifier =
                                             Modifier
                                                 .align(Alignment.BottomCenter)
@@ -1316,7 +1294,14 @@ class MainActivity : FragmentActivity() {
                                         val currentRouteIndex = routeIndexMap[targetState.destination.route] ?: -1
                                         val previousRouteIndex = routeIndexMap[initialState.destination.route] ?: -1
 
-                                        if (currentRouteIndex == -1 || currentRouteIndex > previousRouteIndex) {
+                                        if (targetState.destination.route?.startsWith("settings") == true) {
+                                            slideInHorizontally(
+                                                animationSpec = androidx.compose.animation.core.spring(
+                                                    dampingRatio = 0.84f,
+                                                    stiffness = androidx.compose.animation.core.Spring.StiffnessMedium,
+                                                ),
+                                            ) { it / 20 } + fadeIn(tween(180))
+                                        } else if (currentRouteIndex == -1 || currentRouteIndex > previousRouteIndex) {
                                             slideInHorizontally { it / 8 } + fadeIn(tween(200))
                                         } else {
                                             slideInHorizontally { -it / 8 } + fadeIn(tween(200))
@@ -1326,7 +1311,14 @@ class MainActivity : FragmentActivity() {
                                         val currentRouteIndex = routeIndexMap[initialState.destination.route] ?: -1
                                         val targetRouteIndex = routeIndexMap[targetState.destination.route] ?: -1
 
-                                        if (targetRouteIndex == -1 || targetRouteIndex > currentRouteIndex) {
+                                        if (initialState.destination.route?.startsWith("settings") == true) {
+                                            slideOutHorizontally(
+                                                animationSpec = androidx.compose.animation.core.spring(
+                                                    dampingRatio = 0.84f,
+                                                    stiffness = androidx.compose.animation.core.Spring.StiffnessMedium,
+                                                ),
+                                            ) { -it / 20 } + fadeOut(tween(160))
+                                        } else if (targetRouteIndex == -1 || targetRouteIndex > currentRouteIndex) {
                                             slideOutHorizontally { -it / 8 } + fadeOut(tween(200))
                                         } else {
                                             slideOutHorizontally { it / 8 } + fadeOut(tween(200))
@@ -1336,7 +1328,14 @@ class MainActivity : FragmentActivity() {
                                         val currentRouteIndex = routeIndexMap[targetState.destination.route] ?: -1
                                         val previousRouteIndex = routeIndexMap[initialState.destination.route] ?: -1
 
-                                        if (previousRouteIndex != -1 && previousRouteIndex < currentRouteIndex) {
+                                        if (targetState.destination.route?.startsWith("settings") == true) {
+                                            slideInHorizontally(
+                                                animationSpec = androidx.compose.animation.core.spring(
+                                                    dampingRatio = 0.84f,
+                                                    stiffness = androidx.compose.animation.core.Spring.StiffnessMedium,
+                                                ),
+                                            ) { it / 20 } + fadeIn(tween(180))
+                                        } else if (previousRouteIndex != -1 && previousRouteIndex < currentRouteIndex) {
                                             slideInHorizontally { it / 8 } + fadeIn(tween(200))
                                         } else {
                                             slideInHorizontally { -it / 8 } + fadeIn(tween(200))
@@ -1346,7 +1345,14 @@ class MainActivity : FragmentActivity() {
                                         val currentRouteIndex = routeIndexMap[initialState.destination.route] ?: -1
                                         val targetRouteIndex = routeIndexMap[targetState.destination.route] ?: -1
 
-                                        if (currentRouteIndex != -1 && currentRouteIndex < targetRouteIndex) {
+                                        if (initialState.destination.route?.startsWith("settings") == true) {
+                                            slideOutHorizontally(
+                                                animationSpec = androidx.compose.animation.core.spring(
+                                                    dampingRatio = 0.84f,
+                                                    stiffness = androidx.compose.animation.core.Spring.StiffnessMedium,
+                                                ),
+                                            ) { -it / 20 } + fadeOut(tween(160))
+                                        } else if (currentRouteIndex != -1 && currentRouteIndex < targetRouteIndex) {
                                             slideOutHorizontally { -it / 8 } + fadeOut(tween(200))
                                         } else {
                                             slideOutHorizontally { it / 8 } + fadeOut(tween(200))
@@ -1394,9 +1400,15 @@ class MainActivity : FragmentActivity() {
                             onDismiss = {
                                 showAccountDialog = false
                                 homeViewModel.refresh()
+                                if (openSettingsAfterAccountClose) {
+                                    openSettingsAfterAccountClose = false
+                                    navController.navigate("settings") { launchSingleTop = true }
+                                }
                             },
                             latestVersionName = latestVersionName,
                             latestVersionCode = latestVersionCode,
+                            onSettingsClick = { openSettingsAfterAccountClose = true },
+                            bottomInset = bottomInset,
                         )
                     }
 

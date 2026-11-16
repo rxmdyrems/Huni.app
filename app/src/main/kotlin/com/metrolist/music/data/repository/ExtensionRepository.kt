@@ -1,6 +1,7 @@
 package com.metrolist.music.data.repository
 
 import com.metrolist.music.data.model.ExtensionMeta
+import com.metrolist.music.data.model.ExtensionIndexProto
 import com.metrolist.music.data.model.ExtensionSourceMeta
 import com.metrolist.music.data.model.RepoEntry
 import io.ktor.client.HttpClient
@@ -16,6 +17,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromByteArray
+import kotlinx.serialization.protobuf.ProtoBuf
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -25,12 +28,14 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
 import java.io.ByteArrayOutputStream
+import java.io.ByteArrayInputStream
 import java.io.File
+import java.util.zip.GZIPInputStream
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
-/** Persists Mihon extension APKs and parses JSON extension repository indexes. */
+/** Persists Mihon extension APKs and parses JSON and gzip/protobuf repository indexes. */
 class ExtensionRepository(
     filesDir: File,
     private val client: HttpClient = HttpClient(OkHttp) {
@@ -53,11 +58,33 @@ class ExtensionRepository(
             validateHttpUrl(repoUrl)
             val response = client.get(repoUrl) { header("User-Agent", "Huni-Reader/1.0") }
             if (response.status.value !in 200..299) throw IllegalStateException("HTTP ${response.status.value}")
-            val body = ByteArrayOutputStream().use { output ->
+            val bytes = ByteArrayOutputStream().use { output ->
                 copyBody(response, output, MAX_INDEX_BYTES)
-                output.toByteArray().toString(Charsets.UTF_8)
+                output.toByteArray()
             }
-            parseCatalog(body, repoUrl)
+            val isProtobuf = repoUrl.substringBefore('?').endsWith(".pb", ignoreCase = true) ||
+                (bytes.size >= 2 && bytes[0] == 0x1f.toByte() && bytes[1] == 0x8b.toByte())
+            if (isProtobuf) {
+                require(bytes.size >= 2 && bytes[0] == 0x1f.toByte() && bytes[1] == 0x8b.toByte()) {
+                    "The .pb index is not gzip-compressed."
+                }
+                val decoded = GZIPInputStream(ByteArrayInputStream(bytes)).use { input ->
+                    val output = ByteArrayOutputStream()
+                    val buffer = ByteArray(64 * 1024)
+                    var total = 0
+                    while (true) {
+                        val count = input.read(buffer)
+                        if (count < 0) break
+                        total += count
+                        require(total <= MAX_DECOMPRESSED_INDEX_BYTES) { "Decompressed catalog exceeds the size limit." }
+                        output.write(buffer, 0, count)
+                    }
+                    output.toByteArray()
+                }
+                parseProtobufCatalog(decoded, repoUrl)
+            } else {
+                parseCatalog(bytes.toString(Charsets.UTF_8), repoUrl)
+            }
         })
     } catch (cancelled: CancellationException) {
         throw cancelled
@@ -118,9 +145,16 @@ class ExtensionRepository(
             writeJsonAtomically(reposFile, json.encodeToString(defaults))
             defaults
         } else {
-            runCatching { json.decodeFromString<List<RepoEntry>>(reposFile.readText()) }
+            val stored = runCatching { json.decodeFromString<List<RepoEntry>>(reposFile.readText()) }
                 .getOrDefault(emptyList())
-                .filter { runCatching { validateHttpUrl(it.url); it.label.isNotBlank() }.getOrDefault(false) }
+            val migrated = stored.map { entry ->
+                if (entry.label == DEFAULT_REPO_LABEL &&
+                    entry.url.contains("keiyoushi/extensions", ignoreCase = true) &&
+                    (entry.url.endsWith("/index.json", ignoreCase = true) || entry.url.endsWith("/index.min.json", ignoreCase = true))
+                ) entry.copy(url = DEFAULT_REPO_URL) else entry
+            }.filter { runCatching { validateHttpUrl(it.url); it.label.isNotBlank() }.getOrDefault(false) }
+            if (migrated != stored) writeJsonAtomically(reposFile, json.encodeToString(migrated))
+            migrated
         }
     }
 
@@ -171,6 +205,38 @@ class ExtensionRepository(
             .sortedWith(compareBy<ExtensionMeta> { it.name.lowercase() }.thenBy { it.lang.lowercase() })
     }
 
+    private fun parseProtobufCatalog(bytes: ByteArray, repoUrl: String): List<ExtensionMeta> {
+        val index = ProtoBuf.decodeFromByteArray<ExtensionIndexProto>(bytes)
+        val extensions = index.extensionList?.extensions
+            ?: throw IllegalArgumentException("Protobuf index does not contain an extension list.")
+        return extensions.mapNotNull { entry ->
+            val pkg = entry.packageName.takeIf(::validPackage) ?: return@mapNotNull null
+            val apkField = entry.resources.apkUrl.takeIf(String::isNotBlank) ?: return@mapNotNull null
+            val name = entry.name.substringAfter("Tachiyomi: ").takeIf(String::isNotBlank) ?: return@mapNotNull null
+            val sources = entry.sources.mapNotNull { source ->
+                if (source.name.isBlank()) return@mapNotNull null
+                ExtensionSourceMeta(
+                    name = source.name,
+                    lang = source.language,
+                    id = source.id.toString(),
+                    baseUrl = source.homeUrl,
+                )
+            }
+            val languages = sources.map { it.lang }.filter(String::isNotBlank).distinct()
+            ExtensionMeta(
+                name = name,
+                pkg = pkg,
+                apk = resolveApkField(apkField, repoUrl),
+                lang = languages.singleOrNull() ?: "all",
+                code = entry.versionCode,
+                version = entry.versionName,
+                nsfw = entry.contentWarning == 2 || entry.contentWarning == 3,
+                sources = sources,
+                iconUrl = entry.resources.iconUrl,
+            )
+        }.distinctBy { it.pkg }.sortedWith(compareBy<ExtensionMeta> { it.name.lowercase() }.thenBy { it.lang.lowercase() })
+    }
+
     private fun parseExtension(element: JsonElement, repoUrl: String): ExtensionMeta? {
         val item = element as? JsonObject ?: return null
         val name = item.string("name")?.takeIf(String::isNotBlank) ?: return null
@@ -196,7 +262,17 @@ class ExtensionRepository(
             ?: item.string("contentWarning")?.contains("NSFW", ignoreCase = true)
             ?: false
         val apk = resolveApkField(apkField, repoUrl)
-        return ExtensionMeta(name, pkg, apk, language, code, version, nsfw, sources)
+        return ExtensionMeta(
+            name = name,
+            pkg = pkg,
+            apk = apk,
+            lang = language,
+            code = code,
+            version = version,
+            nsfw = nsfw,
+            sources = sources,
+            iconUrl = item.string("iconUrl") ?: resources?.string("iconUrl").orEmpty(),
+        )
     }
 
     /** Keiyoushi index.json currently carries absolute release APK URLs; flat indexes may carry a filename. */
@@ -276,10 +352,11 @@ class ExtensionRepository(
     }
 
     private companion object {
-        const val DEFAULT_REPO_URL = "https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.json"
+        const val DEFAULT_REPO_URL = "https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.pb"
         const val DEFAULT_REPO_ROOT = "https://raw.githubusercontent.com/keiyoushi/extensions/repo"
         const val DEFAULT_REPO_LABEL = "Keiyoushi (Default)"
         const val MAX_INDEX_BYTES = 12L * 1024 * 1024
+        const val MAX_DECOMPRESSED_INDEX_BYTES = 32 * 1024 * 1024
         const val MAX_APK_BYTES = 150L * 1024 * 1024
     }
 }

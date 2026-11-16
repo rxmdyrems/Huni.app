@@ -13,6 +13,7 @@ data class ExtensionMeta(
     val version: String,
     val nsfw: Boolean,
     val sources: List<ExtensionSourceMeta> = emptyList(),
+    val iconUrl: String = "",
 )
 
 @Serializable

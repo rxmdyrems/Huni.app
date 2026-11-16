@@ -80,6 +80,7 @@ fun AccountSettings(
     onClose: () -> Unit,
     latestVersionName: String,
     latestVersionCode: Int,
+    onSettingsClick: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -422,8 +423,10 @@ fun AccountSettings(
                         showBadge = BuildConfig.UPDATER_AVAILABLE &&
                             latestVersionCode > BuildConfig.VERSION_CODE,
                         onClick = {
-                            onClose()
-                            navController.navigate("settings")
+                            if (onSettingsClick != null) onSettingsClick() else {
+                                onClose()
+                                navController.navigate("settings")
+                            }
                         }
                     )
                 )

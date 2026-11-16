@@ -3,6 +3,7 @@ package com.metrolist.music.reader.ui
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,12 +14,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -37,10 +43,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -50,6 +58,7 @@ import coil3.network.httpHeaders
 import coil3.request.ImageRequest
 import com.metrolist.music.data.model.ExtensionMeta
 import com.metrolist.music.data.model.ExtensionSourceMeta
+import com.metrolist.music.constants.LanguageCodeToName
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import kotlinx.coroutines.launch
@@ -169,7 +178,7 @@ fun ReaderExtensionsScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(repoLabelDraft, { repoLabelDraft = it }, label = { Text("Label") }, singleLine = true)
-                    OutlinedTextField(repoUrlDraft, { repoUrlDraft = it }, label = { Text("index.json URL") }, singleLine = true)
+                    OutlinedTextField(repoUrlDraft, { repoUrlDraft = it }, label = { Text("Repository index URL") }, singleLine = true)
                 }
             },
             confirmButton = {
@@ -208,7 +217,8 @@ private fun InstalledExtensions(
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxSize().padding(top = 8.dp)) {
                 items(state.installed, key = { it.pkg }) { meta ->
                     Card(Modifier.fillMaxWidth().combinedClickable(onClick = { onOpen(meta) }, onLongClick = { onUninstall(meta) })) {
-                        Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            ExtensionArtwork(meta)
                             Column(Modifier.weight(1f)) {
                                 Text(meta.name, style = MaterialTheme.typography.titleMedium)
                                 Text("${meta.lang} · v${meta.version} · hold to uninstall", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -228,15 +238,48 @@ private fun BrowseExtensions(
     viewModel: ReaderExtensionsViewModel,
     onEditRepo: (com.metrolist.music.data.model.RepoEntry?) -> Unit,
 ) {
-    val filtered = remember(state.catalog, state.catalogQuery) {
+    var selectedLanguage by rememberSaveable { mutableStateOf("all") }
+    val languages = remember(state.catalog) {
+        state.catalog.flatMap { meta ->
+            (meta.sources.map { it.lang } + meta.lang).filter { it.isNotBlank() && !it.equals("all", true) }
+        }.distinctBy { it.lowercase() }.sortedBy(::languageDisplayName)
+    }
+    val filtered = remember(state.catalog, state.catalogQuery, selectedLanguage) {
         val query = state.catalogQuery.trim().lowercase()
-        if (query.isBlank()) state.catalog else state.catalog.filter {
-            it.name.lowercase().contains(query) || it.pkg.lowercase().contains(query) || it.lang.lowercase().contains(query)
+        state.catalog.filter { meta ->
+            val matchesQuery = query.isBlank() || meta.name.lowercase().contains(query) ||
+                meta.pkg.lowercase().contains(query) || meta.lang.lowercase().contains(query) ||
+                meta.sources.any { it.lang.lowercase().contains(query) }
+            val matchesLanguage = selectedLanguage == "all" ||
+                meta.sources.any { it.lang.equals(selectedLanguage, ignoreCase = true) } ||
+                (meta.sources.isEmpty() && meta.lang.equals(selectedLanguage, ignoreCase = true))
+            matchesQuery && matchesLanguage
         }
     }
     LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         item {
             Spacer(Modifier.height(8.dp))
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text("Repositories", Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+                TextButton(onClick = { onEditRepo(null) }) { Text("Add") }
+            }
+            if (state.repos.isEmpty()) {
+                Text("Add a repository index URL to browse extensions.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            } else {
+                state.repos.forEach { repo ->
+                    Card(Modifier.fillMaxWidth()) {
+                        Row(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text(repo.label, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(repo.url, style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            TextButton(onClick = { onEditRepo(repo) }) { Text("Edit") }
+                            TextButton(onClick = { viewModel.removeRepo(repo.url) }) { Text("Remove") }
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(4.dp))
             OutlinedTextField(
                 value = state.catalogQuery,
                 onValueChange = viewModel::setCatalogQuery,
@@ -248,6 +291,7 @@ private fun BrowseExtensions(
                 Text("Catalog", Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
                 TextButton(onClick = viewModel::refreshCatalog, enabled = !state.loading) { Text("Refresh") }
             }
+            LanguageFilterPicker(languages, selectedLanguage) { selectedLanguage = it }
             ExtensionError(state.error)
             if (state.loading && state.installingPkg == null) LinearLoading()
             if (!state.loading && state.catalog.isEmpty() && state.error == null) {
@@ -257,7 +301,8 @@ private fun BrowseExtensions(
         items(filtered, key = { it.pkg }) { meta ->
             val installed = state.installed.any { it.pkg == meta.pkg }
             Card(Modifier.fillMaxWidth()) {
-                Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ExtensionArtwork(meta)
                     Column(Modifier.weight(1f)) {
                         Text(meta.name, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Text("${meta.lang} · v${meta.version}${if (meta.nsfw) " · NSFW" else ""}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -270,26 +315,21 @@ private fun BrowseExtensions(
                 }
             }
         }
-        item {
-            Spacer(Modifier.height(12.dp))
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text("Repositories", Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
-                TextButton(onClick = { onEditRepo(null) }) { Text("Add") }
-            }
-        }
-        items(state.repos, key = { it.url }) { repo ->
-            Card(Modifier.fillMaxWidth()) {
-                Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Text(repo.label, style = MaterialTheme.typography.titleSmall)
-                        Text(repo.url, style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                    TextButton(onClick = { onEditRepo(repo) }) { Text("Edit") }
-                    TextButton(onClick = { viewModel.removeRepo(repo.url) }) { Text("Remove") }
-                }
-            }
-        }
         item { Spacer(Modifier.height(18.dp)) }
+    }
+}
+
+@Composable
+private fun ExtensionArtwork(meta: ExtensionMeta) {
+    val modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp))
+    if (meta.iconUrl.isBlank()) {
+        Box(modifier.background(MaterialTheme.colorScheme.secondaryContainer), contentAlignment = Alignment.Center) {
+            Text(meta.name.take(1).uppercase(), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSecondaryContainer)
+        }
+    } else {
+        val context = LocalContext.current
+        val request = remember(meta.iconUrl) { ImageRequest.Builder(context).data(meta.iconUrl).build() }
+        AsyncImage(model = request, contentDescription = "${meta.name} icon", modifier = modifier, contentScale = ContentScale.Crop)
     }
 }
 
@@ -300,12 +340,20 @@ private fun SourceChooser(
     modifier: Modifier,
     onSource: (String, ExtensionSourceMeta) -> Unit,
 ) {
+    var selectedLanguage by rememberSaveable(pkg) { mutableStateOf("all") }
+    val languages = remember(sources) {
+        sources.map { it.lang }.filter(String::isNotBlank).distinctBy { it.lowercase() }.sortedBy(::languageDisplayName)
+    }
+    val visibleSources = if (selectedLanguage == "all") sources else sources.filter {
+        it.lang.equals(selectedLanguage, ignoreCase = true)
+    }
     Column(modifier.padding(16.dp)) {
         Text("Choose a source", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(8.dp))
+        if (languages.isNotEmpty()) LanguageFilterPicker(languages, selectedLanguage) { selectedLanguage = it }
         if (sources.isEmpty()) Text("No compatible sources are listed for this extension.", color = MaterialTheme.colorScheme.error)
         else LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(sources, key = { it.id }) { source ->
+            items(visibleSources, key = { it.id }) { source ->
                 Card(Modifier.fillMaxWidth().clickable { onSource(pkg, source) }) {
                     Column(Modifier.padding(14.dp)) {
                         Text(source.name, style = MaterialTheme.typography.titleMedium)
@@ -318,6 +366,32 @@ private fun SourceChooser(
 }
 
 @Composable
+private fun LanguageFilterPicker(
+    languages: List<String>,
+    selectedLanguage: String,
+    onSelected: (String) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        TextButton(onClick = { expanded = true }, enabled = languages.isNotEmpty()) {
+            Text("Language: ${if (selectedLanguage == "all") "All" else languageDisplayName(selectedLanguage)}")
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(text = { Text("All languages") }, onClick = { onSelected("all"); expanded = false })
+            languages.forEach { language ->
+                DropdownMenuItem(
+                    text = { Text(languageDisplayName(language)) },
+                    onClick = { onSelected(language); expanded = false },
+                )
+            }
+        }
+    }
+}
+
+private fun languageDisplayName(code: String): String =
+    LanguageCodeToName[code] ?: LanguageCodeToName[code.lowercase()] ?: code.uppercase()
+
+@Composable
 private fun SourceBrowser(
     state: ReaderExtensionState,
     viewModel: ReaderExtensionsViewModel,
@@ -325,6 +399,7 @@ private fun SourceBrowser(
     openingChapter: Boolean,
     onChapter: (SChapter) -> Unit,
 ) {
+    var selectedStoryType by rememberSaveable(state.selectedSourceId) { mutableStateOf("") }
     Column(modifier.padding(horizontal = 16.dp)) {
         ExtensionError(state.error)
         val manga = state.selectedManga
@@ -343,9 +418,26 @@ private fun SourceBrowser(
                 TextButton(onClick = viewModel::loadPopular, enabled = !state.loading) { Text("Popular") }
                 TextButton(onClick = viewModel::nextPage, enabled = state.hasNextPage && !state.loading) { Text("Next page") }
             }
+            val storyTypes = remember(state.mangas) {
+                state.mangas.flatMap { manga ->
+                    manga.genre.orEmpty().split(',', ';', '/', '|').map(String::trim).filter(String::isNotBlank)
+                }.distinct().sortedBy(String::lowercase)
+            }
+            if (storyTypes.isNotEmpty()) {
+                Text("Story type", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(selected = selectedStoryType.isEmpty(), onClick = { selectedStoryType = "" }, label = { Text("All") })
+                    storyTypes.forEach { storyType ->
+                        FilterChip(selected = selectedStoryType.equals(storyType, ignoreCase = true), onClick = { selectedStoryType = storyType }, label = { Text(storyType) })
+                    }
+                }
+            }
             if (state.loading) LinearLoading()
+            val visibleMangas = if (selectedStoryType.isBlank()) state.mangas else state.mangas.filter { manga ->
+                manga.genre.orEmpty().split(',', ';', '/', '|').any { it.trim().equals(selectedStoryType, ignoreCase = true) }
+            }
             LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(state.mangas, key = { it.url }) { item ->
+                items(visibleMangas, key = { it.url }) { item ->
                     Card(Modifier.fillMaxWidth().clickable { viewModel.openManga(item) }) {
                         Row(Modifier.fillMaxWidth().padding(10.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                             item.thumbnail_url?.let { SourceImage(it, state.sourceReferer.orEmpty(), Modifier.size(64.dp)) }
