@@ -163,6 +163,14 @@
 -keep class kotlin.reflect.** { *; }
 -dontwarn kotlin.reflect.**
 
+## Runtime-loaded Mihon extension ABI
+# Extensions execute in a separate DEX classloader. Preserve HttpSource's private lazy delegate
+# and its concrete implementation so release shrinking does not change the runtime field type.
+-keepclassmembers class eu.kanade.tachiyomi.source.online.HttpSource {
+    private *** headers$delegate;
+}
+-keep class kotlin.SynchronizedLazyImpl { *; }
+
 ## Ktor Serialization
 -keep class io.ktor.** { *; }
 -keepclassmembers class io.ktor.** { *; }

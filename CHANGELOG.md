@@ -3,6 +3,10 @@
 
 ## Unreleased
 ---
+## v0.9.17 (2026-11-16)
+### 🐛 Fixes
+- 🐛 Fixed release-build extension loading by preserving the Mihon HttpSource lazy delegate against R8 optimization.
+---
 ## v0.9.16 (2026-11-16)
 ### 🎨 UI
 - 🎨 Refined the floating navigation into a brighter glass pill with swipe magnification, and animated the Menu button into a close icon while the modal is open.
