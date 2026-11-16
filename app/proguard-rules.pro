@@ -171,8 +171,8 @@
 }
 -keep class kotlin.SynchronizedLazyImpl { *; }
 # Dynamically loaded extension DEX may call Kotlin stdlib overloads Huni does not reference itself.
-# Keep the facade intact so R8 cannot remove extension-only joinToString dispatchers.
--keep class kotlin.collections.ArraysKt { *; }
+# Keep the facade family intact so R8 cannot remove extension-only joinToString dispatchers.
+-keep class kotlin.collections.ArraysKt* { *; }
 
 ## Ktor Serialization
 -keep class io.ktor.** { *; }

@@ -10,7 +10,7 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
-EXPECTED_OWNER = "Lkotlin/collections/ArraysKt;"
+EXPECTED_OWNER_PREFIX = "Lkotlin/collections/ArraysKt"
 EXPECTED_METHOD = "joinToString$default"
 EXPECTED_DESCRIPTOR = (
     "([Ljava/lang/Object;Ljava/lang/CharSequence;Ljava/lang/CharSequence;I"
@@ -168,10 +168,15 @@ def main(apk_path: str) -> int:
             all_fields.update(symbols.fields)
             all_classes.update(symbols.classes)
 
-    expected_method = (EXPECTED_OWNER, EXPECTED_METHOD, EXPECTED_DESCRIPTOR)
-    if expected_method not in all_methods:
+    expected_methods = {
+        method for method in all_methods
+        if method[0].startswith(EXPECTED_OWNER_PREFIX)
+        and method[1] == EXPECTED_METHOD
+        and method[2] == EXPECTED_DESCRIPTOR
+    }
+    if not expected_methods:
         print(
-            f"ERROR: minified APK is missing {EXPECTED_OWNER}->{EXPECTED_METHOD}{EXPECTED_DESCRIPTOR}",
+            f"ERROR: minified APK is missing {EXPECTED_OWNER_PREFIX}*->{EXPECTED_METHOD}{EXPECTED_DESCRIPTOR}",
             file=sys.stderr,
         )
         return 1
@@ -192,7 +197,7 @@ def main(apk_path: str) -> int:
         return 1
 
     print(
-        f"Verified minified DEX in {apk.name}: {EXPECTED_OWNER}->{EXPECTED_METHOD} overload, "
+        f"Verified minified DEX in {apk.name}: {sorted(expected_methods)}, "
         f"{HTTP_SOURCE}->{EXPECTED_FIELD}:{EXPECTED_FIELD_TYPE}, and SynchronizedLazyImpl are retained."
     )
     return 0
