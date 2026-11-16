@@ -2,7 +2,12 @@ package com.metrolist.music.reader
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.metrolist.music.data.model.ExtensionEntryProto
+import com.metrolist.music.data.model.ExtensionIndexProto
+import com.metrolist.music.data.model.ExtensionListProto
 import com.metrolist.music.data.model.ExtensionMeta
+import com.metrolist.music.data.model.ExtensionResourcesProto
+import com.metrolist.music.data.model.ExtensionSourceProto
 import com.metrolist.music.data.repository.ExtensionRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -12,6 +17,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.encodeToByteArray
+import kotlinx.serialization.protobuf.ProtoBuf
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -20,7 +28,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.util.zip.GZIPOutputStream
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
@@ -59,6 +69,70 @@ class ExtensionRepositoryTest {
         try {
             val meta = repository.fetchCatalog(REPO_URL).getOrThrow().single()
             assertEquals("https://raw.githubusercontent.com/example/repo/apk/sample.apk", meta.apk)
+        } finally {
+            repository.close()
+        }
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    @Test fun parsesGzipProtobufIndexPbAndMapsKeiyoushiFields() = runBlocking {
+        val payload = ProtoBuf.encodeToByteArray(
+            ExtensionIndexProto.serializer(),
+            ExtensionIndexProto(
+                extensionList = ExtensionListProto(
+                    extensions = listOf(
+                        ExtensionEntryProto(
+                            name = "Tachiyomi: Sample Manga",
+                            packageName = "eu.kanade.tachiyomi.extension.en.sample",
+                            resources = ExtensionResourcesProto(
+                                apkUrl = "https://github.com/keiyoushi/extensions/releases/download/v1.4.2/sample.apk",
+                                iconUrl = "https://example.test/sample.png",
+                            ),
+                            extensionLib = "1.6",
+                            versionCode = 10402L,
+                            versionName = "1.4.2",
+                            contentWarning = 2,
+                            sources = listOf(
+                                ExtensionSourceProto(
+                                    id = 123456789L,
+                                    name = "Sample Manga",
+                                    language = "en",
+                                    homeUrl = "https://example.test",
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        )
+        val compressed = ByteArrayOutputStream().use { output ->
+            GZIPOutputStream(output).use { it.write(payload) }
+            output.toByteArray()
+        }
+        val repository = ExtensionRepository(directory, client { compressed })
+        try {
+            val meta = repository.fetchCatalog(PB_REPO_URL).getOrThrow().single()
+            assertEquals("Sample Manga", meta.name)
+            assertEquals("eu.kanade.tachiyomi.extension.en.sample", meta.pkg)
+            assertEquals("https://github.com/keiyoushi/extensions/releases/download/v1.4.2/sample.apk", meta.apk)
+            assertEquals("https://example.test/sample.png", meta.iconUrl)
+            assertEquals("en", meta.lang)
+            assertEquals(10402L, meta.code)
+            assertEquals("1.4.2", meta.version)
+            assertTrue(meta.nsfw)
+            assertEquals("123456789", meta.sources.single().id)
+            assertEquals("https://example.test", meta.sources.single().baseUrl)
+        } finally {
+            repository.close()
+        }
+    }
+
+    @Test fun rejectsUncompressedProtobufAtPbEndpoint() = runBlocking {
+        val repository = ExtensionRepository(directory, client { byteArrayOf(0x52, 0x01, 0x00) })
+        try {
+            val result = repository.fetchCatalog(PB_REPO_URL)
+            assertTrue(result.isFailure)
+            assertTrue(result.exceptionOrNull()?.message.orEmpty().contains("not gzip-compressed"))
         } finally {
             repository.close()
         }
@@ -147,5 +221,6 @@ class ExtensionRepositoryTest {
 
     private companion object {
         const val REPO_URL = "https://raw.githubusercontent.com/example/repo/index.json"
+        const val PB_REPO_URL = "https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.pb"
     }
 }

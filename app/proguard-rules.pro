@@ -165,11 +165,14 @@
 
 ## Runtime-loaded Mihon extension ABI
 # Extensions execute in a separate DEX classloader. Preserve HttpSource's private lazy delegate
-# and its concrete implementation so release shrinking does not change the runtime field type.
+# so release shrinking does not specialize its field type across the extension ABI.
 -keepclassmembers class eu.kanade.tachiyomi.source.online.HttpSource {
     private *** headers$delegate;
 }
 -keep class kotlin.SynchronizedLazyImpl { *; }
+# Dynamically loaded extension DEX may call Kotlin stdlib overloads Huni does not reference itself.
+# Keep the facade intact so R8 cannot remove extension-only joinToString dispatchers.
+-keep class kotlin.collections.ArraysKt { *; }
 
 ## Ktor Serialization
 -keep class io.ktor.** { *; }

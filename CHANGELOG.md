@@ -3,6 +3,11 @@
 
 ## Unreleased
 ---
+## v0.9.18 (2026-11-16)
+### 🐛 Fixes
+- 🐛 Preserved the Kotlin array join dispatcher required by dynamically loaded Mihon extensions in minified release builds.
+- 🐛 Added regression coverage for JSON and compressed protobuf extension catalogs, plus release DEX ABI checks.
+---
 ## v0.9.17 (2026-11-16)
 ### 🐛 Fixes
 - 🐛 Fixed release-build extension loading by preserving the Mihon HttpSource lazy delegate against R8 optimization.
