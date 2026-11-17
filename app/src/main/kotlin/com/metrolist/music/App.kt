@@ -7,8 +7,6 @@ package com.metrolist.music
 
 import android.app.ActivityManager
 import android.app.Application
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.os.StrictMode
@@ -47,6 +45,7 @@ import com.metrolist.music.utils.CrashReporter
 import com.metrolist.music.utils.InnerTubeXPlayer
 import com.metrolist.music.utils.SpotifyHashSync
 import com.metrolist.music.utils.SpotifyTokenManager
+import com.metrolist.music.utils.UpdateNotifications
 import com.metrolist.music.utils.dataStore
 import com.metrolist.music.utils.installPreferencesSnapshotCollector
 import com.metrolist.music.utils.safeDataStoreEdit
@@ -62,6 +61,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.Credentials
+import mihon.kit.MihonKit
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -130,6 +130,9 @@ class App :
 
         // Plant logging before extraction services initialize.
         Timber.plant(Timber.DebugTree())
+        UpdateNotifications.ensureChannel(this)
+        runCatching { MihonKit.initialize(this) }
+            .onFailure { Timber.e(it, "Failed to initialize Mihon extension runtime") }
         InnerTubeXPlayer.initialize(this)
 
         // Pre-read Coil cache size on background to avoid runBlocking in newImageLoader
@@ -263,16 +266,6 @@ class App :
 
         YouTube.useLoginForBrowse = settings[UseLoginForBrowse] ?: true
 
-        val channel =
-            NotificationChannel(
-                "updates",
-                getString(R.string.update_channel_name),
-                NotificationManager.IMPORTANCE_DEFAULT,
-            ).apply {
-                description = getString(R.string.update_channel_desc)
-            }
-        val nm = getSystemService(NotificationManager::class.java)
-        nm.createNotificationChannel(channel)
     }
 
     private fun observeSettingsChanges() {

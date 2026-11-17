@@ -25,7 +25,8 @@ data class ReleaseInfo(
     val versionName: String,
     val description: String,
     val releaseDate: String,
-    val assets: List<ReleaseAsset>
+    val assets: List<ReleaseAsset>,
+    val versionCode: Int? = null,
 )
 
 data class ReleaseAsset(
@@ -47,33 +48,25 @@ object Updater {
     private const val CHECK_INTERVAL_MILLIS = 24 * 60 * 60 * 1000L
     private const val GITHUB_API_BASE = "https://api.github.com/repos/rxmdyrems/Huni.app"
 
-    /**
-     * Compares two version strings.
-     * Returns: 1 if v1 > v2, -1 if v1 < v2, 0 if equal
-     */
-    fun compareVersions(v1: String, v2: String): Int {
-        val v1Parts = v1.removePrefix("v").split(".").map { it.toIntOrNull() ?: 0 }
-        val v2Parts = v2.removePrefix("v").split(".").map { it.toIntOrNull() ?: 0 }
-        val maxLength = maxOf(v1Parts.size, v2Parts.size)
-        
-        for (i in 0 until maxLength) {
-            val part1 = v1Parts.getOrNull(i) ?: 0
-            val part2 = v2Parts.getOrNull(i) ?: 0
-            when {
-                part1 > part2 -> return 1
-                part1 < part2 -> return -1
-            }
-        }
-        return 0
+    /** The release API has no versionCode field, so read it from the tagged app build file. */
+    private suspend fun getVersionCodeForTag(tagName: String): Int {
+        require(tagName.matches(Regex("v[0-9A-Za-z][0-9A-Za-z._-]{0,63}"))) { "Invalid release tag." }
+        val buildFile = client.get(
+            "https://raw.githubusercontent.com/rxmdyrems/Huni.app/$tagName/app/build.gradle.kts"
+        ).bodyAsText()
+        return parseVersionCode(buildFile)
     }
 
-    /**
-     * Checks if the latest version is newer than the current version.
-     * Returns true if an update is available (latestVersion > currentVersion)
-     */
-    fun isUpdateAvailable(currentVersion: String, latestVersion: String): Boolean {
-        return compareVersions(latestVersion, currentVersion) > 0
-    }
+    internal fun parseVersionCode(buildFile: String): Int =
+        Regex("(?m)^[ \\t]*versionCode[ \\t]*=[ \\t]*(\\d+)[ \\t]*$")
+            .find(buildFile)
+            ?.groupValues
+            ?.get(1)
+            ?.toIntOrNull()
+            ?: error("Could not find versionCode in the tagged app build file.")
+
+    fun isUpdateAvailable(currentVersionCode: Int, latestVersionCode: Int): Boolean =
+        latestVersionCode > currentVersionCode
 
     /**
      * Get the current app's architecture and variant
@@ -102,8 +95,9 @@ object Updater {
             
             // Parse architecture and variant from filename
             val (arch, variant) = when {
-                name == "Huni.apk" || name.startsWith("Huni-") -> "universal" to "foss"
                 name == "Huni-with-Google-Cast.apk" -> "universal" to "gms"
+                name == "Huni-izzy.apk" -> null to null
+                name == "Huni.apk" || name.startsWith("Huni-") -> "universal" to "foss"
                 name.startsWith("app-") && name.endsWith("-release.apk") -> {
                     val arch = name.removePrefix("app-").removeSuffix("-release.apk")
                     arch to "foss"
@@ -138,12 +132,14 @@ object Updater {
                     .bodyAsText()
                 val json = JSONObject(response)
                 
+                val tagName = json.getString("tag_name")
                 val releaseInfo = ReleaseInfo(
-                    tagName = json.getString("tag_name"),
-                    versionName = json.getString("tag_name").removePrefix("v"),
+                    tagName = tagName,
+                    versionName = tagName.removePrefix("v"),
                     description = json.getString("body"),
                     releaseDate = json.getString("published_at"),
-                    assets = parseAssets(json.getJSONArray("assets"))
+                    assets = parseAssets(json.getJSONArray("assets")),
+                    versionCode = getVersionCodeForTag(tagName),
                 )
                 
                 cachedReleaseInfo = releaseInfo
@@ -238,20 +234,18 @@ object Updater {
                     (System.currentTimeMillis() - lastCheckTime) > CHECK_INTERVAL_MILLIS
                 
                 if (!shouldFetch && cachedReleaseInfo != null) {
-                    val hasUpdate = isUpdateAvailable(
-                        BuildConfig.BASE_VERSION_NAME,
-                        cachedReleaseInfo!!.versionName
-                    )
+                    val latestVersionCode = cachedReleaseInfo!!.versionCode
+                        ?: error("The cached release has no versionCode.")
+                    val hasUpdate = isUpdateAvailable(BuildConfig.VERSION_CODE, latestVersionCode)
                     return@runCatching cachedReleaseInfo!! to hasUpdate
                 }
                 
                 val result = getLatestRelease(forceRefresh = true)
                 if (result.isSuccess) {
                     val releaseInfo = result.getOrThrow()
-                    val hasUpdate = isUpdateAvailable(
-                        BuildConfig.BASE_VERSION_NAME,
-                        releaseInfo.versionName
-                    )
+                    val latestVersionCode = releaseInfo.versionCode
+                        ?: error("The release has no versionCode.")
+                    val hasUpdate = isUpdateAvailable(BuildConfig.VERSION_CODE, latestVersionCode)
                     releaseInfo to hasUpdate
                 } else {
                     throw result.exceptionOrNull() ?: Exception("Unknown error")

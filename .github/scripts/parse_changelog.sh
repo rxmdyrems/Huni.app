@@ -1,30 +1,15 @@
 #!/usr/bin/env bash
-# parse_changelog.sh — Extract the changelog entry for a specific version
-#
-# Reads changelog.md (or a custom file) and outputs the content block
-# associated with the given version, as delimited by ---vX.Y.Z separators.
-#
-# Usage:
-#   ./parse_changelog.sh <version> [changelog_file]
-#
-# Examples:
-#   ./parse_changelog.sh 13.2.1
-#   ./parse_changelog.sh v13.2.1 changelog.md
-#   ./parse_changelog.sh 13.2.1 /path/to/changelog.md
-#
-# Exit codes:
-#   0 — Version found; content written to stdout
-#   1 — Error (missing args, file not found, version not found)
-
+# Extract a changelog entry for one version while preserving its Markdown text.
+# Supports canonical ## vX.Y.Z headings and the legacy ---vX.Y.Z separators.
+# Usage: ./parse_changelog.sh <version> [changelog_file]
 set -euo pipefail
 
 VERSION="${1:-}"
-CHANGELOG_FILE="${2:-changelog.md}"
+CHANGELOG_FILE="${2:-CHANGELOG.md}"
 
 if [ -z "$VERSION" ]; then
     echo "Error: version argument required" >&2
     echo "Usage: $0 <version> [changelog_file]" >&2
-    echo "Example: $0 13.2.1" >&2
     exit 1
 fi
 
@@ -35,16 +20,24 @@ fi
 
 VERSION="${VERSION#v}"
 
-if ! grep -q "^---v${VERSION}$" "$CHANGELOG_FILE"; then
-    echo "Error: version '$VERSION' not found in '$CHANGELOG_FILE'" >&2
-    exit 1
-fi
-
 awk -v ver="$VERSION" '
     /^---v/ {
         if (found) exit
         if ($0 == "---v" ver) { found=1; next }
         next
     }
+    /^##[[:space:]]+/ {
+        heading=$0
+        sub(/^##[[:space:]]+/, "", heading)
+        if (heading ~ /^v?[0-9]+([.][0-9]+)*([[:space:]]|$)/) {
+            if (found) exit
+            sub(/^v/, "", heading)
+            sub(/[[:space:]].*$/, "", heading)
+            if (heading == ver) { found=1; next }
+            next
+        }
+    }
+    found && /^---[[:space:]]*$/ { exit }
     found { print }
+    END { if (!found) exit 1 }
 ' "$CHANGELOG_FILE"

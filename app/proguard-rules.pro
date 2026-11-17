@@ -152,9 +152,6 @@
 -keep class com.google.android.gms.cast.** { *; }
 -keep class androidx.mediarouter.** { *; }
 
-## JSoup re2j optional dependency
--dontwarn com.google.re2j.**
-
 # Vibra fingerprint library
 -keep class com.metrolist.music.recognition.VibraSignature { *; }
 -keepclassmembers class com.metrolist.music.recognition.VibraSignature {
@@ -165,6 +162,17 @@
 -keep class kotlin.Metadata { *; }
 -keep class kotlin.reflect.** { *; }
 -dontwarn kotlin.reflect.**
+
+## Runtime-loaded Mihon extension ABI
+# Extensions execute in a separate DEX classloader. Preserve HttpSource's private lazy delegate
+# so release shrinking does not specialize its field type across the extension ABI.
+-keepclassmembers class eu.kanade.tachiyomi.source.online.HttpSource {
+    private *** headers$delegate;
+}
+-keep class kotlin.SynchronizedLazyImpl { *; }
+# Dynamically loaded extension DEX may call Kotlin stdlib overloads Huni does not reference itself.
+# Keep the facade family intact so R8 cannot remove extension-only joinToString dispatchers.
+-keep class kotlin.collections.ArraysKt* { *; }
 
 ## Ktor Serialization
 -keep class io.ktor.** { *; }

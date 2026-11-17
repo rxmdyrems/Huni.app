@@ -1,14 +1,77 @@
-# 📜 Huni Changelog
-
-> Every notable change to Huni, newest first.&nbsp;&nbsp;✨ Added · 🔄 Changed · 🛠️ Fixed
+# Huni Changelog
+> Every notable change to Huni, newest first. New release-text emoji prefixes follow CONTRIBUTING.md.
 
 ## Unreleased
-
-### 🔄 Changed
-- Fixed the CI debug build keystore.
-
 ---
-
+## v0.9.19 (2026-11-17)
+### 🎨 UI
+- 🎨 Added the fluid floating navigation dock with theme-aware glass styling, animated collapse-on-scroll, compact sizing, drag magnification, and persisted Appearance controls.
+### 🐛 Known issues
+- 🐛 The player slider issue remains unresolved and is intentionally deferred to the next update.
+- 🐛 MangaDex/source-operation compatibility remains unresolved and is intentionally deferred to the next update.
+---
+## v0.9.18 (2026-11-16)
+### 🐛 Fixes
+- 🐛 Preserved the Kotlin array join dispatcher required by dynamically loaded Mihon extensions in minified release builds.
+- 🐛 Added regression coverage for JSON and compressed protobuf extension catalogs, plus release DEX ABI checks.
+---
+## v0.9.17 (2026-11-16)
+### 🐛 Fixes
+- 🐛 Fixed release-build extension loading by preserving the Mihon HttpSource lazy delegate against R8 optimization.
+---
+## v0.9.16 (2026-11-16)
+### 🎨 UI
+- 🎨 Refined the floating navigation into a brighter glass pill with swipe magnification, and animated the Menu button into a close icon while the modal is open.
+- 🎨 Added a glass-navigation preference in Appearance and fixed Home navigation after changing themes.
+### 📚 Reader
+- 📚 Added compressed `.pb` extension-index support, language filtering, catalog artwork, and top-positioned editable repository links.
+- 📚 Added story-type filtering for extension sources.
+### 🐛 Fixes
+- 🐛 Fixed extension APK loading by ensuring downloaded packages are not writable when loaded as DEX.
+---
+## v0.9.15 (2026-11-16)
+### 🐛 Fixes
+- 🐛 Restored a discoverable Settings entry for update checks and compare GitHub releases by versionCode.
+- 🐛 Added scheduled background release checks with network constraints and permission-aware update notifications.
+- 🐛 Consolidated About photo controls into one action sheet for gallery, presets, and removal.
+- 🐛 Fixed extension-install failure handling so loader and save errors are reported accurately and downloaded APKs are retained for retry.
+---
+## v0.9.14 (2026-11-15)
+### ✨ New
+- ✨ Added persistent local profile avatars with custom-photo selection and preset fallback across onboarding, Home, and About.
+- ✨ Added MihonKit-powered extension browsing, editable repositories, and source chapter navigation into the reader.
+### 🔧 Under the hood
+- 🔧 Isolated MihonKit's bundled QuickJS native libraries to avoid runtime library collisions.
+### 🐛 Known issues
+- 🐛 Extension installation may show “Extension incompatible”; a compatibility fix is planned for a later update.
+---
+## v0.9.13 (2026-11-14)
+### ✨ New
+- ✨ Added first-run setup for local profile customization and configurable navigation, plus local audio-file deletion with Android consent.
+### 🎨 UI
+- 🎨 Replaced the welcome-page placeholder with the transparent Huni glass logo.
+- 🎨 Refined the About layout and compact density options.
+### 🐛 Fixes
+- 🐛 Fixed onboarding startup and data reset so the welcome flow opens at page one.
+- 🐛 Fixed secondary-screen routing, duplicate Home greeting, Speed dial alignment, and player-sheet placement when navigation is hidden.
+- 🐛 Set new-user navigation to hide Reader and density to 85% while preserving saved preferences.
+### 🔄 Updates
+- 🔄 Persisted the selected YouTube channel across restarts and kept local profile data excluded from Android backup.
+---
+## v0.9.12 (2026-11-13)
+### ✨ New
+- ✨ Added Mihon-inspired right-to-left, left-to-right, vertical, and continuous long-strip reading modes.
+- ✨ Added tap navigation, page seeking, and saved reading progress.
+- ✨ Added reader options for image scaling, page background, fullscreen, and keeping the screen awake.
+---
+## v0.9.11 (2026-11-13)
+### ✨ New
+- ✨ Added a local manga reader.
+### 🔧 Under the hood
+- 🔧 Fixed the CI debug build keystore.
+- 🔧 Kept release APKs on Huni's stable package ID.
+- 🔧 Added release APK identity verification and SHA-256 checksums.
+---
 ## v0.9.10 (2026-11-12)
 
 ### 🛠️ Fixed

@@ -108,8 +108,6 @@ import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.util.Consumer
@@ -138,10 +136,13 @@ import com.metrolist.innertube.models.WatchEndpoint
 import com.metrolist.music.constants.AppBarHeight
 import com.metrolist.music.constants.AppLanguageKey
 import com.metrolist.music.constants.CheckForUpdatesKey
+import com.metrolist.music.constants.ChannelSwitchCompletedKey
+import com.metrolist.music.constants.OnboardingDoneKey
 import com.metrolist.music.constants.DarkModeKey
 import com.metrolist.music.constants.DefaultOpenTabKey
 import com.metrolist.music.constants.DismissedKmpUpdateKey
 import com.metrolist.music.constants.DismissedStandaloneUpdateKey
+import com.metrolist.music.constants.DensityScale
 import com.metrolist.music.constants.DensityScaleKey
 import com.metrolist.music.constants.DisableScreenshotKey
 import com.metrolist.music.constants.DynamicThemeKey
@@ -157,6 +158,11 @@ import com.metrolist.music.constants.MiniPlayerBottomSpacing
 import com.metrolist.music.constants.MiniPlayerHeight
 import com.metrolist.music.constants.NavigationBarAnimationSpec
 import com.metrolist.music.constants.NavigationBarHeight
+import com.metrolist.music.constants.NavigationTabsKey
+import com.metrolist.music.constants.GlassNavigationKey
+import com.metrolist.music.constants.CollapseNavigationOnScrollKey
+import com.metrolist.music.constants.KeepNavigationExpandedKey
+import com.metrolist.music.constants.FluidNavigationMotionKey
 import com.metrolist.music.constants.PauseListenHistoryKey
 import com.metrolist.music.constants.PauseSearchHistoryKey
 import com.metrolist.music.constants.PreferredLyricsProvider
@@ -169,7 +175,7 @@ import com.metrolist.music.constants.SlimNavBarHeight
 import com.metrolist.music.constants.SlimNavBarKey
 import com.metrolist.music.constants.StopMusicOnTaskClearKey
 import com.metrolist.music.constants.UpdateNotificationsEnabledKey
-import com.metrolist.music.constants.UseNewMiniPlayerDesignKey
+import com.metrolist.music.constants.UserNameKey
 import com.metrolist.music.constants.VideoThumbnailMigrationDoneKey
 import com.metrolist.music.db.MusicDatabase
 import com.metrolist.music.db.entities.SearchHistory
@@ -194,10 +200,13 @@ import com.metrolist.music.ui.menu.YouTubeSongMenu
 import com.metrolist.music.ui.player.BottomSheetPlayer
 import com.metrolist.music.ui.screens.Screens
 import com.metrolist.music.ui.screens.CrashReportDialog
+import com.metrolist.music.ui.screens.OnboardingScreen
 import com.metrolist.music.ui.screens.navigationBuilder
 import com.metrolist.music.ui.screens.settings.ChangelogScreen
 import com.metrolist.music.ui.screens.settings.DarkMode
 import com.metrolist.music.ui.screens.settings.NavigationTab
+import com.metrolist.music.ui.screens.settings.NavigationConfig
+import com.metrolist.music.ui.screens.placeholderForEmptyName
 import com.metrolist.music.ui.theme.DefaultPalette
 import com.metrolist.music.ui.theme.HuniPalettes
 import com.metrolist.music.ui.theme.MetrolistTheme
@@ -206,9 +215,13 @@ import com.metrolist.music.ui.utils.resetHeightOffset
 import com.metrolist.music.utils.ReleaseInfo
 import com.metrolist.music.utils.SearchRoutes
 import com.metrolist.music.utils.SyncUtils
+import com.metrolist.music.utils.GreetingPeriod
+import com.metrolist.music.utils.currentGreetingPeriod
 import com.metrolist.music.utils.ArtistNameAliases
 import com.metrolist.music.utils.CrashReporter
 import com.metrolist.music.utils.Updater
+import com.metrolist.music.utils.UpdateCheckScheduler
+import com.metrolist.music.utils.UpdateNotifications
 import com.metrolist.music.utils.dataStore
 import com.metrolist.music.utils.safeDataStoreEdit
 import com.metrolist.music.utils.get
@@ -235,16 +248,12 @@ import java.util.Calendar
 import java.util.Locale
 import javax.inject.Inject
 
-private fun chooseHomeGreeting(): String {
-    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-    val greetings = when (hour) {
-        in 5..11 -> listOf("Good morning", "Morning tunes await", "A fresh start sounds good")
-        in 12..16 -> listOf("Good afternoon", "A little music for the afternoon", "Take a music break")
-        in 17..21 -> listOf("Good evening", "Time to unwind", "Settle in with a song")
-        else -> listOf("Night owl", "A little music after hours", "Late nights sound better with Huni")
-    }
-    return greetings.random()
-}
+private fun chooseHomeGreeting(): String = when (currentGreetingPeriod()) {
+    GreetingPeriod.MORNING -> listOf("Good morning", "Morning tunes await", "A fresh start sounds good")
+    GreetingPeriod.AFTERNOON -> listOf("Good afternoon", "A little music for the afternoon", "Take a music break")
+    GreetingPeriod.EVENING -> listOf("Good evening", "Time to unwind", "Settle in with a song")
+    GreetingPeriod.NIGHT -> listOf("Night owl", "A little music after hours", "Late nights sound better with Huni")
+}.random()
 
 private data class AvailableUpdate(
     val release: ReleaseInfo,
@@ -282,6 +291,7 @@ class MainActivity : FragmentActivity() {
     private lateinit var navController: NavHostController
     private var pendingIntent: Intent? = null
     private var latestVersionName by mutableStateOf(BuildConfig.BASE_VERSION_NAME)
+    private var latestVersionCode by mutableStateOf(BuildConfig.VERSION_CODE)
 
     // Keep PlayerConnection as regular property - NOT mutableStateOf to prevent UI recomposition
     // when it becomes null during onStop. Only update the snapshot for Compose when needed.
@@ -502,6 +512,8 @@ class MainActivity : FragmentActivity() {
                 pendingCrashReport = pendingCrashReport,
                 latestVersionName = latestVersionName,
                 onLatestVersionNameChange = { latestVersionName = it },
+                latestVersionCode = latestVersionCode,
+                onLatestVersionCodeChange = { latestVersionCode = it },
                 playerConnection = playerConnectionSnapshot,
                 database = database,
                 downloadUtil = downloadUtil,
@@ -519,6 +531,8 @@ class MainActivity : FragmentActivity() {
         pendingCrashReport: String?,
         latestVersionName: String,
         onLatestVersionNameChange: (String) -> Unit,
+        latestVersionCode: Int,
+        onLatestVersionCodeChange: (Int) -> Unit,
         playerConnection: PlayerConnection?,
         database: MusicDatabase,
         downloadUtil: DownloadUtil,
@@ -527,76 +541,78 @@ class MainActivity : FragmentActivity() {
         initialPaletteId: String,
     ) {
         val checkForUpdates by rememberPreference(CheckForUpdatesKey, defaultValue = true)
+        var onboardingDone by remember { mutableStateOf<Boolean?>(null) }
+        LaunchedEffect(Unit) {
+            onboardingDone = dataStore.data.first()[OnboardingDoneKey] ?: false
+        }
+        val startupPalette = HuniPalettes.find { it.id == initialPaletteId } ?: DefaultPalette
+        val startupDarkTheme = when (initialDarkMode) {
+            DarkMode.AUTO -> isSystemInDarkTheme()
+            DarkMode.ON -> true
+            DarkMode.OFF -> false
+        }
+        if (onboardingDone == null) {
+            MetrolistTheme(
+                darkTheme = startupDarkTheme,
+                pureBlack = false,
+                themeColor = if (startupDarkTheme) startupPalette.accentDark else startupPalette.accentLight,
+                palette = startupPalette,
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    androidx.compose.material3.CircularProgressIndicator()
+                }
+            }
+            return
+        }
+        if (onboardingDone == false) {
+            MetrolistTheme(
+                darkTheme = startupDarkTheme,
+                pureBlack = false,
+                themeColor = if (startupDarkTheme) startupPalette.accentDark else startupPalette.accentLight,
+                palette = startupPalette,
+            ) {
+                OnboardingScreen(onFinished = { onboardingDone = true })
+            }
+            return
+        }
         var availableUpdate by remember { mutableStateOf<AvailableUpdate?>(null) }
         var showCrashReport by remember { mutableStateOf(pendingCrashReport != null) }
 
-        if (BuildConfig.UPDATER_AVAILABLE) {
-            LaunchedEffect(checkForUpdates) {
-                if (checkForUpdates) {
-                    val preferences = dataStore.data.first()
-                    val notificationsEnabled = preferences[UpdateNotificationsEnabledKey] ?: true
-                    val (releaseInfo, hasUpdate) = Updater.checkForUpdate().getOrNull() ?: (null to false)
-                    releaseInfo?.let { onLatestVersionNameChange(it.versionName) }
+        LaunchedEffect(checkForUpdates) {
+            UpdateCheckScheduler.sync(
+                this@MainActivity,
+                enabled = BuildConfig.UPDATER_AVAILABLE && checkForUpdates,
+            )
+            if (BuildConfig.UPDATER_AVAILABLE && checkForUpdates) {
+                val preferences = dataStore.data.first()
+                val notificationsEnabled = preferences[UpdateNotificationsEnabledKey] ?: true
+                val (releaseInfo, hasUpdate) = Updater.checkForUpdate().getOrNull() ?: (null to false)
+                releaseInfo?.let {
+                    onLatestVersionNameChange(it.versionName)
+                    onLatestVersionCodeChange(it.versionCode ?: BuildConfig.VERSION_CODE)
+                }
 
-                    val standaloneUpdate =
-                        releaseInfo
-                            ?.takeIf { hasUpdate }
-                            ?.let { release ->
-                                Updater.getDownloadUrlForCurrentVariant(release)?.let { downloadUrl ->
-                                    AvailableUpdate(release, downloadUrl, isKmp = false)
-                                }
-                            }
-                    // Upstream offers its Metrolist-KMP rewrite here in preference to its own
-                    // release. Huni has no KMP build and must not point users at another app,
-                    // so only Huni's own releases are offered. The isKmp plumbing below is left
-                    // in place to keep future upstream merges small.
-                    val update = standaloneUpdate
-                    availableUpdate = update?.takeUnless {
-                        it.release.tagName == preferences[it.dismissalKey]
-                    }
-
-                    if (update != null && notificationsEnabled) {
-                        val intent = Intent(Intent.ACTION_VIEW, update.downloadUrl.toUri())
-                        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                        val pending = PendingIntent.getActivity(this@MainActivity, 1001, intent, flags)
-                        val notificationText =
-                            if (update.isKmp) {
-                                getString(R.string.kmp_upgrade_warning)
-                            } else {
-                                update.release.versionName
-                            }
-                        val notification =
-                            NotificationCompat
-                                .Builder(this@MainActivity, "updates")
-                                .setSmallIcon(R.drawable.update)
-                                .setContentTitle(
-                                    if (update.isKmp) {
-                                        getString(R.string.kmp_upgrade_title, update.release.versionName)
-                                    } else {
-                                        getString(R.string.update_available_title)
-                                    },
-                                )
-                                .setContentText(notificationText)
-                                .apply {
-                                    if (update.isKmp) {
-                                        setStyle(NotificationCompat.BigTextStyle().bigText(notificationText))
-                                    }
-                                }
-                                .setContentIntent(pending)
-                                .setAutoCancel(true)
-                                .build()
-
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-                            ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.POST_NOTIFICATIONS) ==
-                            PackageManager.PERMISSION_GRANTED
-                        ) {
-                            NotificationManagerCompat.from(this@MainActivity).notify(1001, notification)
+                val update = releaseInfo
+                    ?.takeIf { hasUpdate }
+                    ?.let { release ->
+                        Updater.getDownloadUrlForCurrentVariant(release)?.let { downloadUrl ->
+                            AvailableUpdate(release, downloadUrl, isKmp = false)
                         }
                     }
-                } else {
-                    onLatestVersionNameChange(BuildConfig.BASE_VERSION_NAME)
-                    availableUpdate = null
+                availableUpdate = update?.takeUnless {
+                    it.release.tagName == preferences[it.dismissalKey]
                 }
+
+                if (update != null && notificationsEnabled) {
+                    UpdateNotifications.post(this@MainActivity, update.release.versionName, update.downloadUrl)
+                }
+            } else {
+                onLatestVersionNameChange(BuildConfig.BASE_VERSION_NAME)
+                onLatestVersionCodeChange(BuildConfig.VERSION_CODE)
+                availableUpdate = null
             }
         }
 
@@ -646,7 +662,7 @@ class MainActivity : FragmentActivity() {
         }
 
         val enableLandscapeScaling by rememberPreference(EnableLandscapeScalingKey, defaultValue = false)
-        val userDensityScale by rememberPreference(DensityScaleKey, defaultValue = 1f)
+        val userDensityScale by rememberPreference(DensityScaleKey, defaultValue = DensityScale.SLIGHTLY_COMPACT.value)
         val pureBlackEnabled by rememberPreference(PureBlackKey, defaultValue = false)
         val pureBlack =
             remember(pureBlackEnabled, useDarkTheme) {
@@ -700,37 +716,35 @@ class MainActivity : FragmentActivity() {
                 val cutoutInsets = WindowInsets.displayCutout
                 val windowsInsets = WindowInsets.systemBars
                 val bottomInset = with(density) { windowsInsets.getBottom(density).toDp() }
-                val bottomInsetDp = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
 
                 val navController = rememberNavController()
 
                 LaunchedEffect(Unit) {
                     val lastSeenVersion = dataStore.data.first()[LastSeenVersionKey] ?: ""
                     val currentVersion = BuildConfig.BASE_VERSION_NAME
-                    if (lastSeenVersion != currentVersion) {
+                    if (lastSeenVersion.isNotEmpty() && lastSeenVersion != currentVersion) {
                         showChangelog.value = true
                     }
                 }
 
                 val homeViewModel: HomeViewModel = hiltViewModel()
-                val accountImageUrl by homeViewModel.accountImageUrl.collectAsStateWithLifecycle()
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val (previousTab, setPreviousTab) = rememberSaveable { mutableStateOf("home") }
 
                 val (listenTogetherInTopBar) = rememberPreference(ListenTogetherInTopBarKey, defaultValue = true)
-                val navigationItems =
-                    remember(listenTogetherInTopBar) {
-                        if (listenTogetherInTopBar) {
-                            Screens.MainScreens.filter { it != Screens.ListenTogether }
-                        } else {
-                            Screens.MainScreens
-                        }
-                    }
+                val navigationTabs by rememberPreference(NavigationTabsKey, NavigationConfig.defaultValue)
+                val visibleNavigationTabs = remember(navigationTabs) { NavigationConfig.parse(navigationTabs) }
+                val navigationItems = remember(visibleNavigationTabs, listenTogetherInTopBar) {
+                    NavigationConfig.screens(visibleNavigationTabs)
+                }
                 val routeIndexMap = remember(navigationItems) {
                     navigationItems.mapIndexed { i, s -> s.route to i }.toMap()
                 }
                 val (slimNav) = rememberPreference(SlimNavBarKey, defaultValue = false)
-                val (useNewMiniPlayerDesign) = rememberPreference(UseNewMiniPlayerDesignKey, defaultValue = true)
+                val (glassNavigation) = rememberPreference(GlassNavigationKey, defaultValue = true)
+                val (collapseNavigationOnScroll) = rememberPreference(CollapseNavigationOnScrollKey, defaultValue = true)
+                val (keepNavigationExpanded) = rememberPreference(KeepNavigationExpandedKey, defaultValue = false)
+                val (fluidNavigationMotion) = rememberPreference(FluidNavigationMotionKey, defaultValue = true)
                 val (defaultOpenTabInt) = rememberPreference(DefaultOpenTabKey, defaultValue = NavigationTab.HOME.name)
                 val defaultOpenTab = remember(defaultOpenTabInt) {
                     try {
@@ -785,13 +799,18 @@ class MainActivity : FragmentActivity() {
                         }
                     }
 
-                val currentRoute by remember {
-                    derivedStateOf { navBackStackEntry?.destination?.route }
+                val currentRoute = navBackStackEntry?.destination?.route
+
+                LaunchedEffect(navigationItems, currentRoute) {
+                    if (NavigationConfig.shouldRedirectHiddenTopLevelRoute(currentRoute, visibleNavigationTabs)) {
+                        navController.navigate(navigationItems.first().route) {
+                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
                 }
 
-                val inSearchScreen by remember {
-                    derivedStateOf { currentRoute?.startsWith("search/") == true }
-                }
+                val inSearchScreen = currentRoute?.startsWith("search/") == true
                 val navigationItemRoutes =
                     remember(navigationItems) {
                         navigationItems.map { it.route }.toSet()
@@ -966,6 +985,13 @@ class MainActivity : FragmentActivity() {
                 val snackbarHostState = remember { SnackbarHostState() }
 
                 LaunchedEffect(Unit) {
+                    if (dataStore[ChannelSwitchCompletedKey] == true) {
+                        safeDataStoreEdit { it.remove(ChannelSwitchCompletedKey) }
+                        snackbarHostState.showSnackbar("YouTube channel switched")
+                    }
+                }
+
+                LaunchedEffect(Unit) {
                     if (pendingIntent != null) {
                         handleWidgetTargetIntent(pendingIntent!!, navController)
                         handleRecognitionIntent(pendingIntent!!, navController)
@@ -1003,7 +1029,9 @@ class MainActivity : FragmentActivity() {
                     }
 
                 var showAccountDialog by remember { mutableStateOf(false) }
+                var openSettingsAfterAccountClose by remember { mutableStateOf(false) }
                 val homeGreeting = rememberSaveable { chooseHomeGreeting() }
+                val profileName by rememberPreference(UserNameKey, defaultValue = "")
 
                 val pauseListenHistory by rememberPreference(PauseListenHistoryKey, defaultValue = false)
                 val eventCount by database.eventCount().collectAsStateWithLifecycle(initialValue = 0)
@@ -1012,7 +1040,6 @@ class MainActivity : FragmentActivity() {
                         !(pauseListenHistory && eventCount == 0)
                     }
 
-                val baseBg = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surface
                 val artistNameAliases by ArtistNameAliases.aliases.collectAsStateWithLifecycle()
 
                 CompositionLocalProvider(
@@ -1048,7 +1075,10 @@ class MainActivity : FragmentActivity() {
                                     TopAppBar(
                                         title = {
                                             if (navBackStackEntry?.destination?.route == Screens.Home.route) {
-                                                com.metrolist.music.ui.component.HuniWordmark(homeGreeting)
+                                                com.metrolist.music.ui.component.HuniWordmark(
+                                                    greeting = homeGreeting,
+                                                    name = profileName.ifBlank { placeholderForEmptyName() },
+                                                )
                                             } else {
                                                 com.metrolist.music.ui.component.HuniScreenTitle(
                                                     currentTitleRes?.let { stringResource(it) } ?: "",
@@ -1071,30 +1101,6 @@ class MainActivity : FragmentActivity() {
                                                         painter = painterResource(R.drawable.group_outlined),
                                                         contentDescription = stringResource(R.string.together),
                                                     )
-                                                }
-                                            }
-                                            IconButton(onClick = { showAccountDialog = true }) {
-                                                BadgedBox(badge = {
-                                                    if (latestVersionName != BuildConfig.BASE_VERSION_NAME) {
-                                                        Badge()
-                                                    }
-                                                }) {
-                                                    if (accountImageUrl != null) {
-                                                        AsyncImage(
-                                                            model = accountImageUrl,
-                                                            contentDescription = stringResource(R.string.account),
-                                                            modifier =
-                                                                Modifier
-                                                                    .size(24.dp)
-                                                                    .clip(CircleShape),
-                                                        )
-                                                    } else {
-                                                        Icon(
-                                                            painter = painterResource(R.drawable.account),
-                                                            contentDescription = stringResource(R.string.account),
-                                                            modifier = Modifier.size(24.dp),
-                                                        )
-                                                    }
                                                 }
                                             }
                                         },
@@ -1185,7 +1191,7 @@ class MainActivity : FragmentActivity() {
                             // Pre-calculate values for graphicsLayer to avoid reading state during composition
                             val navBarTotalHeight = bottomInset + NavigationBarHeight
 
-                            if (!showRail && currentRoute != "wrapped") {
+                            if (!showRail && shouldShowNavigationBar && currentRoute != "wrapped") {
                                 Box {
                                     if (activePlayerConnection != null) {
                                         BottomSheetPlayer(
@@ -1203,6 +1209,14 @@ class MainActivity : FragmentActivity() {
                                         slimNav = slimNav,
                                         onSearchLongClick = onSearchLongClick,
                                         onHomeLongHold = { showAccountDialog = true },
+                                        onMenuClick = { showAccountDialog = true },
+                                        menuExpanded = showAccountDialog,
+                                        bottomInset = bottomInset,
+                                        glassStyle = glassNavigation,
+                                        collapseFraction = topAppBarScrollBehavior.state.collapsedFraction,
+                                        collapseOnScroll = collapseNavigationOnScroll,
+                                        keepExpanded = keepNavigationExpanded,
+                                        fluidMotion = fluidNavigationMotion,
                                         modifier =
                                             Modifier
                                                 .align(Alignment.BottomCenter)
@@ -1227,50 +1241,7 @@ class MainActivity : FragmentActivity() {
                                                 },
                                     )
 
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .align(Alignment.BottomCenter)
-                                                .height(bottomInsetDp)
-                                                // Use graphicsLayer for background color changes
-                                                .graphicsLayer {
-                                                    val progress = playerBottomSheetState.progress
-                                                    alpha =
-                                                        if (progress > 0f ||
-                                                            (useNewMiniPlayerDesign && !shouldShowNavigationBar)
-                                                        ) {
-                                                            0f
-                                                        } else {
-                                                            1f
-                                                        }
-                                                }.background(baseBg),
-                                    )
                                 }
-                            } else {
-                                if (currentRoute != "wrapped") {
-                                    if (activePlayerConnection != null) {
-                                        BottomSheetPlayer(
-                                            state = playerBottomSheetState,
-                                            navController = navController,
-                                            pureBlack = pureBlack,
-                                        )
-                                    }
-                                }
-
-                                Box(
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .align(Alignment.BottomCenter)
-                                            .height(bottomInsetDp)
-                                            // Use graphicsLayer for background color changes
-                                            .graphicsLayer {
-                                                val progress = playerBottomSheetState.progress
-                                                alpha =
-                                                    if (progress > 0f || (useNewMiniPlayerDesign && !shouldShowNavigationBar)) 0f else 1f
-                                            }.background(baseBg),
-                                )
                             }
                         },
                         modifier =
@@ -1326,17 +1297,21 @@ class MainActivity : FragmentActivity() {
                                 // NavHost with animations (Material 3 Expressive style)
                                 NavHost(
                                     navController = navController,
-                                    startDestination =
-                                        when (tabOpenedFromShortcut ?: defaultOpenTab) {
-                                            NavigationTab.HOME -> Screens.Home
-                                            NavigationTab.SEARCH -> Screens.Search
-                                            NavigationTab.LIBRARY -> Screens.Library
-                                        }.route,
+                                    startDestination = NavigationConfig.screens(visibleNavigationTabs)
+                                        .firstOrNull { it.route == NavigationConfig.route(tabOpenedFromShortcut ?: defaultOpenTab) }
+                                        ?.route ?: navigationItems.first().route,
                                     enterTransition = {
                                         val currentRouteIndex = routeIndexMap[targetState.destination.route] ?: -1
                                         val previousRouteIndex = routeIndexMap[initialState.destination.route] ?: -1
 
-                                        if (currentRouteIndex == -1 || currentRouteIndex > previousRouteIndex) {
+                                        if (targetState.destination.route?.startsWith("settings") == true) {
+                                            slideInHorizontally(
+                                                animationSpec = androidx.compose.animation.core.spring(
+                                                    dampingRatio = 0.84f,
+                                                    stiffness = androidx.compose.animation.core.Spring.StiffnessMedium,
+                                                ),
+                                            ) { it / 20 } + fadeIn(tween(180))
+                                        } else if (currentRouteIndex == -1 || currentRouteIndex > previousRouteIndex) {
                                             slideInHorizontally { it / 8 } + fadeIn(tween(200))
                                         } else {
                                             slideInHorizontally { -it / 8 } + fadeIn(tween(200))
@@ -1346,7 +1321,14 @@ class MainActivity : FragmentActivity() {
                                         val currentRouteIndex = routeIndexMap[initialState.destination.route] ?: -1
                                         val targetRouteIndex = routeIndexMap[targetState.destination.route] ?: -1
 
-                                        if (targetRouteIndex == -1 || targetRouteIndex > currentRouteIndex) {
+                                        if (initialState.destination.route?.startsWith("settings") == true) {
+                                            slideOutHorizontally(
+                                                animationSpec = androidx.compose.animation.core.spring(
+                                                    dampingRatio = 0.84f,
+                                                    stiffness = androidx.compose.animation.core.Spring.StiffnessMedium,
+                                                ),
+                                            ) { -it / 20 } + fadeOut(tween(160))
+                                        } else if (targetRouteIndex == -1 || targetRouteIndex > currentRouteIndex) {
                                             slideOutHorizontally { -it / 8 } + fadeOut(tween(200))
                                         } else {
                                             slideOutHorizontally { it / 8 } + fadeOut(tween(200))
@@ -1356,7 +1338,14 @@ class MainActivity : FragmentActivity() {
                                         val currentRouteIndex = routeIndexMap[targetState.destination.route] ?: -1
                                         val previousRouteIndex = routeIndexMap[initialState.destination.route] ?: -1
 
-                                        if (previousRouteIndex != -1 && previousRouteIndex < currentRouteIndex) {
+                                        if (targetState.destination.route?.startsWith("settings") == true) {
+                                            slideInHorizontally(
+                                                animationSpec = androidx.compose.animation.core.spring(
+                                                    dampingRatio = 0.84f,
+                                                    stiffness = androidx.compose.animation.core.Spring.StiffnessMedium,
+                                                ),
+                                            ) { it / 20 } + fadeIn(tween(180))
+                                        } else if (previousRouteIndex != -1 && previousRouteIndex < currentRouteIndex) {
                                             slideInHorizontally { it / 8 } + fadeIn(tween(200))
                                         } else {
                                             slideInHorizontally { -it / 8 } + fadeIn(tween(200))
@@ -1366,7 +1355,14 @@ class MainActivity : FragmentActivity() {
                                         val currentRouteIndex = routeIndexMap[initialState.destination.route] ?: -1
                                         val targetRouteIndex = routeIndexMap[targetState.destination.route] ?: -1
 
-                                        if (currentRouteIndex != -1 && currentRouteIndex < targetRouteIndex) {
+                                        if (initialState.destination.route?.startsWith("settings") == true) {
+                                            slideOutHorizontally(
+                                                animationSpec = androidx.compose.animation.core.spring(
+                                                    dampingRatio = 0.84f,
+                                                    stiffness = androidx.compose.animation.core.Spring.StiffnessMedium,
+                                                ),
+                                            ) { -it / 20 } + fadeOut(tween(160))
+                                        } else if (currentRouteIndex != -1 && currentRouteIndex < targetRouteIndex) {
                                             slideOutHorizontally { -it / 8 } + fadeOut(tween(200))
                                         } else {
                                             slideOutHorizontally { it / 8 } + fadeOut(tween(200))
@@ -1378,12 +1374,25 @@ class MainActivity : FragmentActivity() {
                                         navController = navController,
                                         scrollBehavior = topAppBarScrollBehavior,
                                         latestVersionName = latestVersionName,
+                                        latestVersionCode = latestVersionCode,
                                         activity = this@MainActivity,
                                         snackbarHostState = snackbarHostState,
                                     )
                                 }
                             }
                         }
+                    }
+
+                    if ((showRail || !shouldShowNavigationBar) &&
+                        currentRoute != "wrapped" &&
+                        activePlayerConnection != null
+                    ) {
+                        BottomSheetPlayer(
+                            state = playerBottomSheetState,
+                            navController = navController,
+                            modifier = Modifier.fillMaxSize(),
+                            pureBlack = pureBlack,
+                        )
                     }
 
                     BottomSheetMenu(
@@ -1401,8 +1410,15 @@ class MainActivity : FragmentActivity() {
                             onDismiss = {
                                 showAccountDialog = false
                                 homeViewModel.refresh()
+                                if (openSettingsAfterAccountClose) {
+                                    openSettingsAfterAccountClose = false
+                                    navController.navigate("settings") { launchSingleTop = true }
+                                }
                             },
                             latestVersionName = latestVersionName,
+                            latestVersionCode = latestVersionCode,
+                            onSettingsClick = { openSettingsAfterAccountClose = true },
+                            bottomInset = bottomInset,
                         )
                     }
 

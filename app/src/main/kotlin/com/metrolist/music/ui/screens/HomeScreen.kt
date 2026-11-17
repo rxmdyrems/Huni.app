@@ -123,6 +123,8 @@ import com.metrolist.music.constants.ShowPlayRandomButtonKey
 import com.metrolist.music.constants.ShowRecognizeButtonKey
 import com.metrolist.music.constants.SmallGridThumbnailHeight
 import com.metrolist.music.constants.ThumbnailCornerRadius
+import com.metrolist.music.constants.UserNameKey
+import com.metrolist.music.constants.UserAvatarKey
 import com.metrolist.music.db.entities.Album
 import com.metrolist.music.db.entities.Artist
 import com.metrolist.music.db.entities.LocalItem
@@ -173,6 +175,7 @@ import com.metrolist.music.ui.menu.YouTubePlaylistMenu
 import com.metrolist.music.ui.menu.YouTubeSongMenu
 import com.metrolist.music.ui.utils.SnapLayoutInfoProvider
 import com.metrolist.music.utils.isSpotifyId
+import com.metrolist.music.utils.UserAvatarImage
 import com.metrolist.music.ui.utils.resize
 import com.metrolist.music.utils.joinByBullet
 import com.metrolist.music.utils.joinToArtistString
@@ -719,6 +722,8 @@ fun HomeScreen(
     val innerTubeCookie by rememberPreference(InnerTubeCookieKey, "")
     val (randomizeHomeOrder) = rememberPreference(RandomizeHomeOrderKey, true)
     val autoRadioQueue by rememberPreference(AutoRadioQueueKey, defaultValue = true)
+    val profileName by rememberPreference(UserNameKey, defaultValue = "")
+    val profileAvatar by rememberPreference(UserAvatarKey, defaultValue = "avatar_amber")
 
     LaunchedEffect(Unit) { viewModel.loadHomeData() }
 
@@ -1311,6 +1316,20 @@ fun HomeScreen(
                 state = lazylistState,
                 contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
             ) {
+                item(key = "local_profile") {
+                    NavigationTitle(
+                        label = "Local profile",
+                        title = profileName.ifBlank { "Music lover" },
+                        thumbnail = {
+                            UserAvatarImage(
+                                avatarId = profileAvatar,
+                                modifier = Modifier.size(ListThumbnailSize).clip(CircleShape),
+                                contentDescription = "Your local profile avatar",
+                            )
+                        },
+                        onClick = { navController.navigate("settings/about") },
+                    )
+                }
                 item {
                     ChipsRow(
                         chips = listOf<Pair<com.metrolist.innertube.pages.HomePage.Chip?, String>>(null to "All") + (homePage?.chips?.map { it to it.title } ?: emptyList()),

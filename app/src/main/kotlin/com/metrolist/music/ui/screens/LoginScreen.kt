@@ -75,6 +75,7 @@ import com.metrolist.innertube.utils.parseCookieString
 import com.metrolist.music.LocalPlayerAwareWindowInsets
 import com.metrolist.music.R
 import com.metrolist.music.constants.AccountChannelHandleKey
+import com.metrolist.music.constants.ChannelSwitchCompletedKey
 import com.metrolist.music.constants.AccountEmailKey
 import com.metrolist.music.constants.AccountNameKey
 import com.metrolist.music.constants.DataSyncIdKey
@@ -211,6 +212,7 @@ fun LoginScreen(
                         settings[AccountNameKey] = accountInfo.name
                         settings[AccountEmailKey] = accountInfo.email.orEmpty()
                         settings[AccountChannelHandleKey] = accountInfo.channelHandle.orEmpty()
+                        if (isSwitchingChannel) settings[ChannelSwitchCompletedKey] = true
                     }
                 }
             check(saved) { "Failed to persist account data" }

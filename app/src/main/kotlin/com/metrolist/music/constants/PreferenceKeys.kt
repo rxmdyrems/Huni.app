@@ -38,7 +38,7 @@ enum class DensityScale(
     val label: String,
 ) {
     NATIVE(1.0f, "Native (100%)"),
-    SLIGHTLY_COMPACT(0.85f, "Slightly Compact (85%)"),
+    SLIGHTLY_COMPACT(0.85f, "Slightly compact (85%)"),
     COMPACT(0.75f, "Compact (75%)"),
     VERY_COMPACT(0.65f, "Very Compact (65%)"),
     ULTRA_COMPACT(0.55f, "Ultra Compact (55%)"),
@@ -51,6 +51,14 @@ enum class DensityScale(
 
 val DefaultOpenTabKey = stringPreferencesKey("defaultOpenTab")
 val SlimNavBarKey = booleanPreferencesKey("slimNavBar")
+val NavigationTabsKey = stringPreferencesKey("nav_hidden_tabs")
+val GlassNavigationKey = booleanPreferencesKey("glassNavigation")
+val CollapseNavigationOnScrollKey = booleanPreferencesKey("collapseNavigationOnScroll")
+val KeepNavigationExpandedKey = booleanPreferencesKey("keepNavigationExpanded")
+val FluidNavigationMotionKey = booleanPreferencesKey("fluidNavigationMotion")
+val OnboardingDoneKey = booleanPreferencesKey("onboarding_done")
+val UserNameKey = stringPreferencesKey("user_name")
+val UserAvatarKey = stringPreferencesKey("user_avatar")
 val GridItemsSizeKey = stringPreferencesKey("gridItemSize")
 val SliderStyleKey = stringPreferencesKey("sliderStyle")
 val SquigglySliderKey = booleanPreferencesKey("squigglySlider")
@@ -189,6 +197,13 @@ val DiscordUserStatusKey = stringPreferencesKey("discordUserStatus")
 
 // Google Cast
 val EnableGoogleCastKey = booleanPreferencesKey("enableGoogleCast")
+
+// Local manga reader
+val ReaderReadingModeKey = stringPreferencesKey("readerReadingMode")
+val ReaderScaleModeKey = stringPreferencesKey("readerScaleMode")
+val ReaderBackgroundKey = stringPreferencesKey("readerBackground")
+val ReaderFullscreenKey = booleanPreferencesKey("readerFullscreen")
+val ReaderKeepScreenOnKey = booleanPreferencesKey("readerKeepScreenOn")
 
 // Listen Together
 val ListenTogetherServerUrlKey = stringPreferencesKey("listenTogetherServerUrl")
@@ -591,6 +606,7 @@ val InnerTubeCookieKey = stringPreferencesKey("innerTubeCookie")
 val AccountNameKey = stringPreferencesKey("accountName")
 val AccountEmailKey = stringPreferencesKey("accountEmail")
 val AccountChannelHandleKey = stringPreferencesKey("accountChannelHandle")
+val ChannelSwitchCompletedKey = booleanPreferencesKey("channelSwitchCompleted")
 val UseLoginForBrowse = booleanPreferencesKey("useLoginForBrowse")
 
 // SponsorBlock

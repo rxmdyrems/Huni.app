@@ -5,7 +5,30 @@
 
 package com.metrolist.music.ui.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.runtime.SideEffect
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +43,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +65,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -141,42 +167,144 @@ fun DefaultDialog(
 fun AccountSettingsDialog(
     onDismiss: () -> Unit,
     latestVersionName: String,
+    latestVersionCode: Int,
+    onSettingsClick: () -> Unit = {},
+    bottomInset: androidx.compose.ui.unit.Dp = 0.dp,
 ) {
     val navController = LocalNavController.current
+    val visible = remember { mutableStateOf(false) }
+    val closing = remember { mutableStateOf(false) }
+    val glassSweep by rememberInfiniteTransition(label = "accountGlassSweep").animateFloat(
+        initialValue = -0.3f,
+        targetValue = 1.3f,
+        animationSpec = infiniteRepeatable(tween(durationMillis = 4600, easing = LinearEasing), repeatMode = RepeatMode.Restart),
+        label = "accountGlassSweep",
+    )
+    val closeModal = {
+        if (!closing.value) {
+            closing.value = true
+            visible.value = false
+        }
+    }
+    LaunchedEffect(Unit) { visible.value = true }
+    LaunchedEffect(closing.value) {
+        if (closing.value) {
+            delay(420)
+            onDismiss()
+        }
+    }
     Dialog(
-        onDismissRequest = onDismiss,
-        properties =
-            DialogProperties(
-                usePlatformDefaultWidth = false,
-                dismissOnClickOutside = true,
-            ),
+        onDismissRequest = closeModal,
+        properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = false),
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onTap = { onDismiss() }
-                        )
-                    },
-            contentAlignment = Alignment.TopCenter,
-        ) {
-            Surface(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 72.dp, start = 16.dp, end = 16.dp)
-                        .clip(RoundedCornerShape(28.dp)),
-                shape = MaterialTheme.shapes.large,
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                tonalElevation = 8.dp,
-            ) {
-                AccountSettings(
-                    navController = navController,
-                    onClose = onDismiss,
-                    latestVersionName = latestVersionName,
+        val dialogWindow = (LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window
+        SideEffect { dialogWindow?.setDimAmount(0f) }
+        androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize()) {
+            val targetWidth = (maxWidth - 32.dp).coerceAtLeast(64.dp)
+            val targetHeight = (maxHeight - 152.dp).coerceAtLeast(240.dp)
+            val startX = (maxWidth - 80.dp).coerceAtLeast(0.dp)
+            val startY = (maxHeight - bottomInset - 72.dp).coerceAtLeast(0.dp)
+            val offsetX by animateDpAsState(
+                targetValue = if (visible.value) 16.dp else startX,
+                animationSpec = spring(dampingRatio = 0.82f, stiffness = Spring.StiffnessMedium),
+                label = "accountModalX",
+            )
+            val offsetY by animateDpAsState(
+                targetValue = if (visible.value) 72.dp else startY,
+                animationSpec = spring(dampingRatio = 0.82f, stiffness = Spring.StiffnessMedium),
+                label = "accountModalY",
+            )
+            val width by animateDpAsState(
+                targetValue = if (visible.value) targetWidth else 64.dp,
+                animationSpec = spring(dampingRatio = 0.82f, stiffness = Spring.StiffnessMedium),
+                label = "accountModalWidth",
+            )
+            val height by animateDpAsState(
+                targetValue = if (visible.value) targetHeight else 64.dp,
+                animationSpec = spring(dampingRatio = 0.82f, stiffness = Spring.StiffnessMedium),
+                label = "accountModalHeight",
+            )
+            val corner by animateDpAsState(
+                targetValue = if (visible.value) 28.dp else 32.dp,
+                animationSpec = spring(dampingRatio = 0.82f, stiffness = Spring.StiffnessMedium),
+                label = "accountModalCorner",
+            )
+            val scrimAlpha by animateFloatAsState(
+                targetValue = if (visible.value) 0.52f else 0f,
+                animationSpec = tween(200),
+                label = "accountModalScrim",
+            )
+            val contentAlpha by animateFloatAsState(
+                targetValue = if (visible.value) 1f else 0f,
+                animationSpec = tween(150, delayMillis = 80),
+                label = "accountModalContent",
+            )
+            Box(Modifier.fillMaxSize()) {
+                Box(
+                    Modifier.fillMaxSize().background(Color.Black.copy(alpha = scrimAlpha))
+                        .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { closeModal() },
                 )
+                Box(
+                    Modifier.offset(x = offsetX, y = offsetY).size(width, height)
+                        .clip(RoundedCornerShape(corner))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    Color.White.copy(alpha = 0.17f),
+                                    MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.91f),
+                                    Color(0xFF17131D).copy(alpha = 0.87f),
+                                ),
+                            ),
+                        )
+                        .border(1.dp, Color.White.copy(alpha = 0.32f), RoundedCornerShape(corner))
+                        .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {},
+                ) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        shape = RoundedCornerShape(corner),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.78f),
+                        tonalElevation = 4.dp,
+                    ) {
+                        Box(Modifier.fillMaxSize()) {
+                            Canvas(Modifier.fillMaxSize()) {
+                                val leftGlow = Offset(size.width * 0.12f, -size.height * 0.08f)
+                                val rightGlow = Offset(size.width * 0.92f, size.height * 0.18f)
+                                drawCircle(
+                                    brush = Brush.radialGradient(listOf(Color.White.copy(alpha = 0.18f), Color.Transparent), leftGlow, size.width * 0.8f),
+                                    radius = size.width * 0.8f,
+                                    center = leftGlow,
+                                )
+                                drawCircle(
+                                    brush = Brush.radialGradient(listOf(Color(0xFFFFB84D).copy(alpha = 0.10f), Color.Transparent), rightGlow, size.width * 0.65f),
+                                    radius = size.width * 0.65f,
+                                    center = rightGlow,
+                                )
+                                val sweepX = size.width * glassSweep
+                                drawRect(
+                                    brush = Brush.linearGradient(
+                                        colors = listOf(Color.Transparent, Color.White.copy(alpha = 0.055f), Color.Transparent),
+                                        start = Offset(sweepX - size.height * 0.25f, 0f),
+                                        end = Offset(sweepX + size.height * 0.25f, size.height),
+                                    ),
+                                    topLeft = Offset(sweepX - size.height * 0.25f, 0f),
+                                    size = Size(size.height * 0.5f, size.height),
+                                )
+                            }
+                            Box(Modifier.fillMaxSize().graphicsLayer { alpha = contentAlpha }) {
+                                AccountSettings(
+                                    navController = navController,
+                                    onClose = closeModal,
+                                    latestVersionName = latestVersionName,
+                                    latestVersionCode = latestVersionCode,
+                                    onSettingsClick = {
+                                        onSettingsClick()
+                                        closeModal()
+                                    },
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }

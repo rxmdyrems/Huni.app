@@ -78,7 +78,9 @@ import com.metrolist.music.viewmodels.HomeViewModel
 fun AccountSettings(
     navController: NavController,
     onClose: () -> Unit,
-    latestVersionName: String
+    latestVersionName: String,
+    latestVersionCode: Int,
+    onSettingsClick: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -419,15 +421,17 @@ fun AccountSettings(
                         title = { Text(stringResource(R.string.settings), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         icon = painterResource(R.drawable.settings),
                         showBadge = BuildConfig.UPDATER_AVAILABLE &&
-                            latestVersionName != BuildConfig.BASE_VERSION_NAME,
+                            latestVersionCode > BuildConfig.VERSION_CODE,
                         onClick = {
-                            onClose()
-                            navController.navigate("settings")
+                            if (onSettingsClick != null) onSettingsClick() else {
+                                onClose()
+                                navController.navigate("settings")
+                            }
                         }
                     )
                 )
 
-                if (BuildConfig.UPDATER_AVAILABLE && latestVersionName != BuildConfig.BASE_VERSION_NAME) {
+                if (BuildConfig.UPDATER_AVAILABLE && latestVersionCode > BuildConfig.VERSION_CODE) {
                     val releaseInfo = Updater.getCachedLatestRelease()
                     val downloadUrl = releaseInfo?.let { Updater.getDownloadUrlForCurrentVariant(it) }
                     if (downloadUrl != null) {

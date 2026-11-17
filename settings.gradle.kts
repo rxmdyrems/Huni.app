@@ -40,3 +40,13 @@ dependencyResolutionManagement {
 rootProject.name = "Metrolist"
 include(":app")
 include(":innertube")
+
+// MihonKit v1.1.0's published POM references unpublished :core:metro and :i18n
+// artifacts. Build the exact upstream tag as a composite so those modules are
+// present while retaining the public dependency coordinate in :app.
+includeBuild("vendor/mihon-kit") {
+    dependencySubstitution {
+        substitute(module("com.github.verizonkert:mihon-kit"))
+            .using(project(":mihon-kit"))
+    }
+}

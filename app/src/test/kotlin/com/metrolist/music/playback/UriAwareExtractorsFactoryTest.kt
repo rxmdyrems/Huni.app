@@ -1,16 +1,21 @@
 package com.metrolist.music.playback
 
 import android.net.Uri
-import androidx.media3.extractor.FlacExtractor
-import androidx.media3.extractor.Mp3Extractor
+import androidx.media3.extractor.flac.FlacExtractor
+import androidx.media3.extractor.mp3.Mp3Extractor
 import androidx.media3.extractor.mkv.MatroskaExtractor
 import androidx.media3.extractor.mp4.FragmentedMp4Extractor
 import androidx.media3.extractor.mp4.Mp4Extractor
+import org.junit.runner.RunWith
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @androidx.media3.common.util.UnstableApi
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
 class UriAwareExtractorsFactoryTest {
     private val factory = UriAwareExtractorsFactory()
 

@@ -8,6 +8,7 @@ data class ReaderBookEntity(
     @PrimaryKey val id: String,
     val title: String,
     val sourceName: String,
+    val referer: String? = null,
     val addedAt: Long = System.currentTimeMillis(),
     val currentPage: Int = 0,
 )
