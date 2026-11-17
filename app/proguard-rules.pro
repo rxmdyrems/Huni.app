@@ -173,6 +173,17 @@
 # Dynamically loaded extension DEX may call Kotlin stdlib overloads Huni does not reference itself.
 # Keep the facade family intact so R8 cannot remove extension-only joinToString dispatchers.
 -keep class kotlin.collections.ArraysKt* { *; }
+# Mihon extensions are separate DEX files and rely on the host for shared runtime libraries.
+# R8 otherwise removes methods/classes only referenced by the dynamically loaded DEX.
+-keep class kotlin.** { *; }
+-keep class kotlinx.** { *; }
+-keep class eu.kanade.tachiyomi.** { *; }
+-keep class tachiyomi.** { *; }
+-keep class okhttp3.** { *; }
+-keep class okio.** { *; }
+-keep class org.jsoup.** { *; }
+-keep class uy.kohesive.injekt.** { *; }
+-keep class com.squareup.zstd.** { *; }
 
 ## Ktor Serialization
 -keep class io.ktor.** { *; }
