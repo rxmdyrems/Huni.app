@@ -2,6 +2,9 @@
 > Every notable change to Huni, newest first. New release-text emoji prefixes follow CONTRIBUTING.md.
 
 ## Unreleased
+### 🐛 Fixes
+- 🐛 Restored the Mihon AppInfo host API required by the current MangaDex extension and added release DEX ABI verification for it.
+- 🐛 Kept player slider ranges finite and nonzero until duration is available, and disabled seeking until the duration is valid.
 ### 🎨 UI
 - 🎨 Refined shared section headers with cleaner theme-aware typography and a subtle accent, keeping the HUNI branding font for branding.
 ---

@@ -271,6 +271,12 @@ class ReaderExtensionsViewModel @Inject constructor(application: Application) : 
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Throwable) {
+                logSourceFailure(
+                    operation = if (query.isBlank()) "popular" else "search",
+                    packageName = selection.first.meta.pkg,
+                    sourceId = selection.second,
+                    error = error,
+                )
                 showError(sourceError(error))
                 mutableState.value = mutableState.value.copy(mangas = emptyList(), hasNextPage = false)
             }
@@ -289,6 +295,7 @@ class ReaderExtensionsViewModel @Inject constructor(application: Application) : 
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Throwable) {
+                logSourceFailure("details-or-chapters", selection.first.meta.pkg, sourceId, error)
                 showError(sourceError(error))
             }
         }
@@ -308,6 +315,7 @@ class ReaderExtensionsViewModel @Inject constructor(application: Application) : 
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (error: Throwable) {
+            logSourceFailure("pages", selection.first.meta.pkg, sourceId, error)
             val message = sourceError(error)
             mutableState.value = mutableState.value.copy(loading = false, error = message)
             throw IllegalStateException(message, error)
@@ -355,6 +363,28 @@ class ReaderExtensionsViewModel @Inject constructor(application: Application) : 
     private data class InstalledExtension(val meta: ExtensionMeta, val apkFile: java.io.File)
 
     private val ExtensionMeta.apkFile: java.io.File get() = repository.apkFile(pkg)
+
+    private fun logSourceFailure(operation: String, packageName: String, sourceId: Long, error: Throwable) {
+        val chain = generateSequence(error) { it.cause }.take(8).toList()
+        val linkageError = chain.firstOrNull {
+            it is ClassNotFoundException ||
+                it is NoClassDefFoundError ||
+                it is NoSuchMethodError ||
+                it is NoSuchFieldError
+        }
+        val missingApi = linkageError?.message?.takeIf { message ->
+            message.isNotBlank() && message.length <= 180 &&
+                message.all { it.isLetterOrDigit() || it in "._/$:()[];,<> -" }
+        }
+        Timber.w(
+            "Reader extension operation failed: operation=%s package=%s sourceId=%d errorType=%s missingApi=%s",
+            operation,
+            packageName,
+            sourceId,
+            error.javaClass.simpleName,
+            missingApi ?: "-",
+        )
+    }
 
     private fun sourceError(error: Throwable): String {
         val chain = generateSequence(error) { it.cause }.toList()

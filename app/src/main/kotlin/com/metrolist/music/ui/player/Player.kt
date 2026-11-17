@@ -391,6 +391,9 @@ fun BottomSheetPlayer(
     var sliderPosition by remember {
         mutableStateOf<Long?>(null)
     }
+    val sliderInput = remember(duration, effectivePosition, sliderPosition) {
+        playerSliderInput(duration, sliderPosition ?: effectivePosition)
+    }
     // Track when we last manually set position to avoid Cast overwriting it
     var lastManualSeekTime by remember { mutableLongStateOf(0L) }
 
@@ -1371,8 +1374,8 @@ fun BottomSheetPlayer(
             when (sliderStyle) {
                 SliderStyle.DEFAULT -> {
                     Slider(
-                        value = (sliderPosition ?: effectivePosition).toFloat(),
-                        valueRange = 0f..(if (duration == C.TIME_UNSET) 0f else duration.toFloat()),
+                        value = sliderInput.value,
+                        valueRange = sliderInput.valueRange,
                         onValueChange = {
                             if (!isListenTogetherGuest) {
                                 sliderPosition = it.toLong()
@@ -1392,7 +1395,7 @@ fun BottomSheetPlayer(
                                 sliderPosition = null
                             }
                         },
-                        enabled = !isListenTogetherGuest,
+                        enabled = sliderInput.isSeekable && !isListenTogetherGuest,
                         colors = PlayerSliderColors.getSliderColors(textButtonColor, playerBackground, useDarkTheme),
                         modifier = Modifier.padding(horizontal = PlayerHorizontalPadding),
                     )
@@ -1401,8 +1404,8 @@ fun BottomSheetPlayer(
                 SliderStyle.WAVY -> {
                     if (squigglySlider) {
                         SquigglySlider(
-                            value = (sliderPosition ?: effectivePosition).toFloat(),
-                            valueRange = 0f..(if (duration == C.TIME_UNSET) 0f else duration.toFloat()),
+                            value = sliderInput.value,
+                            valueRange = sliderInput.valueRange,
                             onValueChange = {
                                 sliderPosition = it.toLong()
                             },
@@ -1421,11 +1424,12 @@ fun BottomSheetPlayer(
                             modifier = Modifier.padding(horizontal = PlayerHorizontalPadding),
                             colors = PlayerSliderColors.getSliderColors(textButtonColor, playerBackground, useDarkTheme),
                             isPlaying = effectiveIsPlaying,
+                            enabled = sliderInput.isSeekable && !isListenTogetherGuest,
                         )
                     } else {
                         WavySlider(
-                            value = (sliderPosition ?: effectivePosition).toFloat(),
-                            valueRange = 0f..(if (duration == C.TIME_UNSET) 0f else duration.toFloat()),
+                            value = sliderInput.value,
+                            valueRange = sliderInput.valueRange,
                             onValueChange = {
                                 sliderPosition = it.toLong()
                             },
@@ -1444,14 +1448,15 @@ fun BottomSheetPlayer(
                             colors = PlayerSliderColors.getSliderColors(textButtonColor, playerBackground, useDarkTheme),
                             modifier = Modifier.padding(horizontal = PlayerHorizontalPadding),
                             isPlaying = effectiveIsPlaying,
+                            enabled = sliderInput.isSeekable && !isListenTogetherGuest,
                         )
                     }
                 }
 
                 SliderStyle.SLIM -> {
                     Slider(
-                        value = (sliderPosition ?: effectivePosition).toFloat(),
-                        valueRange = 0f..(if (duration == C.TIME_UNSET) 0f else duration.toFloat()),
+                        value = sliderInput.value,
+                        valueRange = sliderInput.valueRange,
                         onValueChange = {
                             if (!isListenTogetherGuest) {
                                 sliderPosition = it.toLong()
@@ -1471,7 +1476,7 @@ fun BottomSheetPlayer(
                                 sliderPosition = null
                             }
                         },
-                        enabled = !isListenTogetherGuest,
+                        enabled = sliderInput.isSeekable && !isListenTogetherGuest,
                         thumb = { Spacer(modifier = Modifier.size(0.dp)) },
                         track = { sliderState ->
                             PlayerSliderTrack(
