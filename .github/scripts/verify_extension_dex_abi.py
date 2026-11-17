@@ -13,13 +13,26 @@ from pathlib import Path
 EXPECTED_OWNER_PREFIX = "Lkotlin/collections/ArraysKt"
 EXPECTED_METHOD = "joinToString$default"
 EXPECTED_DESCRIPTOR = (
-    "([Ljava/lang/Object;Ljava/lang/CharSequence;Ljava/lang/CharSequence;I"
+    "([Ljava/lang/Object;Ljava/lang/CharSequence;Ljava/lang/CharSequence;"
+    "Ljava/lang/CharSequence;ILjava/lang/CharSequence;"
     "Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/String;"
 )
 HTTP_SOURCE = "Leu/kanade/tachiyomi/source/online/HttpSource;"
 EXPECTED_FIELD = "headers$delegate"
 EXPECTED_FIELD_TYPE = "Lkotlin/Lazy;"
 EXPECTED_LAZY_IMPL = "Lkotlin/SynchronizedLazyImpl;"
+REQUIRED_RUNTIME_CLASSES = (
+    "Lkotlin/LazyKt;",
+    "Lkotlin/collections/MapsKt;",
+    "Lkotlin/coroutines/intrinsics/IntrinsicsKt;",
+    "Lkotlinx/serialization/SerializationStrategy;",
+    "Lkotlinx/serialization/internal/ArrayListSerializer;",
+    "Lkotlinx/serialization/json/okio/OkioStreamsKt;",
+    "Lokhttp3/brotli/BrotliInterceptor;",
+    "Lokhttp3/zstd/Zstd;",
+    "Lorg/jsoup/Jsoup;",
+    "Luy/kohesive/injekt/api/InjektFactory;",
+)
 
 
 def u32(data: bytes, offset: int) -> int:
@@ -196,9 +209,18 @@ def main(apk_path: str) -> int:
         print(f"ERROR: minified APK is missing {EXPECTED_LAZY_IMPL}", file=sys.stderr)
         return 1
 
+    missing_runtime_classes = sorted(set(REQUIRED_RUNTIME_CLASSES) - all_classes)
+    if missing_runtime_classes:
+        print(
+            f"ERROR: minified APK is missing dynamically used runtime classes: {missing_runtime_classes}",
+            file=sys.stderr,
+        )
+        return 1
+
     print(
         f"Verified minified DEX in {apk.name}: {sorted(expected_methods)}, "
-        f"{HTTP_SOURCE}->{EXPECTED_FIELD}:{EXPECTED_FIELD_TYPE}, and SynchronizedLazyImpl are retained."
+        f"{HTTP_SOURCE}->{EXPECTED_FIELD}:{EXPECTED_FIELD_TYPE}, SynchronizedLazyImpl, and "
+        f"{len(REQUIRED_RUNTIME_CLASSES)} extension runtime classes are retained."
     )
     return 0
 
