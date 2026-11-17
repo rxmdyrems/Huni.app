@@ -5,8 +5,9 @@
 ---
 ## v0.9.18 (2026-11-16)
 ### 🐛 Fixes
-- 🐛 Preserved the Kotlin array join dispatcher required by dynamically loaded Mihon extensions in minified release builds.
-- 🐛 Added regression coverage for JSON and compressed protobuf extension catalogs, plus release DEX ABI checks.
+- 🐛 Preserved the Kotlin, serialization, Mihon source API, OkHttp/Okio, Jsoup, Injekt, and Zstandard runtime classes required by dynamically loaded Mihon extensions in minified release builds.
+- 🐛 Added release DEX ABI checks for extension-only runtime classes and exposed the missing class name when dynamic extension loading fails.
+- 🐛 Added regression coverage for JSON and compressed protobuf extension catalogs.
 ---
 ## v0.9.17 (2026-11-16)
 ### 🐛 Fixes

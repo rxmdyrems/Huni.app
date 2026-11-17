@@ -164,9 +164,17 @@ class ReaderExtensionsViewModel @Inject constructor(application: Application) : 
     private fun installFailureMessage(error: Throwable): String {
         val chain = generateSequence(error) { it.cause }.toList()
         val message = chain.joinToString(" ") { it.message.orEmpty() }
+        val missingClass = chain.firstNotNullOfOrNull { cause ->
+            when (cause) {
+                is ClassNotFoundException -> cause.message
+                is NoClassDefFoundError -> cause.message
+                else -> null
+            }
+        }?.let { raw ->
+            Regex("L([^;]+);").find(raw)?.groupValues?.get(1)?.replace('/', '.') ?: raw
+        }
         return when {
-            chain.any { it is ClassNotFoundException || it is NoClassDefFoundError } ->
-                "Extension classes are missing or use an unsupported API. Update the repository and retry."
+            missingClass != null -> "Missing extension runtime class: ${missingClass.take(160)}"
             message.contains("package does not match", ignoreCase = true) ->
                 "Downloaded APK package does not match the repository entry."
             message.contains("source", ignoreCase = true) && message.contains("declare", ignoreCase = true) ->
