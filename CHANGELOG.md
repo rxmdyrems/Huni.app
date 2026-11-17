@@ -3,6 +3,13 @@
 
 ## Unreleased
 ---
+## v0.9.19 (2026-11-17)
+### 🎨 UI
+- 🎨 Added the fluid floating navigation dock with theme-aware glass styling, animated collapse-on-scroll, compact sizing, drag magnification, and persisted Appearance controls.
+### 🐛 Known issues
+- 🐛 The player slider issue remains unresolved and is intentionally deferred to the next update.
+- 🐛 MangaDex/source-operation compatibility remains unresolved and is intentionally deferred to the next update.
+---
 ## v0.9.18 (2026-11-16)
 ### 🐛 Fixes
 - 🐛 Preserved the Kotlin array join dispatcher required by dynamically loaded Mihon extensions in minified release builds.

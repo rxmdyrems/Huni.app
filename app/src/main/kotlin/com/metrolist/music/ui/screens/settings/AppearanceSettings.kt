@@ -63,6 +63,7 @@ import androidx.navigation.NavController
 import com.metrolist.music.LocalPlayerAwareWindowInsets
 import com.metrolist.music.R
 import com.metrolist.music.constants.ChipSortTypeKey
+import com.metrolist.music.constants.CollapseNavigationOnScrollKey
 import com.metrolist.music.constants.CropAlbumArtKey
 import com.metrolist.music.constants.DefaultOpenTabKey
 import com.metrolist.music.constants.DensityScale
@@ -77,6 +78,8 @@ import com.metrolist.music.constants.GridItemsSizeKey
 import com.metrolist.music.constants.GlassNavigationKey
 import com.metrolist.music.constants.HidePlayerThumbnailKey
 import com.metrolist.music.constants.HideStatusBarOnFullscreenKey
+import com.metrolist.music.constants.FluidNavigationMotionKey
+import com.metrolist.music.constants.KeepNavigationExpandedKey
 import com.metrolist.music.constants.LibraryFilter
 import com.metrolist.music.constants.ListenTogetherInTopBarKey
 import com.metrolist.music.constants.NavigationTabsKey
@@ -225,6 +228,12 @@ fun AppearanceSettings(
     val (navigationTabsValue, onNavigationTabsChange) =
         rememberPreference(NavigationTabsKey, NavigationConfig.defaultValue)
     val (glassNavigation, onGlassNavigationChange) = rememberPreference(GlassNavigationKey, defaultValue = true)
+    val (collapseNavigationOnScroll, onCollapseNavigationOnScrollChange) =
+        rememberPreference(CollapseNavigationOnScrollKey, defaultValue = true)
+    val (keepNavigationExpanded, onKeepNavigationExpandedChange) =
+        rememberPreference(KeepNavigationExpandedKey, defaultValue = false)
+    val (fluidNavigationMotion, onFluidNavigationMotionChange) =
+        rememberPreference(FluidNavigationMotionKey, defaultValue = true)
     val visibleNavigationTabs = remember(navigationTabsValue) { NavigationConfig.parse(navigationTabsValue) }
     val (playerButtonsStyle, onPlayerButtonsStyleChange) =
         rememberEnumPreference(
@@ -1551,9 +1560,27 @@ fun AppearanceSettings(
             items = listOf(
                 Material3SettingsItem(
                     title = { Text("Floating glass bar") },
-                    description = { Text("Use a dark translucent pill and round menu button.") },
+                    description = { Text("Use a translucent frosted dock and separate round menu button.") },
                     trailingContent = { HuniSwitch(checked = glassNavigation, onCheckedChange = onGlassNavigationChange) },
                     onClick = { onGlassNavigationChange(!glassNavigation) },
+                ),
+                Material3SettingsItem(
+                    title = { Text("Collapse on scroll") },
+                    description = { Text("Fade labels and make the dock more compact while content scrolls.") },
+                    trailingContent = { HuniSwitch(checked = collapseNavigationOnScroll, onCheckedChange = onCollapseNavigationOnScrollChange) },
+                    onClick = { onCollapseNavigationOnScrollChange(!collapseNavigationOnScroll) },
+                ),
+                Material3SettingsItem(
+                    title = { Text("Keep dock expanded") },
+                    description = { Text("Always show labels and keep the dock at its full size.") },
+                    trailingContent = { HuniSwitch(checked = keepNavigationExpanded, onCheckedChange = onKeepNavigationExpandedChange) },
+                    onClick = { onKeepNavigationExpandedChange(!keepNavigationExpanded) },
+                ),
+                Material3SettingsItem(
+                    title = { Text("Fluid tab motion") },
+                    description = { Text("Enable drag magnification and animated tab transitions.") },
+                    trailingContent = { HuniSwitch(checked = fluidNavigationMotion, onCheckedChange = onFluidNavigationMotionChange) },
+                    onClick = { onFluidNavigationMotionChange(!fluidNavigationMotion) },
                 ),
             ),
         )

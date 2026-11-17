@@ -160,6 +160,9 @@ import com.metrolist.music.constants.NavigationBarAnimationSpec
 import com.metrolist.music.constants.NavigationBarHeight
 import com.metrolist.music.constants.NavigationTabsKey
 import com.metrolist.music.constants.GlassNavigationKey
+import com.metrolist.music.constants.CollapseNavigationOnScrollKey
+import com.metrolist.music.constants.KeepNavigationExpandedKey
+import com.metrolist.music.constants.FluidNavigationMotionKey
 import com.metrolist.music.constants.PauseListenHistoryKey
 import com.metrolist.music.constants.PauseSearchHistoryKey
 import com.metrolist.music.constants.PreferredLyricsProvider
@@ -739,6 +742,9 @@ class MainActivity : FragmentActivity() {
                 }
                 val (slimNav) = rememberPreference(SlimNavBarKey, defaultValue = false)
                 val (glassNavigation) = rememberPreference(GlassNavigationKey, defaultValue = true)
+                val (collapseNavigationOnScroll) = rememberPreference(CollapseNavigationOnScrollKey, defaultValue = true)
+                val (keepNavigationExpanded) = rememberPreference(KeepNavigationExpandedKey, defaultValue = false)
+                val (fluidNavigationMotion) = rememberPreference(FluidNavigationMotionKey, defaultValue = true)
                 val (defaultOpenTabInt) = rememberPreference(DefaultOpenTabKey, defaultValue = NavigationTab.HOME.name)
                 val defaultOpenTab = remember(defaultOpenTabInt) {
                     try {
@@ -1207,6 +1213,10 @@ class MainActivity : FragmentActivity() {
                                         menuExpanded = showAccountDialog,
                                         bottomInset = bottomInset,
                                         glassStyle = glassNavigation,
+                                        collapseFraction = topAppBarScrollBehavior.state.collapsedFraction,
+                                        collapseOnScroll = collapseNavigationOnScroll,
+                                        keepExpanded = keepNavigationExpanded,
+                                        fluidMotion = fluidNavigationMotion,
                                         modifier =
                                             Modifier
                                                 .align(Alignment.BottomCenter)
