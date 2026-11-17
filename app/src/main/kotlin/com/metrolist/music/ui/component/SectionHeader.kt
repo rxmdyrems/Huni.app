@@ -1,37 +1,53 @@
 package com.metrolist.music.ui.component
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
 fun HuniSectionHeader(
     text: String,
     modifier: Modifier = Modifier,
-    style: TextStyle = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp),
+    style: TextStyle = MaterialTheme.typography.titleMedium.copy(
+        fontSize = 16.sp,
+        fontWeight = FontWeight.SemiBold,
+    ),
     maxLines: Int = 2,
-    minSize: Int = 14,
 ) {
-    var fontSize by remember(text) { mutableStateOf(style.fontSize.value.coerceAtMost(18f)) }
-    Text(
-        text = text,
+    Row(
         modifier = modifier,
-        style = style.copy(fontSize = fontSize.sp),
-        color = MaterialTheme.colorScheme.primary,
-        maxLines = maxLines,
-        softWrap = true,
-        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-        onTextLayout = { result ->
-            if ((result.didOverflowHeight || result.lineCount > maxLines) && fontSize > minSize) {
-                fontSize -= 1f
-            }
-        },
-    )
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .width(3.dp)
+                .height(16.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(MaterialTheme.colorScheme.primary),
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = text,
+            style = style.copy(fontSize = style.fontSize.value.coerceAtMost(18f).sp),
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = maxLines,
+            softWrap = true,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
 }
