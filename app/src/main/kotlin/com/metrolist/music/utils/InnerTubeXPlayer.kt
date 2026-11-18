@@ -100,17 +100,25 @@ object InnerTubeXPlayer {
         } catch (error: CancellationException) {
             throw error
         } catch (error: StreamResolveException) {
-            val cause = error.cause
-            Result.failure(
-                if (error.reason == StreamResolveException.Reason.NETWORK && cause != null) {
-                    cause
-                } else {
-                    error
-                },
-            )
+            Result.failure(error.withSafeDiagnostics())
         } catch (error: Exception) {
             Result.failure(error)
         }
+
+    private fun StreamResolveException.withSafeDiagnostics(): StreamResolveException {
+        val attempts = diagnostics?.attempts.orEmpty()
+        if (attempts.isEmpty()) return this
+        val summary =
+            attempts.joinToString(separator = "; ", limit = 16) { attempt ->
+                "${attempt.clientName}:${attempt.outcome}"
+            }
+        return StreamResolveException(
+            reason = reason,
+            message = "$message [clients: $summary; authenticatedWatchPage=${diagnostics?.usedAuthenticatedWatchPage == true}]",
+            cause = cause,
+            diagnostics = diagnostics,
+        )
+    }
 
     internal fun markStreamClientFailed(
         videoId: String,
