@@ -1,9 +1,3 @@
----v0.9.22
-# Huni 0.9.22 — Startup and onboarding fixes
-
-- Delayed notification permission until onboarding completes and bounded first-run setup.
-- Improved welcome layout feedback, light-theme defaults, extension diagnostics, and CI submodule checkout.
-
 ---v0.9.2
 # Huni 0.9.2 — A more personal Huni
 

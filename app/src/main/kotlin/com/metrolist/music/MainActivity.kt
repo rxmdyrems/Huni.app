@@ -21,6 +21,7 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -107,7 +108,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.util.Consumer
@@ -300,7 +300,12 @@ class MainActivity : FragmentActivity() {
 
     // This is the snapshot we pass to Compose - changes here trigger recomposition
     private var playerConnectionSnapshot by mutableStateOf<PlayerConnection?>(null)
-    private var initialThemeMode: DarkMode = DarkMode.ON
+    private var initialThemeMode: DarkMode = DarkMode.OFF
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        Timber.d("Notification permission result: granted=%s", granted)
+    }
     private var initialPaletteId: String = DefaultPalette.id
 
     private var isServiceBound = false
@@ -564,7 +569,7 @@ class MainActivity : FragmentActivity() {
                     TextButton(onClick = {
                         showNotificationRationale = false
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1000)
+                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                         }
                     }) { Text("Allow") }
                 },

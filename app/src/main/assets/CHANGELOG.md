@@ -1,6 +1,14 @@
 # Huni Changelog
 > Every notable change to Huni, newest first. New release-text emoji prefixes follow CONTRIBUTING.md.
 
+## v0.9.22 (2026-11-19)
+### 🐛 Fixes
+- 🐛 Fixed CI APK jobs by checking out the pinned MihonKit submodule recursively.
+- 🐛 Moved notification permission prompting after onboarding and bounded first-run setup.
+- 🐛 Preserved safe diagnostics for extension and More info failures.
+### 🎨 UI
+- 🎨 Made new installations default to light appearance and reserved the display font for HUNI branding.
+---
 ## Unreleased
 ### 🐛 Fixes
 - 🐛 Restored a discoverable Settings entry for update checks and compare GitHub releases by versionCode.
