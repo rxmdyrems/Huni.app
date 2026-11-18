@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "fix/**"
+      - "fix-0.9.19-bugs"
   workflow_dispatch:
 
 permissions:
