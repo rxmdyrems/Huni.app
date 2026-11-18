@@ -243,6 +243,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 import java.util.Calendar
 import java.util.Locale
@@ -343,13 +344,6 @@ class MainActivity : FragmentActivity() {
 
     override fun onStart() {
         super.onStart()
-        // Request notification permission on Android 13+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1000)
-            }
-        }
-
         // Start the playback service explicitly once so it can outlive binding.
         // Re-issuing startForegroundService() while an existing service instance is already
         // running can trigger "did not then call startForeground" on some Android 9 devices
@@ -503,7 +497,7 @@ class MainActivity : FragmentActivity() {
         }
 
         val initialSettings = runBlocking(Dispatchers.IO) { dataStore.data.first() }
-        initialThemeMode = initialSettings[DarkModeKey]?.toEnum(DarkMode.ON) ?: DarkMode.ON
+        initialThemeMode = initialSettings[DarkModeKey]?.toEnum(DarkMode.OFF) ?: DarkMode.OFF
         initialPaletteId = initialSettings[ThemePaletteKey] ?: DefaultPalette.id
 
         val pendingCrashReport = CrashReporter.readPending(this)
@@ -542,8 +536,40 @@ class MainActivity : FragmentActivity() {
     ) {
         val checkForUpdates by rememberPreference(CheckForUpdatesKey, defaultValue = true)
         var onboardingDone by remember { mutableStateOf<Boolean?>(null) }
+        var showNotificationRationale by rememberSaveable { mutableStateOf(false) }
+        var notificationPromptShown by rememberSaveable { mutableStateOf(false) }
         LaunchedEffect(Unit) {
-            onboardingDone = dataStore.data.first()[OnboardingDoneKey] ?: false
+            onboardingDone = withTimeoutOrNull(6_000L) {
+                dataStore.data.first()[OnboardingDoneKey] ?: false
+            } ?: run {
+                Timber.w("Startup preference read timed out; continuing with onboarding-safe defaults")
+                false
+            }
+        }
+        LaunchedEffect(onboardingDone) {
+            if (onboardingDone == true && !notificationPromptShown && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+            ) {
+                kotlinx.coroutines.delay(450)
+                notificationPromptShown = true
+                showNotificationRationale = true
+            }
+        }
+        if (showNotificationRationale) {
+            AlertDialog(
+                onDismissRequest = { showNotificationRationale = false },
+                title = { Text("Stay informed") },
+                text = { Text("Allow Huni to notify you when a new update is available. You can change this later in Android settings.") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showNotificationRationale = false
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1000)
+                        }
+                    }) { Text("Allow") }
+                },
+                dismissButton = { TextButton(onClick = { showNotificationRationale = false }) { Text("Not now") } },
+            )
         }
         val startupPalette = HuniPalettes.find { it.id == initialPaletteId } ?: DefaultPalette
         val startupDarkTheme = when (initialDarkMode) {

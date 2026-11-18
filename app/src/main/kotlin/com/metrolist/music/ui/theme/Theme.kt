@@ -53,10 +53,10 @@ val DefaultThemeColor = DefaultPalette.accentDark
 
 private val HuniTypography = Typography().let { base ->
     base.copy(
-        headlineLarge = base.headlineLarge.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold, fontSize = 20.sp),
-        headlineMedium = base.headlineMedium.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold, fontSize = 20.sp),
-        headlineSmall = base.headlineSmall.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold, fontSize = 20.sp),
-        titleLarge = base.titleLarge.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold, fontSize = 20.sp),
+        headlineLarge = base.headlineLarge.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold, fontSize = 24.sp),
+        headlineMedium = base.headlineMedium.copy(fontFamily = base.headlineMedium.fontFamily, fontWeight = FontWeight.SemiBold, fontSize = 20.sp),
+        headlineSmall = base.headlineSmall.copy(fontFamily = base.headlineSmall.fontFamily, fontWeight = FontWeight.SemiBold, fontSize = 20.sp),
+        titleLarge = base.titleLarge.copy(fontFamily = base.titleLarge.fontFamily, fontWeight = FontWeight.SemiBold, fontSize = 20.sp),
         titleMedium = base.titleMedium.copy(fontSize = 16.sp), titleSmall = base.titleSmall.copy(fontSize = 16.sp),
         bodyMedium = base.bodyMedium.copy(fontSize = 13.sp), bodySmall = base.bodySmall.copy(fontSize = 13.sp),
         labelLarge = base.labelLarge.copy(fontSize = 16.sp), labelMedium = base.labelMedium.copy(fontSize = 16.sp), labelSmall = base.labelSmall.copy(fontSize = 13.sp),

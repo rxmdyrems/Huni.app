@@ -367,11 +367,14 @@ class ReaderExtensionsViewModel @Inject constructor(application: Application) : 
     private fun sourceError(error: Throwable): String {
         val chain = generateSequence(error) { it.cause }.toList()
         val message = chain.joinToString(" ") { it.message.orEmpty() }
+        val diagnostic = chain.take(3).joinToString(" <- ") { cause ->
+            "${cause::class.java.simpleName}: ${cause.message.orEmpty().take(180)}"
+        }
         return when {
             chain.any { it is ClassNotFoundException || it is NoClassDefFoundError } ->
-                "Extension classes are missing or use an unsupported API. Update Huni or refresh the repository."
+                "Extension classes are missing or use an unsupported API. Update Huni or refresh the repository.\n$diagnostic"
             message.contains("HTTP", ignoreCase = true) -> "Source could not be reached. Check your connection."
-            else -> "Source may be broken. Try updating."
+            else -> "Source may be broken. Try updating.\n$diagnostic"
         }
     }
 

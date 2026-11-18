@@ -56,6 +56,7 @@ import com.metrolist.music.ui.component.shimmer.TextPlaceholder
 import com.metrolist.music.utils.ArtistNameAliases
 import com.metrolist.music.utils.rememberEnumPreference
 import androidx.compose.ui.platform.LocalLocale
+import timber.log.Timber
 
 @Composable
 fun getLoudnessLevelLabel(loudnessLevel: LoudnessLevel): String {
@@ -73,9 +74,8 @@ fun ShowMediaInfo(videoId: String) {
 
     val windowInsets = WindowInsets.systemBars
 
-    var info by remember {
-        mutableStateOf<MediaInfo?>(null)
-    }
+    var info by remember { mutableStateOf<MediaInfo?>(null) }
+    var infoError by remember { mutableStateOf<String?>(null) }
 
     val database = LocalDatabase.current
     var song by remember { mutableStateOf<Song?>(null) }
@@ -95,7 +95,18 @@ fun ShowMediaInfo(videoId: String) {
     val targetLufs: Float = loudnessLevel.targetLufs
 
     LaunchedEffect(Unit, videoId) {
-        info = YouTube.getMediaInfo(videoId).getOrNull()
+        runCatching { YouTube.getMediaInfo(videoId) }
+            .onSuccess { result ->
+                result.onSuccess { info = it; infoError = null }
+                    .onFailure { error ->
+                        infoError = "Media details unavailable: ${error::class.java.simpleName}"
+                        Timber.w(error, "Could not load media details for More info")
+                    }
+            }
+            .onFailure { error ->
+                infoError = "Media details unavailable: ${error::class.java.simpleName}"
+                Timber.w(error, "More info request failed")
+            }
     }
 
     LaunchedEffect(Unit, videoId) {
@@ -247,6 +258,14 @@ fun ShowMediaInfo(videoId: String) {
                         )
                     )
                 }
+            }
+        } else if (infoError != null) {
+            item(contentType = "MediaInfoError") {
+                Text(
+                    text = infoError.orEmpty(),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(24.dp),
+                )
             }
         } else {
             item(contentType = "MediaInfoLoader") {

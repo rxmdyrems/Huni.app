@@ -1,6 +1,11 @@
 # Huni Changelog
 > Every notable change to Huni, newest first. New release-text emoji prefixes follow CONTRIBUTING.md.
 
+## v0.9.22 (2026-11-19)
+### 🐛 Fixes
+- 🐛 Delayed notification permission until onboarding completes and added a bounded first-run setup transition.
+- 🐛 Improved onboarding insets, greeting/avatar feedback, light-theme defaults, extension diagnostics, and CI submodule checkout.
+
 ## v0.9.21 (2026-11-18)
 ### 🔐 Release
 - 🔐 Published production-signed FOSS, Google Cast, and Izzy APKs with the stable package ID so existing users can receive the update.
