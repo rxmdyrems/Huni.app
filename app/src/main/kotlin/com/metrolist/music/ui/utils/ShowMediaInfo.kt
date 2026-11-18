@@ -83,7 +83,8 @@ fun ShowMediaInfo(videoId: String) {
     var currentFormat by remember { mutableStateOf<FormatEntity?>(null) }
 
     val playerConnection = LocalPlayerConnection.current
-    val currentStreamClient by playerConnection?.currentStreamClient?.collectAsState() ?: remember { mutableStateOf(null) }
+    val currentStreamClient by playerConnection?.currentStreamClient?.collectAsState()
+        ?: remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
     val artistNameAliases = LocalArtistNameAliases.current
 
@@ -94,7 +95,7 @@ fun ShowMediaInfo(videoId: String) {
 
     val targetLufs: Float = loudnessLevel.targetLufs
 
-    LaunchedEffect(Unit, videoId) {
+    LaunchedEffect(videoId) {
         runCatching { YouTube.getMediaInfo(videoId) }
             .onSuccess { result ->
                 result.onSuccess { info = it; infoError = null }
@@ -109,15 +110,23 @@ fun ShowMediaInfo(videoId: String) {
             }
     }
 
-    LaunchedEffect(Unit, videoId) {
-        database.song(videoId).collect {
-            song = it
+    LaunchedEffect(database, videoId) {
+        runCatching {
+            database.song(videoId).collect {
+                song = it
+            }
+        }.onFailure { error ->
+            Timber.w(error, "Could not load song data for More info")
         }
     }
 
-    LaunchedEffect(Unit, videoId) {
-        database.format(videoId).collect {
-            currentFormat = it
+    LaunchedEffect(database, videoId) {
+        runCatching {
+            database.format(videoId).collect {
+                currentFormat = it
+            }
+        }.onFailure { error ->
+            Timber.w(error, "Could not load format data for More info")
         }
     }
 
@@ -185,7 +194,13 @@ fun ShowMediaInfo(videoId: String) {
                                 String.format(LocalLocale.current.platformLocale, "%.2f dB", it - targetLufs)
                             },
                             stringResource(R.string.loudness_level) to getLoudnessLevelLabel(loudnessLevel),
-                            stringResource(R.string.volume) to if (playerConnection != null) "${(playerConnection.player.volume * 100).toInt()}%" else null,
+                            stringResource(R.string.volume) to playerConnection?.let {
+                                runCatching { "${(it.player.volume * 100).toInt()}%" }
+                                    .onFailure { error ->
+                                        Timber.w(error, "Player was unavailable while rendering More info")
+                                    }
+                                    .getOrNull()
+                            },
                             stringResource(R.string.file_size) to
                                     currentFormat?.contentLength?.let {
                                         Formatter.formatShortFileSize(
