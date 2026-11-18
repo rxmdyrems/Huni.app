@@ -68,24 +68,35 @@ object InnerTubeXPlayer {
                         contentHints.isUploaded == true ||
                             playlistId == "MLPT" ||
                             playlistId?.contains("MLPT") == true,
-                ).withStreamCapabilities(
+            ).withStreamCapabilities(
                     allowHls = false,
                     allowSabr = false,
                     allowBoundedRange = allowBoundedRange,
                 )
             val excludedClients = failedStreamClients(videoId)
-            val stream =
-                requireNotNull(
-                    bundle().extractor.extract(
-                        videoId = videoId,
-                        hints = hints,
-                        excludedClients = excludedClients,
-                        audioQuality = audioQuality.toInnerTubeX(connectivityManager),
-                        clientPlaybackNonce = generateClientPlaybackNonce(),
-                    ),
-                ) { "InnerTubeX returned no playable stream" }
-            check(stream.sabrBootstrap == null) { "SABR is not supported by this playback engine" }
-            Result.success(stream.toPlaybackData())
+            val extractor = bundle().extractor
+            var stream = extractor.extract(
+                videoId = videoId,
+                hints = hints,
+                excludedClients = excludedClients,
+                audioQuality = audioQuality.toInnerTubeX(connectivityManager),
+                clientPlaybackNonce = generateClientPlaybackNonce(),
+            )
+            if (stream == null) {
+                // A client failure is temporary, and some videos reject bounded
+                // range requests. Retry once without the cached exclusion list
+                // and without bounded range before reporting a real failure.
+                stream = extractor.extract(
+                    videoId = videoId,
+                    hints = hints.withStreamCapabilities(allowBoundedRange = false),
+                    excludedClients = emptySet(),
+                    audioQuality = audioQuality.toInnerTubeX(connectivityManager),
+                    clientPlaybackNonce = generateClientPlaybackNonce(),
+                )
+            }
+            val resolvedStream = requireNotNull(stream) { "InnerTubeX returned no playable stream" }
+            check(resolvedStream.sabrBootstrap == null) { "SABR is not supported by this playback engine" }
+            Result.success(resolvedStream.toPlaybackData())
         } catch (error: CancellationException) {
             throw error
         } catch (error: StreamResolveException) {
