@@ -299,7 +299,9 @@ private fun BrowseExtensions(
             }
         }
         items(filtered, key = { it.pkg }) { meta ->
-            val installed = state.installed.any { it.pkg == meta.pkg }
+            val installedMeta = state.installed.firstOrNull { it.pkg == meta.pkg }
+            val installed = installedMeta != null
+            val hasUpdate = installedMeta != null && meta.code > installedMeta.code
             Card(Modifier.fillMaxWidth()) {
                 Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     ExtensionArtwork(meta)
@@ -308,6 +310,7 @@ private fun BrowseExtensions(
                         Text("${meta.lang} · v${meta.version}${if (meta.nsfw) " · NSFW" else ""}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     when {
+                        hasUpdate -> TextButton(onClick = { viewModel.install(meta) }) { Text("Update") }
                         installed -> Text("Installed", color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(horizontal = 8.dp))
                         state.installingPkg == meta.pkg -> CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
                         else -> TextButton(onClick = { if (state.failedInstallPkg == meta.pkg) viewModel.retryInstall(meta.pkg) else viewModel.install(meta) }) { Text(if (state.failedInstallPkg == meta.pkg) "Retry" else "Install") }

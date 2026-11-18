@@ -807,8 +807,8 @@ fun PlayerMenu(
                                     )
                                 },
                                 onClick = {
-                                    onShowDetailsDialog()
                                     onDismiss()
+                                    onShowDetailsDialog()
                                 },
                             ),
                         )

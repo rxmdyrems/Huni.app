@@ -558,8 +558,8 @@ fun QueueMenu(
                                 )
                             },
                             onClick = {
-                                onShowDetailsDialog()
                                 onDismiss()
+                                onShowDetailsDialog()
                             }
                         )
                     )

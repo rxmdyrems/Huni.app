@@ -123,6 +123,10 @@ class ReaderExtensionsViewModel @Inject constructor(application: Application) : 
                 return@launch
             }
             try {
+                // The runtime caches sources by package. Invalidate that cache before
+                // loading a replacement APK, otherwise an update silently keeps using
+                // the old DEX and old MangaDex chapter behavior.
+                runtime.remove(meta.pkg)
                 withContext(Dispatchers.IO) { runtime.loadSources(apk, meta.pkg) }
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -208,7 +212,7 @@ class ReaderExtensionsViewModel @Inject constructor(application: Application) : 
         if (extension == null) return showError("Extension is not installed.")
         mutableState.value = mutableState.value.copy(
             selectedPackage = pkg,
-            sources = extension.sources,
+            sources = emptyList(),
             selectedSourceId = null,
             selectedSourceName = null,
             mangas = emptyList(),
@@ -217,6 +221,27 @@ class ReaderExtensionsViewModel @Inject constructor(application: Application) : 
             chapters = emptyList(),
             error = null,
         )
+        viewModelScope.launch {
+            try {
+                val actualSources = withContext(Dispatchers.IO) {
+                    runtime.loadSources(repository.apkFile(pkg), pkg)
+                }.map { source ->
+                    ExtensionSourceMeta(
+                        name = source.name,
+                        lang = source.lang,
+                        id = source.id.toString(),
+                        baseUrl = source.baseUrl,
+                    )
+                }
+                if (mutableState.value.selectedPackage == pkg) {
+                    mutableState.value = mutableState.value.copy(sources = actualSources, error = null)
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Throwable) {
+                showError(sourceError(error))
+            }
+        }
     }
 
     fun selectSource(pkg: String, source: ExtensionSourceMeta) {
