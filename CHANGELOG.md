@@ -1,6 +1,11 @@
 # Huni Changelog
 > Every notable change to Huni, newest first. New release-text emoji prefixes follow CONTRIBUTING.md.
 
+## v0.9.21 (2026-11-18)
+### 🔐 Release
+- 🔐 Published production-signed FOSS, Google Cast, and Izzy APKs with the stable package ID so existing users can receive the update.
+- 🔐 Verified the production signing certificate and release APK identity in CI.
+
 ## v0.9.20 (2026-11-18)
 ---
 ### 🎨 UI

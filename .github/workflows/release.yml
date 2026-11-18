@@ -331,9 +331,8 @@ jobs:
             --title "Huni v${{ needs.check-version.outputs.new_version }}" \
             --notes-file release_notes.md \
             --verify-tag \
-            --draft \
             --target "$GITHUB_SHA" \
-            --latest=false \
+            --latest \
             release_files/*
 
           echo "Release created successfully!"
