@@ -21,6 +21,9 @@ HTTP_SOURCE = "Leu/kanade/tachiyomi/source/online/HttpSource;"
 EXPECTED_FIELD = "headers$delegate"
 EXPECTED_FIELD_TYPE = "Lkotlin/Lazy;"
 EXPECTED_LAZY_IMPL = "Lkotlin/SynchronizedLazyImpl;"
+APP_INFO = "Leu/kanade/tachiyomi/AppInfo;"
+APP_INFO_INSTANCE = (APP_INFO, "INSTANCE", APP_INFO)
+APP_INFO_VERSION_METHOD = (APP_INFO, "getVersionName", "()Ljava/lang/String;")
 REQUIRED_RUNTIME_CLASSES = (
     "Lkotlin/LazyKt;",
     "Lkotlin/collections/MapsKt;",
@@ -209,6 +212,18 @@ def main(apk_path: str) -> int:
         print(f"ERROR: minified APK is missing {EXPECTED_LAZY_IMPL}", file=sys.stderr)
         return 1
 
+    if APP_INFO not in all_classes:
+        print(f"ERROR: minified APK is missing dynamic extension host class {APP_INFO}", file=sys.stderr)
+        return 1
+
+    if APP_INFO_INSTANCE not in all_fields:
+        print(f"ERROR: minified APK is missing dynamic extension field {APP_INFO_INSTANCE}", file=sys.stderr)
+        return 1
+
+    if APP_INFO_VERSION_METHOD not in all_methods:
+        print(f"ERROR: minified APK is missing dynamic extension method {APP_INFO_VERSION_METHOD}", file=sys.stderr)
+        return 1
+
     missing_runtime_classes = sorted(set(REQUIRED_RUNTIME_CLASSES) - all_classes)
     if missing_runtime_classes:
         print(
@@ -219,8 +234,9 @@ def main(apk_path: str) -> int:
 
     print(
         f"Verified minified DEX in {apk.name}: {sorted(expected_methods)}, "
-        f"{HTTP_SOURCE}->{EXPECTED_FIELD}:{EXPECTED_FIELD_TYPE}, SynchronizedLazyImpl, and "
-        f"{len(REQUIRED_RUNTIME_CLASSES)} extension runtime classes are retained."
+        f"{HTTP_SOURCE}->{EXPECTED_FIELD}:{EXPECTED_FIELD_TYPE}, SynchronizedLazyImpl, "
+        f"AppInfo.INSTANCE/getVersionName, and {len(REQUIRED_RUNTIME_CLASSES)} "
+        f"extension runtime classes are retained."
     )
     return 0
 
