@@ -56,12 +56,17 @@ fun SquigglySlider(
     val primaryColor = colors.activeTrackColor
     val inactiveColor = colors.inactiveTrackColor
 
+    val safeStart = valueRange.start.takeIf { it.isFinite() } ?: 0f
+    val safeEnd = valueRange.endInclusive.takeIf { it.isFinite() && it > safeStart } ?: (safeStart + 1f)
+    val safeRange = safeStart..safeEnd
+    val safeValue = value.takeIf { it.isFinite() }?.coerceIn(safeStart, safeEnd) ?: safeStart
+
     var isDragging by remember { mutableStateOf(false) }
-    var dragPosition by remember { mutableFloatStateOf(value) }
+    var dragPosition by remember { mutableFloatStateOf(safeValue) }
     
-    val currentValue = if (isDragging) dragPosition else value
-    val duration = valueRange.endInclusive - valueRange.start
-    val position = currentValue - valueRange.start
+    val currentValue = if (isDragging) dragPosition else safeValue
+    val duration = safeEnd - safeStart
+    val position = currentValue - safeStart
 
     // Animation state
     var phaseOffset by remember { mutableFloatStateOf(0f) }
@@ -123,20 +128,22 @@ fun SquigglySlider(
             .then(
                 if (enabled) {
                     Modifier
-                        .pointerInput(valueRange) {
+                        .pointerInput(safeRange) {
                             detectTapGestures { offset ->
+                                if (size.width <= 0f) return@detectTapGestures
                                 val newPosition = (offset.x / size.width) * duration
-                                val mappedValue = valueRange.start + newPosition.coerceIn(0f, duration)
+                                val mappedValue = safeStart + newPosition.coerceIn(0f, duration)
                                 onValueChange(mappedValue)
                                 onValueChangeFinished?.invoke()
                             }
                         }
-                        .pointerInput(valueRange) {
+                        .pointerInput(safeRange) {
                             detectDragGestures(
                                 onDragStart = { offset ->
+                                    if (size.width <= 0f) return@detectDragGestures
                                     isDragging = true
                                     val newPosition = (offset.x / size.width) * duration
-                                    dragPosition = valueRange.start + newPosition.coerceIn(0f, duration)
+                                    dragPosition = safeStart + newPosition.coerceIn(0f, duration)
                                     onValueChange(dragPosition)
                                 },
                                 onDragEnd = {
@@ -148,8 +155,9 @@ fun SquigglySlider(
                                 },
                                 onDrag = { change, _ ->
                                     change.consume()
+                                    if (size.width <= 0f) return@detectDragGestures
                                     val newPosition = (change.position.x / size.width) * duration
-                                    dragPosition = valueRange.start + newPosition.coerceIn(0f, duration)
+                                    dragPosition = safeStart + newPosition.coerceIn(0f, duration)
                                     onValueChange(dragPosition)
                                 }
                             )
