@@ -69,6 +69,7 @@ import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.lerp
 import com.metrolist.music.ui.screens.Screens
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -185,15 +186,31 @@ fun AppNavigationBar(
     menuExpanded: Boolean = false,
     bottomInset: androidx.compose.ui.unit.Dp = 0.dp,
     glassStyle: Boolean = true,
+    collapseOnScroll: Boolean = true,
+    keepExpanded: Boolean = false,
+    fluidInteraction: Boolean = true,
+    collapseProgress: Float = 0f,
 ) {
-    val containerColor = if (glassStyle) Color(0xFF16121C).copy(alpha = 0.58f) else MaterialTheme.colorScheme.surface
-    val outline = Color.White.copy(alpha = 0.25f)
+    val scheme = MaterialTheme.colorScheme
+    val containerColor = if (pureBlack) Color.Black else scheme.surface
+    val glassBase = if (pureBlack) Color.Black else scheme.surfaceVariant
+    val contentColor = if (pureBlack) Color.White else scheme.onSurface
+    val selectedColor = scheme.primary
+    val outline = scheme.outline.copy(alpha = if (glassStyle) 0.62f else 0.4f)
     val haptics = LocalHapticFeedback.current
     val viewConfiguration = LocalViewConfiguration.current
     val latestItems = rememberUpdatedState(navigationItems)
     val latestRoute = rememberUpdatedState(currentRoute)
     val latestOnItemClick = rememberUpdatedState(onItemClick)
     var dragIndex by remember { mutableIntStateOf(-1) }
+    val collapseFraction by animateFloatAsState(
+        targetValue = if (collapseOnScroll && !keepExpanded) collapseProgress.coerceIn(0f, 1f) else 0f,
+        animationSpec = spring(dampingRatio = 0.86f, stiffness = 420f),
+        label = "navigationCollapse",
+    )
+    val dockHeight = lerp(64.dp, 52.dp, collapseFraction)
+    val indicatorHeight = lerp(56.dp, 44.dp, collapseFraction)
+    val labelAlpha = 1f - collapseFraction
     val menuProgress by animateFloatAsState(
         targetValue = if (menuExpanded) 1f else 0f,
         animationSpec = spring(dampingRatio = 0.78f, stiffness = 440f),
@@ -211,23 +228,23 @@ fun AppNavigationBar(
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         ) {
             androidx.compose.foundation.layout.BoxWithConstraints(
-                modifier = Modifier.weight(1f).height(64.dp)
+                modifier = Modifier.weight(1f).height(if (slimNav) lerp(56.dp, 48.dp, collapseFraction) else dockHeight)
                     .shadow(18.dp, RoundedCornerShape(32.dp), clip = false)
                     .clip(RoundedCornerShape(32.dp))
                     .background(
                         if (glassStyle) {
                             Brush.verticalGradient(
                                 listOf(
-                                    Color(0xFF8F8299).copy(alpha = 0.34f),
-                                    Color(0xFF393241).copy(alpha = 0.82f),
-                                    Color(0xFF16121C).copy(alpha = 0.92f),
+                                    scheme.surface.copy(alpha = 0.72f),
+                                    glassBase.copy(alpha = 0.88f),
+                                    containerColor.copy(alpha = 0.96f),
                                 ),
                             )
                         } else {
                             Brush.verticalGradient(listOf(containerColor, containerColor))
                         },
                     )
-                    .border(1.dp, Color.White.copy(alpha = if (glassStyle) 0.38f else 0.25f), RoundedCornerShape(32.dp))
+                    .border(1.dp, outline, RoundedCornerShape(32.dp))
                     .pointerInput(navigationItems) {
                         val itemCount = navigationItems.size.coerceAtLeast(1)
                         val itemWidthPx = size.width.toFloat() / itemCount
@@ -278,13 +295,13 @@ fun AppNavigationBar(
                 )
                 Box(
                     modifier = Modifier.offset(x = indicatorOffset + 4.dp).align(androidx.compose.ui.Alignment.CenterStart)
-                        .width(itemWidth - 8.dp).height(56.dp).clip(RoundedCornerShape(28.dp))
+                        .width(itemWidth - 8.dp).height(indicatorHeight).clip(RoundedCornerShape(28.dp))
                         .background(
                             Brush.verticalGradient(
-                                listOf(Color.White.copy(alpha = 0.24f), Color(0xFFFFB84D).copy(alpha = 0.11f), Color.White.copy(alpha = 0.06f)),
+                                listOf(selectedColor.copy(alpha = 0.28f), selectedColor.copy(alpha = 0.12f), Color.Transparent),
                             ),
                         )
-                        .border(1.dp, Color.White.copy(alpha = 0.24f), RoundedCornerShape(28.dp)),
+                        .border(1.dp, selectedColor.copy(alpha = 0.42f), RoundedCornerShape(28.dp)),
                 )
                 if (glassStyle) GlassHighlight(Modifier.matchParentSize())
                 Row(Modifier.fillMaxSize()) {
@@ -297,8 +314,8 @@ fun AppNavigationBar(
                         val distanceFromFinger = if (dragIndex < 0) Int.MAX_VALUE else abs(index - dragIndex)
                         val scale by animateFloatAsState(
                             targetValue = when (distanceFromFinger) {
-                                0 -> 1.22f
-                                1 -> 1.08f
+                                0 -> if (fluidInteraction) 1.22f else 1f
+                                1 -> if (fluidInteraction) 1.08f else 1f
                                 else -> 1f
                             },
                             animationSpec = spring(dampingRatio = 0.72f, stiffness = 520f),
@@ -356,32 +373,33 @@ fun AppNavigationBar(
                                     painter = painterResource(id = iconRes),
                                     contentDescription = null,
                                     modifier = Modifier.size(22.dp),
-                                    tint = if (isSelected) Color(0xFFFFB84D) else Color.White.copy(alpha = 0.82f),
+                                    tint = if (isSelected) selectedColor else contentColor.copy(alpha = 0.76f),
                                 )
-                                Text(
-                                    text = tabLabel,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = if (isSelected) Color.White else Color.White.copy(alpha = 0.88f),
-                                )
+                                    Text(
+                                        text = tabLabel,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = if (isSelected) contentColor else contentColor.copy(alpha = 0.82f),
+                                        modifier = Modifier.graphicsLayer { alpha = labelAlpha },
+                                    )
                             }
                         }
                     }
                 }
             }
             Box(
-                modifier = Modifier.size(64.dp).shadow(18.dp, CircleShape, clip = false).clip(CircleShape)
+                modifier = Modifier.size(lerp(64.dp, 52.dp, collapseFraction)).shadow(18.dp, CircleShape, clip = false).clip(CircleShape)
                     .background(
                         if (glassStyle) {
                             Brush.verticalGradient(
-                                listOf(Color(0xFF8F8299).copy(alpha = 0.34f), Color(0xFF393241).copy(alpha = 0.82f), Color(0xFF16121C).copy(alpha = 0.92f)),
+                                listOf(scheme.surface.copy(alpha = 0.72f), glassBase.copy(alpha = 0.88f), containerColor.copy(alpha = 0.96f)),
                             )
                         } else {
                             Brush.verticalGradient(listOf(containerColor, containerColor))
                         },
                     )
-                    .border(1.dp, Color.White.copy(alpha = if (glassStyle) 0.38f else 0.25f), CircleShape)
+                    .border(1.dp, outline, CircleShape)
                     .clickable {
                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         onMenuClick()
@@ -397,9 +415,9 @@ fun AppNavigationBar(
                     val halfLength = 8.dp.toPx()
                     val gap = 6.dp.toPx()
                     val progress = menuProgress
-                    drawLine(Color.White, Offset(centerX - halfLength, centerY - gap), Offset(centerX + halfLength, centerY - gap + 2f * gap * progress), lineWidth, cap = StrokeCap.Round)
-                    drawLine(Color.White, Offset(centerX - halfLength, centerY + gap), Offset(centerX + halfLength, centerY + gap - 2f * gap * progress), lineWidth, cap = StrokeCap.Round)
-                    drawLine(Color.White.copy(alpha = 1f - progress), Offset(centerX - halfLength, centerY), Offset(centerX + halfLength, centerY), lineWidth, cap = StrokeCap.Round)
+                    drawLine(contentColor, Offset(centerX - halfLength, centerY - gap), Offset(centerX + halfLength, centerY - gap + 2f * gap * progress), lineWidth, cap = StrokeCap.Round)
+                    drawLine(contentColor, Offset(centerX - halfLength, centerY + gap), Offset(centerX + halfLength, centerY + gap - 2f * gap * progress), lineWidth, cap = StrokeCap.Round)
+                    drawLine(contentColor.copy(alpha = 1f - progress), Offset(centerX - halfLength, centerY), Offset(centerX + halfLength, centerY), lineWidth, cap = StrokeCap.Round)
                 }
             }
         }
@@ -408,21 +426,23 @@ fun AppNavigationBar(
 
 @Composable
 private fun GlassHighlight(modifier: Modifier = Modifier) {
+    val highlightColor = MaterialTheme.colorScheme.onSurface
+    val accentColor = MaterialTheme.colorScheme.primary
     Canvas(modifier) {
         val leftGlow = Offset(size.width * 0.16f, -size.height * 0.12f)
         val rightGlow = Offset(size.width * 0.88f, size.height * 0.2f)
         drawCircle(
-            brush = Brush.radialGradient(listOf(Color.White.copy(alpha = 0.22f), Color.Transparent), leftGlow, size.width * 0.78f),
+            brush = Brush.radialGradient(listOf(highlightColor.copy(alpha = 0.22f), Color.Transparent), leftGlow, size.width * 0.78f),
             radius = size.width * 0.78f,
             center = leftGlow,
         )
         drawCircle(
-            brush = Brush.radialGradient(listOf(Color(0xFFFFB84D).copy(alpha = 0.10f), Color.Transparent), rightGlow, size.width * 0.54f),
+            brush = Brush.radialGradient(listOf(accentColor.copy(alpha = 0.10f), Color.Transparent), rightGlow, size.width * 0.54f),
             radius = size.width * 0.54f,
             center = rightGlow,
         )
         drawLine(
-            brush = Brush.horizontalGradient(listOf(Color.Transparent, Color.White.copy(alpha = 0.34f), Color.Transparent)),
+            brush = Brush.horizontalGradient(listOf(Color.Transparent, highlightColor.copy(alpha = 0.34f), Color.Transparent)),
             start = Offset(size.width * 0.12f, 1.dp.toPx()),
             end = Offset(size.width * 0.88f, 1.dp.toPx()),
             strokeWidth = 1.dp.toPx(),

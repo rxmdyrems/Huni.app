@@ -47,7 +47,7 @@ fun PlayerSliderTrack(
             calcFraction(
                 valueRange.start,
                 valueRange.endInclusive,
-                sliderState.value.coerceIn(valueRange.start, valueRange.endInclusive)
+                sliderState.value,
             ),
             inactiveTrackColor,
             activeTrackColor,
@@ -114,4 +114,4 @@ private fun stepsToTickFractions(steps: Int): FloatArray {
 }
 
 private fun calcFraction(a: Float, b: Float, pos: Float) =
-    (if (b - a == 0f) 0f else (pos - a) / (b - a)).coerceIn(0f, 1f)
+    safeSliderFraction(pos, a..b)

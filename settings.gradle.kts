@@ -26,6 +26,7 @@ dependencyResolutionManagement {
                     includeModule("com.github.MetrolistGroup", "innertubex-desktop")
                 } else {
                     includeGroup("com.github.MetrolistGroup.innertubex")
+                    includeGroup("com.github.MetrolistGroup.quackjs")
                 }
             }
         }

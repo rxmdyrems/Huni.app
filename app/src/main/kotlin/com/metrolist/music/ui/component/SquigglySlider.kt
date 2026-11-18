@@ -61,7 +61,6 @@ fun SquigglySlider(
     
     val currentValue = if (isDragging) dragPosition else value
     val duration = valueRange.endInclusive - valueRange.start
-    val position = currentValue - valueRange.start
 
     // Animation state
     var phaseOffset by remember { mutableFloatStateOf(0f) }
@@ -166,7 +165,7 @@ fun SquigglySlider(
                 .height(48.dp)
         ) {
             val strokeWidth = 5.dp.toPx()
-            val progress = if (duration > 0f) (position / duration).coerceIn(0f, 1f) else 0f
+            val progress = safeSliderFraction(currentValue, valueRange)
             val totalWidth = size.width
             val totalProgressPx = totalWidth * progress
             val centerY = size.height / 2f

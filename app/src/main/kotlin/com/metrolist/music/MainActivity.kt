@@ -160,6 +160,9 @@ import com.metrolist.music.constants.NavigationBarAnimationSpec
 import com.metrolist.music.constants.NavigationBarHeight
 import com.metrolist.music.constants.NavigationTabsKey
 import com.metrolist.music.constants.GlassNavigationKey
+import com.metrolist.music.constants.NavCollapseOnScrollKey
+import com.metrolist.music.constants.NavKeepExpandedKey
+import com.metrolist.music.constants.NavFluidInteractionKey
 import com.metrolist.music.constants.PauseListenHistoryKey
 import com.metrolist.music.constants.PauseSearchHistoryKey
 import com.metrolist.music.constants.PreferredLyricsProvider
@@ -739,6 +742,9 @@ class MainActivity : FragmentActivity() {
                 }
                 val (slimNav) = rememberPreference(SlimNavBarKey, defaultValue = false)
                 val (glassNavigation) = rememberPreference(GlassNavigationKey, defaultValue = true)
+                val (navCollapseOnScroll) = rememberPreference(NavCollapseOnScrollKey, defaultValue = true)
+                val (navKeepExpanded) = rememberPreference(NavKeepExpandedKey, defaultValue = false)
+                val (navFluidInteraction) = rememberPreference(NavFluidInteractionKey, defaultValue = true)
                 val (defaultOpenTabInt) = rememberPreference(DefaultOpenTabKey, defaultValue = NavigationTab.HOME.name)
                 val defaultOpenTab = remember(defaultOpenTabInt) {
                     try {
@@ -1207,6 +1213,10 @@ class MainActivity : FragmentActivity() {
                                         menuExpanded = showAccountDialog,
                                         bottomInset = bottomInset,
                                         glassStyle = glassNavigation,
+                                        collapseOnScroll = navCollapseOnScroll,
+                                        keepExpanded = navKeepExpanded,
+                                        fluidInteraction = navFluidInteraction,
+                                        collapseProgress = topAppBarScrollBehavior.state.collapsedFraction,
                                         modifier =
                                             Modifier
                                                 .align(Alignment.BottomCenter)

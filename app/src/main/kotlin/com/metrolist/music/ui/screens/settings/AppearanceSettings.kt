@@ -75,6 +75,9 @@ import com.metrolist.music.constants.ExperimentalLyricsKey
 import com.metrolist.music.constants.GridItemSize
 import com.metrolist.music.constants.GridItemsSizeKey
 import com.metrolist.music.constants.GlassNavigationKey
+import com.metrolist.music.constants.NavCollapseOnScrollKey
+import com.metrolist.music.constants.NavKeepExpandedKey
+import com.metrolist.music.constants.NavFluidInteractionKey
 import com.metrolist.music.constants.HidePlayerThumbnailKey
 import com.metrolist.music.constants.HideStatusBarOnFullscreenKey
 import com.metrolist.music.constants.LibraryFilter
@@ -120,8 +123,8 @@ import com.metrolist.music.ui.component.EnumDialog
 import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.component.Material3SettingsGroup
 import com.metrolist.music.ui.component.Material3SettingsItem
-import com.metrolist.music.ui.component.PlayerSliderTrack
 import com.metrolist.music.ui.component.SquigglySlider
+import com.metrolist.music.ui.component.SliderPreview
 import com.metrolist.music.ui.component.WavySlider
 import com.metrolist.music.ui.theme.DefaultPalette
 import com.metrolist.music.ui.theme.HuniPalettes
@@ -294,6 +297,21 @@ fun AppearanceSettings(
         rememberPreference(
             SlimNavBarKey,
             defaultValue = false,
+        )
+    val (navCollapseOnScroll, onNavCollapseOnScrollChange) =
+        rememberPreference(
+            NavCollapseOnScrollKey,
+            defaultValue = true,
+        )
+    val (navKeepExpanded, onNavKeepExpandedChange) =
+        rememberPreference(
+            NavKeepExpandedKey,
+            defaultValue = false,
+        )
+    val (navFluidInteraction, onNavFluidInteractionChange) =
+        rememberPreference(
+            NavFluidInteractionKey,
+            defaultValue = true,
         )
 
     val (densityScale, onDensityScaleChange) = rememberPreference(
@@ -770,12 +788,9 @@ fun AppearanceSettings(
                                 }.padding(12.dp),
                     ) {
                         val sliderValue = 0.35f
-                        Slider(
+                        SliderPreview(
                             value = sliderValue,
-                            valueRange = 0f..1f,
-                            onValueChange = { /* preview only */ },
                             colors = sliderPreviewColors,
-                            enabled = false,
                             modifier = Modifier.weight(1f),
                         )
                         Text(
@@ -855,19 +870,10 @@ fun AppearanceSettings(
                                 }.padding(12.dp),
                     ) {
                         val sliderValue = 0.65f
-                        Slider(
+                        SliderPreview(
                             value = sliderValue,
-                            valueRange = 0f..1f,
-                            onValueChange = { /* preview only */ },
-                            thumb = { Spacer(modifier = Modifier.size(0.dp)) },
-                            track = { sliderState ->
-                                PlayerSliderTrack(
-                                    sliderState = sliderState,
-                                    colors = sliderPreviewColors,
-                                )
-                            },
                             colors = sliderPreviewColors,
-                            enabled = false,
+                            compact = true,
                             modifier = Modifier.weight(1f),
                         )
 
@@ -1551,9 +1557,32 @@ fun AppearanceSettings(
             items = listOf(
                 Material3SettingsItem(
                     title = { Text("Floating glass bar") },
-                    description = { Text("Use a dark translucent pill and round menu button.") },
+                    description = { Text("Use a translucent frosted pill and round menu button.") },
                     trailingContent = { HuniSwitch(checked = glassNavigation, onCheckedChange = onGlassNavigationChange) },
                     onClick = { onGlassNavigationChange(!glassNavigation) },
+                ),
+            ),
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Material3SettingsGroup(
+            items = listOf(
+                Material3SettingsItem(
+                    title = { Text("Collapse on scroll") },
+                    description = { Text("Compact the dock and fade labels as content scrolls.") },
+                    trailingContent = { HuniSwitch(checked = navCollapseOnScroll, onCheckedChange = onNavCollapseOnScrollChange) },
+                    onClick = { onNavCollapseOnScrollChange(!navCollapseOnScroll) },
+                ),
+                Material3SettingsItem(
+                    title = { Text("Keep dock expanded") },
+                    description = { Text("Always show the full dock and labels while scrolling.") },
+                    trailingContent = { HuniSwitch(checked = navKeepExpanded, onCheckedChange = onNavKeepExpandedChange) },
+                    onClick = { onNavKeepExpandedChange(!navKeepExpanded) },
+                ),
+                Material3SettingsItem(
+                    title = { Text("Fluid tab interaction") },
+                    description = { Text("Enable drag selection and nearby-tab magnification.") },
+                    trailingContent = { HuniSwitch(checked = navFluidInteraction, onCheckedChange = onNavFluidInteractionChange) },
+                    onClick = { onNavFluidInteractionChange(!navFluidInteraction) },
                 ),
             ),
         )

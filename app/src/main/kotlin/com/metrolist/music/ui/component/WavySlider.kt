@@ -58,8 +58,7 @@ fun WavySlider(
         Stroke(width = strokeWidthPx, cap = StrokeCap.Round) 
     }
     
-    val normalizedValue = ((value - valueRange.start) / (valueRange.endInclusive - valueRange.start))
-        .coerceIn(0f, 1f)
+    val normalizedValue = safeSliderFraction(value, valueRange)
     
     var isDragging by remember { mutableStateOf(false) }
     var dragValue by remember { mutableFloatStateOf(normalizedValue) }

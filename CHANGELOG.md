@@ -1,8 +1,15 @@
 # Huni Changelog
 > Every notable change to Huni, newest first. New release-text emoji prefixes follow CONTRIBUTING.md.
 
-## Unreleased
+## v0.9.20 (2026-11-18)
 ---
+### 🎨 UI
+- 🎨 Restored the floating liquid-glass navigation treatment with theme-aware tint, accent-aware selection motion, drag interaction, and scroll-responsive compact mode.
+- 🎨 Added Appearance controls for glass navigation, collapse-on-scroll, keeping the dock expanded, fluid tab interaction, slim sizing, and visible tabs.
+### 🐛 Fixes
+- 🐛 Hardened Appearance slider previews and custom player-slider drawing against invalid ranges and non-finite values.
+- 🐛 Updated InnerTubeX to v0.11.9 to improve stream-client fallback and playback reliability.
+
 ## v0.9.18 (2026-11-16)
 ### 🐛 Fixes
 - 🐛 Preserved the Kotlin, serialization, Mihon source API, OkHttp/Okio, Jsoup, Injekt, and Zstandard runtime classes required by dynamically loaded Mihon extensions in minified release builds.
