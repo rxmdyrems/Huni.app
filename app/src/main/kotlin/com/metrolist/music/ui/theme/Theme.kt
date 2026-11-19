@@ -53,7 +53,7 @@ val DefaultThemeColor = DefaultPalette.accentDark
 
 private val HuniTypography = Typography().let { base ->
     base.copy(
-        headlineLarge = base.headlineLarge.copy(fontFamily = bbhBartle, fontWeight = FontWeight.SemiBold, fontSize = 24.sp),
+        headlineLarge = base.headlineLarge.copy(fontWeight = FontWeight.SemiBold, fontSize = 24.sp),
         headlineMedium = base.headlineMedium.copy(fontFamily = base.headlineMedium.fontFamily, fontWeight = FontWeight.SemiBold, fontSize = 20.sp),
         headlineSmall = base.headlineSmall.copy(fontFamily = base.headlineSmall.fontFamily, fontWeight = FontWeight.SemiBold, fontSize = 20.sp),
         titleLarge = base.titleLarge.copy(fontFamily = base.titleLarge.fontFamily, fontWeight = FontWeight.SemiBold, fontSize = 20.sp),
