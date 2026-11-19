@@ -79,6 +79,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -201,6 +202,8 @@ import com.metrolist.music.ui.player.BottomSheetPlayer
 import com.metrolist.music.ui.screens.Screens
 import com.metrolist.music.ui.screens.CrashReportDialog
 import com.metrolist.music.ui.screens.OnboardingScreen
+import com.metrolist.music.ui.screens.FirstRunSetupContent
+import com.metrolist.music.ui.screens.rememberSystemAnimationsEnabled
 import com.metrolist.music.ui.screens.navigationBuilder
 import com.metrolist.music.ui.screens.settings.ChangelogScreen
 import com.metrolist.music.ui.screens.settings.DarkMode
@@ -542,6 +545,9 @@ class MainActivity : FragmentActivity() {
         val checkForUpdates by rememberPreference(CheckForUpdatesKey, defaultValue = true)
         var onboardingDone by remember { mutableStateOf<Boolean?>(null) }
         var welcomeFlowComplete by rememberSaveable { mutableStateOf(false) }
+        var showFirstRunSetup by rememberSaveable { mutableStateOf(false) }
+        var firstRunSetupStep by rememberSaveable { mutableIntStateOf(0) }
+        val animationsEnabled = rememberSystemAnimationsEnabled()
         var showNotificationRationale by rememberSaveable { mutableStateOf(false) }
         var notificationPromptShown by rememberSaveable { mutableStateOf(false) }
         LaunchedEffect(Unit) {
@@ -554,8 +560,22 @@ class MainActivity : FragmentActivity() {
             onboardingDone = storedOnboardingDone
             welcomeFlowComplete = storedOnboardingDone
         }
-        LaunchedEffect(onboardingDone, welcomeFlowComplete) {
-            if (onboardingDone == true && welcomeFlowComplete && !notificationPromptShown && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+        LaunchedEffect(showFirstRunSetup, animationsEnabled) {
+            if (showFirstRunSetup) {
+                if (animationsEnabled) {
+                    for (step in 0..2) {
+                        firstRunSetupStep = step
+                        kotlinx.coroutines.delay(680)
+                    }
+                } else {
+                    firstRunSetupStep = 2
+                    kotlinx.coroutines.delay(180)
+                }
+                showFirstRunSetup = false
+            }
+        }
+        LaunchedEffect(onboardingDone, welcomeFlowComplete, showFirstRunSetup) {
+            if (onboardingDone == true && welcomeFlowComplete && !showFirstRunSetup && !notificationPromptShown && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                 ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
             ) {
                 kotlinx.coroutines.delay(450)
@@ -610,6 +630,8 @@ class MainActivity : FragmentActivity() {
             ) {
                 OnboardingScreen(onFinished = {
                     welcomeFlowComplete = true
+                    firstRunSetupStep = 0
+                    showFirstRunSetup = true
                     onboardingDone = true
                 })
             }
@@ -1554,6 +1576,24 @@ class MainActivity : FragmentActivity() {
                                         Text(stringResource(R.string.kmp_upgrade_later))
                                     }
                                 },
+                            )
+                        }
+                    }
+
+                    AnimatedVisibility(
+                        visible = showFirstRunSetup,
+                        enter = fadeIn(tween(if (animationsEnabled) 160 else 0)),
+                        exit = fadeOut(tween(if (animationsEnabled) 260 else 0)),
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.background,
+                        ) {
+                            FirstRunSetupContent(
+                                step = firstRunSetupStep,
+                                animationsEnabled = animationsEnabled,
+                                modifier = Modifier.fillMaxSize(),
                             )
                         }
                     }
