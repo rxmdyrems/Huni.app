@@ -43,7 +43,6 @@ import com.metrolist.innertube.YouTube
 import com.metrolist.innertube.models.MediaInfo
 import com.metrolist.music.LocalArtistNameAliases
 import com.metrolist.music.LocalDatabase
-import com.metrolist.music.LocalPlayerConnection
 import com.metrolist.music.R
 import com.metrolist.music.constants.LoudnessLevel
 import com.metrolist.music.constants.LoudnessLevelKey
@@ -82,9 +81,6 @@ fun ShowMediaInfo(videoId: String) {
 
     var currentFormat by remember { mutableStateOf<FormatEntity?>(null) }
 
-    val playerConnection = LocalPlayerConnection.current
-    val currentStreamClient by playerConnection?.currentStreamClient?.collectAsState()
-        ?: remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
     val artistNameAliases = LocalArtistNameAliases.current
 
@@ -185,7 +181,7 @@ fun ShowMediaInfo(videoId: String) {
                             stringResource(R.string.likes) to info?.like?.let(::numberFormatter).orEmpty(),
                             stringResource(R.string.dislikes) to info?.dislike?.let(::numberFormatter).orEmpty(),
                             "Itag" to currentFormat?.itag?.toString(),
-                            stringResource(R.string.stream_client) to currentStreamClient,
+                            stringResource(R.string.stream_client) to null,
                             stringResource(R.string.mime_type) to currentFormat?.mimeType,
                             stringResource(R.string.codecs) to currentFormat?.codecs,
                             stringResource(R.string.bitrate) to currentFormat?.bitrate?.let { "${it / 1000} Kbps" },
@@ -194,13 +190,6 @@ fun ShowMediaInfo(videoId: String) {
                                 String.format(LocalLocale.current.platformLocale, "%.2f dB", it - targetLufs)
                             },
                             stringResource(R.string.loudness_level) to getLoudnessLevelLabel(loudnessLevel),
-                            stringResource(R.string.volume) to playerConnection?.let {
-                                runCatching { "${(it.player.volume * 100).toInt()}%" }
-                                    .onFailure { error ->
-                                        Timber.w(error, "Player was unavailable while rendering More info")
-                                    }
-                                    .getOrNull()
-                            },
                             stringResource(R.string.file_size) to
                                     currentFormat?.contentLength?.let {
                                         Formatter.formatShortFileSize(

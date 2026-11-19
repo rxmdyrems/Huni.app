@@ -50,7 +50,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -73,7 +73,6 @@ import androidx.compose.ui.unit.lerp
 import com.metrolist.music.ui.screens.Screens
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
-import kotlin.math.abs
 
 @Stable
 private fun isRouteSelected(currentRoute: String?, screenRoute: String, navigationItems: List<Screens>): Boolean {
@@ -202,7 +201,7 @@ fun AppNavigationBar(
     val latestItems = rememberUpdatedState(navigationItems)
     val latestRoute = rememberUpdatedState(currentRoute)
     val latestOnItemClick = rememberUpdatedState(onItemClick)
-    var dragIndex by remember { mutableIntStateOf(-1) }
+    var dragPosition by remember { mutableFloatStateOf(-1f) }
     val collapseFraction by animateFloatAsState(
         targetValue = if (collapseOnScroll && !keepExpanded) collapseProgress.coerceIn(0f, 1f) else 0f,
         animationSpec = spring(dampingRatio = 0.86f, stiffness = 420f),
@@ -250,8 +249,7 @@ fun AppNavigationBar(
                         val itemWidthPx = size.width.toFloat() / itemCount
                         awaitEachGesture {
                             val down = awaitFirstDown(requireUnconsumed = false)
-                            val downIndex = (down.position.x / itemWidthPx).toInt().coerceIn(0, itemCount - 1)
-                            dragIndex = downIndex
+                            dragPosition = down.position.x / itemWidthPx
                             var dragging = false
                             var lastIndex = -1
                             try {
@@ -266,7 +264,7 @@ fun AppNavigationBar(
                                     if (dragging) {
                                         val latest = latestItems.value
                                         val index = (change.position.x / itemWidthPx).toInt().coerceIn(0, latest.lastIndex)
-                                        dragIndex = index
+                                        dragPosition = (change.position.x / itemWidthPx).coerceIn(0f, (latest.lastIndex).toFloat())
                                         if (index != lastIndex) {
                                             lastIndex = index
                                             val screen = latest[index]
@@ -278,7 +276,7 @@ fun AppNavigationBar(
                                     }
                                 }
                             } finally {
-                                dragIndex = -1
+                                dragPosition = -1f
                             }
                         }
                     },
@@ -311,13 +309,11 @@ fun AppNavigationBar(
                             isRouteSelected(currentRoute, screen.route, navigationItems)
                         }
                         val iconRes = if (isSelected) screen.iconIdActive else screen.iconIdInactive
-                        val distanceFromFinger = if (dragIndex < 0) Int.MAX_VALUE else abs(index - dragIndex)
+                        val distanceFromFinger = if (dragPosition < 0f) 2f else kotlin.math.abs(index - dragPosition)
                         val scale by animateFloatAsState(
-                            targetValue = when (distanceFromFinger) {
-                                0 -> if (fluidInteraction) 1.22f else 1f
-                                1 -> if (fluidInteraction) 1.08f else 1f
-                                else -> 1f
-                            },
+                            targetValue = if (fluidInteraction) {
+                                1f + 0.22f * (1f - distanceFromFinger.coerceIn(0f, 1f))
+                            } else 1f,
                             animationSpec = spring(dampingRatio = 0.72f, stiffness = 520f),
                             label = "navTabMagnification$index",
                         )

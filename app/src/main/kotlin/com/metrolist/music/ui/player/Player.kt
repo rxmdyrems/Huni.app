@@ -2157,6 +2157,7 @@ private fun PlayerMoreMenuButton(
                             mediaMetadata = mediaMetadata,
                             playerBottomSheetState = state,
                             onShowDetailsDialog = {
+                                state.dismiss()
                                 mediaMetadata.id.let {
                                     bottomSheetPageState.showAfterMenuDismissal {
                                         ShowMediaInfo(it)

@@ -102,6 +102,7 @@ import kotlin.math.roundToInt
 @Composable
 fun ReaderLibraryScreen(navController: NavController, viewModel: ReaderViewModel = hiltViewModel()) {
     val books by viewModel.books.collectAsState()
+    var chapterStory by remember { mutableStateOf<ReaderStory?>(null) }
     var libraryLayout by rememberEnumPreference(ReaderLibraryLayoutKey, ReaderLibraryLayout.BLOCKS)
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         viewModel.importUris(uris)
@@ -120,7 +121,7 @@ fun ReaderLibraryScreen(navController: NavController, viewModel: ReaderViewModel
             )
         }.sortedByDescending { it.lastReadAt }
     }
-    Scaffold(topBar = { TopAppBar(title = { Text("Reader") }) }) { padding ->
+    Scaffold { padding ->
         Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
             Spacer(Modifier.height(12.dp))
             Text("Your stories", style = MaterialTheme.typography.headlineMedium)
@@ -179,6 +180,7 @@ fun ReaderLibraryScreen(navController: NavController, viewModel: ReaderViewModel
                             story = story,
                             bigType = false,
                             onResume = { navController.navigate("reader/${story.resumeBook.id}") },
+                            onOpenChapters = { chapterStory = story },
                             onDelete = { viewModel.deleteStory(story.chapters) },
                         )
                     }
@@ -194,12 +196,42 @@ fun ReaderLibraryScreen(navController: NavController, viewModel: ReaderViewModel
                             story = story,
                             bigType = true,
                             onResume = { navController.navigate("reader/${story.resumeBook.id}") },
+                            onOpenChapters = { chapterStory = story },
                             onDelete = { viewModel.deleteStory(story.chapters) },
                         )
                     }
                 }
             }
         }
+    }
+    chapterStory?.let { story ->
+        AlertDialog(
+            onDismissRequest = { chapterStory = null },
+            title = { Text(story.title) },
+            text = {
+                Column(Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState())) {
+                    story.chapters.forEach { chapter ->
+                        TextButton(
+                            onClick = {
+                                chapterStory = null
+                                navController.navigate("reader/${chapter.id}")
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
+                                Text(chapter.chapterName ?: chapter.sourceName, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                Text(
+                                    "Page ${chapter.currentPage + 1}${if (chapter.downloadedAt != null) " · Available offline" else ""}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { chapterStory = null }) { Text("Close") } },
+        )
     }
 }
 
@@ -700,6 +732,7 @@ private fun ReaderStoryCard(
     story: ReaderStory,
     bigType: Boolean,
     onResume: () -> Unit,
+    onOpenChapters: () -> Unit,
     onDelete: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -711,7 +744,11 @@ private fun ReaderStoryCard(
             }
         }.build()
     }
-    Card(Modifier.fillMaxWidth().clickable(onClick = onResume)) {
+    Card(
+        Modifier.fillMaxWidth()
+            .then(if (!bigType) Modifier.fillMaxHeight() else Modifier)
+            .clickable(onClick = onOpenChapters),
+    ) {
         if (bigType) {
             Row(Modifier.fillMaxWidth().padding(14.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 ReaderStoryCover(coverRequest, Modifier.size(width = 92.dp, height = 128.dp), story.title)

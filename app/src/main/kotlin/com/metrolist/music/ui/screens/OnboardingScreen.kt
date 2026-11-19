@@ -376,10 +376,10 @@ private fun WelcomePage() {
         Image(
             painter = painterResource(R.drawable.app_logo),
             contentDescription = "Huni app logo",
-            modifier = Modifier.size(176.dp),
+            modifier = Modifier.size(132.dp),
             contentScale = ContentScale.Fit,
         )
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(12.dp))
         Text(
             "Welcome to Huni",
             style = MaterialTheme.typography.headlineMedium.copy(
@@ -388,14 +388,14 @@ private fun WelcomePage() {
             ),
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(8.dp))
         Text(
-            "Thanks for installing Huni. Your music stays close, simple, and yours.",
+            "Thanks for installing Huni.\nYour music stays close, simple, and yours.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(18.dp))
+        Spacer(Modifier.height(10.dp))
         Text(
             "Let’s make it feel like home.",
             style = MaterialTheme.typography.titleMedium,
@@ -491,7 +491,7 @@ private fun AvatarChoice(
 ) {
     Box(
         Modifier
-            .size(68.dp)
+            .size(76.dp)
             .clip(CircleShape)
             .border(
                 width = if (selected) 3.dp else 1.dp,
@@ -501,10 +501,10 @@ private fun AvatarChoice(
             .selectable(selected = selected, enabled = enabled, role = Role.RadioButton, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Box(Modifier.fillMaxSize().clip(CircleShape)) { image() }
+        Box(Modifier.fillMaxSize().padding(3.dp).clip(CircleShape)) { image() }
         if (selected) {
             Surface(
-                modifier = Modifier.align(Alignment.BottomEnd).padding(2.dp).size(22.dp),
+                modifier = Modifier.align(Alignment.BottomEnd).padding(1.dp).size(22.dp),
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primary,
             ) {
