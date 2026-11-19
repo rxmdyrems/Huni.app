@@ -1,14 +1,18 @@
 # Huni Changelog
 > Every notable change to Huni, newest first. New release-text emoji prefixes follow CONTRIBUTING.md.
 
-## v0.9.22 (2026-11-19)
+## v0.9.22 (2026-11-20)
 ### 🐛 Fixes
 - 🐛 Delayed notification permission until onboarding completes and added a bounded first-run setup transition.
 - 🐛 Replaced the synchronous startup preference read with a bounded asynchronous load so activity recreation cannot block first paint.
 - 🐛 Serialized the player menu-to-More info sheet handoff to prevent two modal sheets from opening at once.
+- 🐛 Prevented More info from reading player state while the expanded player sheet is still active.
+- 🐛 Added direct access to every stored reader chapter from each story card and aligned Blocks cards to equal row heights.
+- 🐛 Removed the duplicate Reader header and the bird logo from the setup loader.
 - 🐛 Improved onboarding insets, greeting/avatar feedback, light-theme defaults, extension diagnostics, and CI submodule checkout.
 ### 🎨 UI
 - 🎨 Refined welcome spacing and avatar selection feedback while keeping greetings aligned with the current time.
+- 🎨 Made bottom-navigation drag magnification continuous instead of snapping between tabs.
 ### 📚 Reader
 - 📚 Added cover-led story cards, selectable Blocks/Big type layouts, one-tap resume, automatic/manual next chapter, and offline chapter downloads.
 
