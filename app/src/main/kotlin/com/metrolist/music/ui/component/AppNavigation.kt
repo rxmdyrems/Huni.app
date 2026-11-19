@@ -362,7 +362,7 @@ fun AppNavigationBar(
                         ) {
                             Column(
                                 modifier = Modifier.graphicsLayer { scaleX = scale; scaleY = scale }
-                                    .zIndex(if (distanceFromFinger == 0) 1f else 0f),
+                                    .zIndex(if (distanceFromFinger < 0.5f) 1f else 0f),
                                 horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
                             ) {
                                 Icon(
