@@ -854,7 +854,7 @@ fun Queue(
                                                                 playerBottomSheetState = playerBottomSheetState,
                                                                 onShowDetailsDialog = {
                                                                     window.mediaItem.mediaId.let {
-                                                                        bottomSheetPageState.show {
+                                                                        bottomSheetPageState.showAfterMenuDismissal {
                                                                             ShowMediaInfo(it)
                                                                         }
                                                                     }
@@ -1009,7 +1009,7 @@ fun Queue(
                                                         playerBottomSheetState = playerBottomSheetState,
                                                         onShowDetailsDialog = {
                                                             item.mediaId.let {
-                                                                bottomSheetPageState.show {
+                                                                bottomSheetPageState.showAfterMenuDismissal {
                                                                     ShowMediaInfo(it)
                                                                 }
                                                             }

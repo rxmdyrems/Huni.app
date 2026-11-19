@@ -41,10 +41,23 @@ class BottomSheetPageState(
 ) {
     var isVisible by mutableStateOf(isVisible)
     var content by mutableStateOf(content)
+    private var pendingContent by mutableStateOf<(@Composable ColumnScope.() -> Unit)?>(null)
 
     fun show(content: @Composable ColumnScope.() -> Unit) {
         isVisible = true
         this.content = content
+    }
+
+    fun showAfterMenuDismissal(content: @Composable ColumnScope.() -> Unit) {
+        pendingContent = content
+    }
+
+    fun showPendingAfterMenuDismissal() {
+        pendingContent?.let { nextContent ->
+            content = nextContent
+            isVisible = true
+            pendingContent = null
+        }
     }
 
     fun dismiss() {

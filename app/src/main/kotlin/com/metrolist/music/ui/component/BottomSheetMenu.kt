@@ -66,6 +66,7 @@ class MenuState(
 fun AnimatedBottomSheet(
     isVisible: Boolean,
     onDismissRequest: () -> Unit,
+    onHidden: () -> Unit = {},
     modifier: Modifier = Modifier,
     sheetState: SheetState = rememberMaterialBottomSheetState(initialValue = SheetValue.Hidden),
     sheetMaxWidth: Dp = BottomSheetDefaults.SheetMaxWidth,
@@ -90,8 +91,9 @@ fun AnimatedBottomSheet(
     LaunchedEffect(isVisible) {
         if (isVisible) {
             sheetState.show()
-        } else {
+        } else if (sheetState.isVisible) {
             sheetState.hide()
+            onHidden()
         }
     }
 
@@ -124,6 +126,7 @@ fun BottomSheetMenu(
     background: Color = MaterialTheme.colorScheme.surface,
 ) {
     val focusManager = LocalFocusManager.current
+    val bottomSheetPageState = LocalBottomSheetPageState.current
     val sheetState = rememberMaterialBottomSheetState(initialValue = SheetValue.Hidden)
 
     AnimatedBottomSheet(
@@ -132,6 +135,7 @@ fun BottomSheetMenu(
             focusManager.clearFocus()
             state.isVisible = false
         },
+        onHidden = bottomSheetPageState::showPendingAfterMenuDismissal,
         sheetState = sheetState,
         containerColor = background,
         contentColor = MaterialTheme.colorScheme.onSurface,
