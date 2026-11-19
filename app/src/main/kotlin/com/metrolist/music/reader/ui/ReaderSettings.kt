@@ -3,6 +3,11 @@ package com.metrolist.music.reader.ui
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 
+enum class ReaderLibraryLayout(val title: String) {
+    BLOCKS("Blocks"),
+    BIG_TYPE("Big type"),
+}
+
 /** Reading layouts supported by Huni's local image/archive reader. */
 enum class ReaderReadingMode(
     val title: String,

@@ -4,9 +4,13 @@
 ## v0.9.22 (2026-11-19)
 ### 🐛 Fixes
 - 🐛 Delayed notification permission until onboarding completes and added a bounded first-run setup transition.
+- 🐛 Replaced the synchronous startup preference read with a bounded asynchronous load so activity recreation cannot block first paint.
+- 🐛 Serialized the player menu-to-More info sheet handoff to prevent two modal sheets from opening at once.
 - 🐛 Improved onboarding insets, greeting/avatar feedback, light-theme defaults, extension diagnostics, and CI submodule checkout.
 ### 🎨 UI
 - 🎨 Refined welcome spacing and avatar selection feedback while keeping greetings aligned with the current time.
+### 📚 Reader
+- 📚 Added cover-led story cards, selectable Blocks/Big type layouts, one-tap resume, automatic/manual next chapter, and offline chapter downloads.
 
 ## v0.9.21 (2026-11-18)
 ### 🔐 Release

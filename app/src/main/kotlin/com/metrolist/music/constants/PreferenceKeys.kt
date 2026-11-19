@@ -202,6 +202,8 @@ val EnableGoogleCastKey = booleanPreferencesKey("enableGoogleCast")
 val ReaderReadingModeKey = stringPreferencesKey("readerReadingMode")
 val ReaderScaleModeKey = stringPreferencesKey("readerScaleMode")
 val ReaderBackgroundKey = stringPreferencesKey("readerBackground")
+val ReaderLibraryLayoutKey = stringPreferencesKey("readerLibraryLayout")
+val ReaderAutoAdvanceKey = booleanPreferencesKey("readerAutoAdvance")
 val ReaderFullscreenKey = booleanPreferencesKey("readerFullscreen")
 val ReaderKeepScreenOnKey = booleanPreferencesKey("readerKeepScreenOn")
 

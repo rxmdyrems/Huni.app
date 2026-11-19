@@ -117,17 +117,31 @@ fun ReaderExtensionsScreen(
                 openingChapter = openingChapter,
                 onChapter = { chapter ->
                     val details = state.details ?: state.selectedManga
+                    val manga = details
+                    val sourcePackage = state.selectedPackage
+                    val sourceId = state.selectedSourceId
                     val sourceName = state.selectedSourceName ?: "Mihon source"
                     val referer = state.sourceReferer
                     openingChapter = true
                     scope.launch {
                         try {
+                            val selectedManga = requireNotNull(manga) { "Manga details are unavailable. Refresh the story and try again." }
+                            val selectedPackage = requireNotNull(sourcePackage) { "Source extension is unavailable." }
+                            val selectedSourceId = requireNotNull(sourceId) { "Source selection is unavailable." }
                             val pageUrls = viewModel.pages(chapter)
                             val bookId = readerViewModel.importRemoteChapter(
-                                title = "${details?.title ?: "Manga"} — ${chapter.name}",
+                                title = "${selectedManga.title} — ${chapter.name}",
                                 sourceName = sourceName,
                                 pageUrls = pageUrls,
                                 referer = referer,
+                                storyId = "$selectedPackage:$selectedSourceId:${selectedManga.url}",
+                                storyTitle = selectedManga.title,
+                                chapterUrl = chapter.url,
+                                chapterName = chapter.name,
+                                mangaUrl = selectedManga.url,
+                                sourcePackage = selectedPackage,
+                                sourceId = selectedSourceId,
+                                coverUrl = selectedManga.thumbnail_url?.takeIf(String::isNotBlank),
                             )
                             navController.navigate("reader/$bookId")
                         } catch (error: Exception) {

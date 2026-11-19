@@ -77,7 +77,7 @@ object AppModule {
         context,
         ReaderDatabase::class.java,
         "reader.db",
-    ).addMigrations(ReaderDatabase.MIGRATION_1_2).build()
+    ).addMigrations(ReaderDatabase.MIGRATION_1_2, ReaderDatabase.MIGRATION_2_3).build()
 
     @Singleton
     @Provides
