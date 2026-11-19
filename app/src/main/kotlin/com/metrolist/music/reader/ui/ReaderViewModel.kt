@@ -198,7 +198,9 @@ class ReaderViewModel @Inject constructor(
     }
 
     fun deleteStory(chapters: List<ReaderBookEntity>) {
-        viewModelScope.launch(Dispatchers.IO) { chapters.forEach(::deleteBookNow) }
+        viewModelScope.launch(Dispatchers.IO) {
+            for (chapter in chapters) deleteBookNow(chapter)
+        }
     }
 
     private suspend fun deleteBookNow(book: ReaderBookEntity) {
