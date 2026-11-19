@@ -5,6 +5,8 @@
 ### 🐛 Fixes
 - 🐛 Delayed notification permission until onboarding completes and added a bounded first-run setup transition.
 - 🐛 Improved onboarding insets, greeting/avatar feedback, light-theme defaults, extension diagnostics, and CI submodule checkout.
+### 🎨 UI
+- 🎨 Refined welcome spacing and avatar selection feedback while keeping greetings aligned with the current time.
 
 ## v0.9.21 (2026-11-18)
 ### 🔐 Release

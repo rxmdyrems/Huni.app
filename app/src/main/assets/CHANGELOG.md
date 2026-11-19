@@ -8,6 +8,7 @@
 - 🐛 Preserved safe diagnostics for extension and More info failures.
 ### 🎨 UI
 - 🎨 Made new installations default to light appearance and reserved the display font for HUNI branding.
+- 🎨 Refined welcome spacing and avatar selection feedback while keeping greetings aligned with the current time.
 ---
 ## Unreleased
 ### 🐛 Fixes
