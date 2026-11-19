@@ -1371,7 +1371,7 @@ fun SongMenu(
                                 },
                                 onClick = {
                                     onDismiss()
-                                    bottomSheetPageState.show {
+                                    bottomSheetPageState.showAfterMenuDismissal {
                                         ShowMediaInfo(song.id)
                                     }
                                 },

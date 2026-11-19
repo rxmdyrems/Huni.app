@@ -49,7 +49,10 @@ class ExtensionRuntime(private val context: Context) {
     fun sourceFor(apkFile: File, pkg: String, sourceId: Long): HttpSource {
         val sources = loadSources(apkFile, pkg)
         return sources.firstOrNull { it.id == sourceId }
-            ?: throw IllegalArgumentException("Extension source is unavailable.")
+            ?: throw IllegalArgumentException(
+                "Extension source is unavailable (package=$pkg, requestedId=$sourceId, " +
+                    "loadedIds=${sources.joinToString { "${it.id}:${it.name}" }}).",
+            )
     }
 
     suspend fun fetchPopular(apkFile: File, pkg: String, sourceId: Long, page: Int = 1): MangasPage =

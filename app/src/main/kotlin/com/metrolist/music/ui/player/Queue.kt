@@ -396,7 +396,7 @@ fun Queue(
                                             playerBottomSheetState = playerBottomSheetState,
                                             onShowDetailsDialog = {
                                                 mediaMetadata?.id?.let {
-                                                    bottomSheetPageState.show {
+                                                    bottomSheetPageState.showAfterMenuDismissal {
                                                         ShowMediaInfo(it)
                                                     }
                                                 }
