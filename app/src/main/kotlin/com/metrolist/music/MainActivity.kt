@@ -244,7 +244,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
@@ -504,10 +503,6 @@ class MainActivity : FragmentActivity() {
             }
         }
 
-        val initialSettings = runBlocking(Dispatchers.IO) { dataStore.data.first() }
-        initialThemeMode = initialSettings[DarkModeKey]?.toEnum(DarkMode.OFF) ?: DarkMode.OFF
-        initialPaletteId = initialSettings[ThemePaletteKey] ?: DefaultPalette.id
-
         val pendingCrashReport = CrashReporter.readPending(this)
         setContent {
             MetrolistApp(
@@ -545,18 +540,23 @@ class MainActivity : FragmentActivity() {
         val checkForUpdates by rememberPreference(CheckForUpdatesKey, defaultValue = true)
         var onboardingDone by remember { mutableStateOf<Boolean?>(null) }
         var welcomeFlowComplete by rememberSaveable { mutableStateOf(false) }
+        var resolvedInitialDarkMode by remember { mutableStateOf(initialDarkMode) }
+        var resolvedInitialPaletteId by remember { mutableStateOf(initialPaletteId) }
         var showFirstRunSetup by rememberSaveable { mutableStateOf(false) }
         var firstRunSetupStep by rememberSaveable { mutableIntStateOf(0) }
         val animationsEnabled = rememberSystemAnimationsEnabled()
         var showNotificationRationale by rememberSaveable { mutableStateOf(false) }
         var notificationPromptShown by rememberSaveable { mutableStateOf(false) }
         LaunchedEffect(Unit) {
-            val storedOnboardingDone = withTimeoutOrNull(6_000L) {
-                dataStore.data.first()[OnboardingDoneKey] ?: false
-            } ?: run {
-                Timber.w("Startup preference read timed out; continuing with onboarding-safe defaults")
-                false
+            val startupPreferences = runCatching {
+                withTimeoutOrNull(6_000L) { dataStore.data.first() }
+            }.getOrNull()
+            if (startupPreferences == null) {
+                Timber.w("Startup preference read timed out or failed; continuing with safe defaults")
             }
+            val storedOnboardingDone = startupPreferences?.get(OnboardingDoneKey) ?: false
+            resolvedInitialDarkMode = startupPreferences?.get(DarkModeKey)?.toEnum(DarkMode.OFF) ?: DarkMode.OFF
+            resolvedInitialPaletteId = startupPreferences?.get(ThemePaletteKey) ?: DefaultPalette.id
             onboardingDone = storedOnboardingDone
             welcomeFlowComplete = storedOnboardingDone
         }
@@ -599,8 +599,8 @@ class MainActivity : FragmentActivity() {
                 dismissButton = { TextButton(onClick = { showNotificationRationale = false }) { Text("Not now") } },
             )
         }
-        val startupPalette = HuniPalettes.find { it.id == initialPaletteId } ?: DefaultPalette
-        val startupDarkTheme = when (initialDarkMode) {
+        val startupPalette = HuniPalettes.find { it.id == resolvedInitialPaletteId } ?: DefaultPalette
+        val startupDarkTheme = when (resolvedInitialDarkMode) {
             DarkMode.AUTO -> isSystemInDarkTheme()
             DarkMode.ON -> true
             DarkMode.OFF -> false
@@ -706,7 +706,7 @@ class MainActivity : FragmentActivity() {
             }
         }
 
-        val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = initialDarkMode)
+        val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = resolvedInitialDarkMode)
         val isSystemInDarkTheme = isSystemInDarkTheme()
         val useDarkTheme = remember(darkTheme, isSystemInDarkTheme) {
             when (darkTheme) {
@@ -728,7 +728,7 @@ class MainActivity : FragmentActivity() {
                 pureBlackEnabled && useDarkTheme
             }
 
-        val selectedPaletteId by rememberPreference(ThemePaletteKey, defaultValue = initialPaletteId)
+        val selectedPaletteId by rememberPreference(ThemePaletteKey, defaultValue = resolvedInitialPaletteId)
         val selectedPalette = HuniPalettes.find { it.id == selectedPaletteId } ?: DefaultPalette
         val selectedThemeColor = if (useDarkTheme) selectedPalette.accentDark else selectedPalette.accentLight
         val showChangelog = rememberSaveable { mutableStateOf(false) }
