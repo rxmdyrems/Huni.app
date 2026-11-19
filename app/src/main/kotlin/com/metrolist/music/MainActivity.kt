@@ -541,18 +541,21 @@ class MainActivity : FragmentActivity() {
     ) {
         val checkForUpdates by rememberPreference(CheckForUpdatesKey, defaultValue = true)
         var onboardingDone by remember { mutableStateOf<Boolean?>(null) }
+        var welcomeFlowComplete by rememberSaveable { mutableStateOf(false) }
         var showNotificationRationale by rememberSaveable { mutableStateOf(false) }
         var notificationPromptShown by rememberSaveable { mutableStateOf(false) }
         LaunchedEffect(Unit) {
-            onboardingDone = withTimeoutOrNull(6_000L) {
+            val storedOnboardingDone = withTimeoutOrNull(6_000L) {
                 dataStore.data.first()[OnboardingDoneKey] ?: false
             } ?: run {
                 Timber.w("Startup preference read timed out; continuing with onboarding-safe defaults")
                 false
             }
+            onboardingDone = storedOnboardingDone
+            welcomeFlowComplete = storedOnboardingDone
         }
-        LaunchedEffect(onboardingDone) {
-            if (onboardingDone == true && !notificationPromptShown && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+        LaunchedEffect(onboardingDone, welcomeFlowComplete) {
+            if (onboardingDone == true && welcomeFlowComplete && !notificationPromptShown && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                 ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
             ) {
                 kotlinx.coroutines.delay(450)
@@ -605,7 +608,10 @@ class MainActivity : FragmentActivity() {
                 themeColor = if (startupDarkTheme) startupPalette.accentDark else startupPalette.accentLight,
                 palette = startupPalette,
             ) {
-                OnboardingScreen(onFinished = { onboardingDone = true })
+                OnboardingScreen(onFinished = {
+                    welcomeFlowComplete = true
+                    onboardingDone = true
+                })
             }
             return
         }
