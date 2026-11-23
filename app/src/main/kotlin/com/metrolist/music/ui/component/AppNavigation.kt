@@ -20,6 +20,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -310,16 +311,17 @@ fun AppNavigationBar(
                         }
                         val iconRes = if (isSelected) screen.iconIdActive else screen.iconIdInactive
                         val distanceFromFinger = if (dragPosition < 0f) 2f else kotlin.math.abs(index - dragPosition)
-                        val scale by animateFloatAsState(
-                            targetValue = if (fluidInteraction) {
-                                1f + 0.22f * (1f - distanceFromFinger.coerceIn(0f, 1f))
-                            } else 1f,
-                            animationSpec = spring(dampingRatio = 0.72f, stiffness = 520f),
-                            label = "navTabMagnification$index",
-                        )
                         val isSearchItem = screen == Screens.Search && onSearchLongClick != null
                         val isHomeHoldItem = screen == Screens.Home && onHomeLongHold != null
                         val interactionSource = remember { MutableInteractionSource() }
+                        val isPressed by interactionSource.collectIsPressedAsState()
+                        val dragMagnification = 0.22f * (1f - distanceFromFinger.coerceIn(0f, 1f))
+                        val pressMagnification = if (isPressed) 0.10f else 0f
+                        val scale by animateFloatAsState(
+                            targetValue = if (fluidInteraction) 1f + maxOf(dragMagnification, pressMagnification) else 1f,
+                            animationSpec = spring(dampingRatio = 0.72f, stiffness = 520f),
+                            label = "navTabMagnification$index",
+                        )
 
                         if (isSearchItem || isHomeHoldItem) {
                             LaunchedEffect(interactionSource) {
