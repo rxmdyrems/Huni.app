@@ -11,6 +11,7 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -244,18 +245,21 @@ fun AppNavigationBar(
                         val tabLabel = stringResource(screen.titleId)
                         val isSelected = isRouteSelected(currentRoute, screen.route, navigationItems)
                         val distanceFromFinger = if (dragIndex < 0) Int.MAX_VALUE else abs(index - dragIndex)
-                        val scale by animateFloatAsState(
-                            targetValue = if (!fluidMotion) 1f else when (distanceFromFinger) {
-                                0 -> 1.18f
-                                1 -> 1.06f
-                                else -> 1f
-                            },
-                            animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.78f, stiffness = 520f),
-                            label = "navTabMotion$index",
-                        )
                         val isSearchItem = screen == Screens.Search && onSearchLongClick != null
                         val isHomeHoldItem = screen == Screens.Home && onHomeLongHold != null
                         val interactionSource = remember { MutableInteractionSource() }
+                        val isPressed by interactionSource.collectIsPressedAsState()
+                        val dragScale = if (!fluidMotion) 1f else when (distanceFromFinger) {
+                            0 -> 1.18f
+                            1 -> 1.06f
+                            else -> 1f
+                        }
+                        val pressScale = if (fluidMotion && isPressed) 1.10f else 1f
+                        val scale by animateFloatAsState(
+                            targetValue = maxOf(dragScale, pressScale),
+                            animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.78f, stiffness = 520f),
+                            label = "navTabMotion$index",
+                        )
                         if (isSearchItem || isHomeHoldItem) {
                             LaunchedEffect(interactionSource) {
                                 var isLongClick = false
