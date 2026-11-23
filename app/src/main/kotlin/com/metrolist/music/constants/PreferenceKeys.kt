@@ -52,6 +52,8 @@ enum class DensityScale(
 val DefaultOpenTabKey = stringPreferencesKey("defaultOpenTab")
 val SlimNavBarKey = booleanPreferencesKey("slimNavBar")
 val NavigationTabsKey = stringPreferencesKey("nav_hidden_tabs")
+val AnimeFavoritesKey = stringPreferencesKey("anime_favorites_v1")
+val AnimeContinueWatchingKey = stringPreferencesKey("anime_continue_watching_v1")
 val GlassNavigationKey = booleanPreferencesKey("glassNavigation")
 val CollapseNavigationOnScrollKey = booleanPreferencesKey("collapseNavigationOnScroll")
 val KeepNavigationExpandedKey = booleanPreferencesKey("keepNavigationExpanded")

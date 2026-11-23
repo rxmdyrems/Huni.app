@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dashboard_choose">Choose a dashboard</string>
+    <string name="music_dashboard">Music</string>
+    <string name="anime_dashboard">Anime</string>
+    <string name="manga_dashboard">Manga</string>
+    <string name="anime_dashboard_subtitle">Browse anime from your own trusted JavaScript provider repositories.</string>
+    <string name="anime_no_providers">No anime providers installed</string>
+    <string name="anime_no_providers_description">Add a provider repository below, then install one of its anime sources. Provider scripts run in a restricted runtime and cannot load native extensions.</string>
+    <string name="anime_search">Search anime</string>
+    <string name="anime_search_button">Search</string>
+    <string name="anime_discover">Discover</string>
+    <string name="anime_episodes">Episodes</string>
+    <string name="anime_resolve">Resolve</string>
+    <string name="anime_stream_ready">%1$s stream ready</string>
+    <string name="anime_play">Play</string>
+    <string name="anime_continue_watching">Continue watching</string>
+    <string name="anime_favorites">Favorites</string>
+    <string name="anime_provider_repositories">Provider repositories</string>
+    <string name="anime_manifest_url">HTTPS repository manifest URL</string>
+    <string name="anime_add">Add</string>
+    <string name="anime_refresh">Refresh</string>
+    <string name="anime_remove_repository">Remove repo</string>
+    <string name="anime_install">Install</string>
+    <string name="anime_enable">Enable</string>
+    <string name="anime_disable">Disable</string>
+    <string name="anime_remove">Remove</string>
+    <string name="anime_saved">Saved</string>
+    <string name="anime_save">Save</string>
+    <string name="anime_retry">Retry</string>
+    <string name="anime_loading_provider">Loading provider…</string>
+    <string name="anime_search_no_provider">Install and select an anime provider to search.</string>
+    <string name="anime_search_empty">No anime found. Try another search or provider.</string>
+    <string name="anime_episodes_empty">This provider did not return any episodes.</string>
+    <string name="anime_stream_empty">The provider did not resolve a playable stream.</string>
+    <string name="anime_provider_error">Provider request failed.</string>
+</resources>

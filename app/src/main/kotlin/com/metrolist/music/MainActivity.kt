@@ -192,6 +192,7 @@ import com.metrolist.music.ui.component.AppNavigationBar
 import com.metrolist.music.ui.component.AppNavigationRail
 import com.metrolist.music.ui.component.BottomSheetMenu
 import com.metrolist.music.ui.component.BottomSheetPage
+import com.metrolist.music.ui.component.DashboardMenuSheet
 import com.metrolist.music.ui.component.LocalBottomSheetPageState
 import com.metrolist.music.ui.component.LocalMenuState
 import com.metrolist.music.ui.component.rememberBottomSheetState
@@ -769,6 +770,8 @@ class MainActivity : FragmentActivity() {
                             Screens.Library.route,
                             Screens.Reader.route,
                             Screens.ListenTogether.route,
+                            "anime",
+                            "manga_dashboard",
                             "settings",
                         )
                     }
@@ -820,6 +823,7 @@ class MainActivity : FragmentActivity() {
                     remember(currentRoute, navigationItemRoutes) {
                         currentRoute == null ||
                             navigationItemRoutes.contains(currentRoute) ||
+                            currentRoute in setOf("anime", "manga_dashboard", "settings") ||
                             currentRoute!!.startsWith("search/")
                     }
 
@@ -1029,6 +1033,7 @@ class MainActivity : FragmentActivity() {
                     }
 
                 var showAccountDialog by remember { mutableStateOf(false) }
+                var showDashboardMenu by remember { mutableStateOf(false) }
                 var openSettingsAfterAccountClose by remember { mutableStateOf(false) }
                 val homeGreeting = rememberSaveable { chooseHomeGreeting() }
                 val profileName by rememberPreference(UserNameKey, defaultValue = "")
@@ -1209,8 +1214,8 @@ class MainActivity : FragmentActivity() {
                                         slimNav = slimNav,
                                         onSearchLongClick = onSearchLongClick,
                                         onHomeLongHold = { showAccountDialog = true },
-                                        onMenuClick = { showAccountDialog = true },
-                                        menuExpanded = showAccountDialog,
+                                        onMenuClick = { showDashboardMenu = true },
+                                        menuExpanded = showDashboardMenu,
                                         bottomInset = bottomInset,
                                         glassStyle = glassNavigation,
                                         collapseFraction = topAppBarScrollBehavior.state.collapsedFraction,
@@ -1404,6 +1409,19 @@ class MainActivity : FragmentActivity() {
                         state = LocalBottomSheetPageState.current,
                         modifier = Modifier.align(Alignment.BottomCenter),
                     )
+
+                    if (showDashboardMenu) {
+                        DashboardMenuSheet(
+                            onDismiss = { showDashboardMenu = false },
+                            onSelect = { route ->
+                                navController.navigate(route) {
+                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                        )
+                    }
 
                     if (showAccountDialog) {
                         AccountSettingsDialog(

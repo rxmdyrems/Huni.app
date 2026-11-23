@@ -35,6 +35,7 @@ kuromojiIpadic = "0.9.0"
 innertubex = "v0.5.2"
 tinypinyin = "2.0.3"
 protobuf = "4.36.0"
+rhino = "1.7.15"
 
 [libraries]
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
@@ -110,6 +111,7 @@ tinypinyin = { module = "com.github.promeG:tinypinyin", version.ref = "tinypinyi
 
 protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobuf" }
 protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobuf" }
+rhino = { module = "org.mozilla:rhino", version.ref = "rhino" }
 
 [plugins]
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

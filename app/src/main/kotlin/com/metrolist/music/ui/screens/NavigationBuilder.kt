@@ -113,6 +113,14 @@ fun NavGraphBuilder.navigationBuilder(
         ReaderLibraryScreen(navController)
     }
 
+    composable("manga_dashboard") {
+        ReaderLibraryScreen(navController)
+    }
+
+    composable("anime") {
+        AnimeDashboardScreen()
+    }
+
     composable("reader/extensions") {
         ReaderExtensionsScreen(navController)
     }

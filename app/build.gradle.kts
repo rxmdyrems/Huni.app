@@ -355,6 +355,7 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.client.encoding)
     implementation(libs.ktor.serialization.json)
+    implementation(libs.rhino)
     implementation("com.github.verizonkert:mihon-kit:v1.1.0") {
         exclude(group = "com.github.zhanghai.quickjs-java", module = "quickjs-android")
     }
