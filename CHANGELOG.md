@@ -1,6 +1,13 @@
 # Huni Changelog
 > Every notable change to Huni, newest first. New release-text emoji prefixes follow CONTRIBUTING.md.
 
+## v0.9.23 (draft)
+### 🎨 UI
+- 🎨 Redesigned first-run onboarding and setup/loading with the bird-inclusive Huni wordmark, theme-aware rose glow, and subtle falling sakura.
+- 🎨 Replaced the Home top-bar text mark with the supplied bird wordmark and added restrained, motion-accessible sakura over the dark-first Home screen.
+- 🎨 Applied the supplied phoenix/sakura emblem to the in-app logo and adaptive, monochrome, palette-matched, and legacy launcher icons.
+- 🎨 Set dark mode and the rose palette as new-install defaults while preserving existing user theme selections.
+
 ## v0.9.22 (2026-11-20)
 ### 🐛 Fixes
 - 🐛 Delayed notification permission until onboarding completes and added a bounded first-run setup transition.

@@ -48,7 +48,7 @@ val HuniPalettes = listOf(
     HuniPalette("slate", "Slate", Color(0xFFCBD5E1), Color(0xFF334155), Color(0xFF111317), Color(0xFF1B1E24), Color(0xFF262A32), Color(0xFFF7F8FA), Color(0xFFE8EBF0)),
 )
 
-val DefaultPalette = HuniPalettes.first()
+val DefaultPalette = HuniPalettes.find { it.id == "rose" } ?: HuniPalettes.first()
 val DefaultThemeColor = DefaultPalette.accentDark
 
 private val HuniTypography = Typography().let { base ->

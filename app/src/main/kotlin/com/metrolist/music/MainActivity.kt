@@ -302,7 +302,7 @@ class MainActivity : FragmentActivity() {
 
     // This is the snapshot we pass to Compose - changes here trigger recomposition
     private var playerConnectionSnapshot by mutableStateOf<PlayerConnection?>(null)
-    private var initialThemeMode: DarkMode = DarkMode.OFF
+    private var initialThemeMode: DarkMode = DarkMode.ON
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { granted ->
@@ -555,7 +555,7 @@ class MainActivity : FragmentActivity() {
                 Timber.w("Startup preference read timed out or failed; continuing with safe defaults")
             }
             val storedOnboardingDone = startupPreferences?.get(OnboardingDoneKey) ?: false
-            resolvedInitialDarkMode = startupPreferences?.get(DarkModeKey)?.toEnum(DarkMode.OFF) ?: DarkMode.OFF
+            resolvedInitialDarkMode = startupPreferences?.get(DarkModeKey)?.toEnum(DarkMode.ON) ?: DarkMode.ON
             resolvedInitialPaletteId = startupPreferences?.get(ThemePaletteKey) ?: DefaultPalette.id
             onboardingDone = storedOnboardingDone
             welcomeFlowComplete = storedOnboardingDone

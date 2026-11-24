@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -61,6 +62,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -356,10 +358,11 @@ private fun StepPage(content: @Composable () -> Unit) {
             .padding(top = 12.dp),
         verticalArrangement = Arrangement.spacedBy(22.dp),
     ) {
-        Text(
-            "HUNI",
-            style = MaterialTheme.typography.headlineLarge.copy(fontFamily = bbhBartle),
-            color = MaterialTheme.colorScheme.primary,
+        Image(
+            painter = painterResource(R.drawable.huni_wordmark_bird),
+            contentDescription = "Huni wordmark with bird",
+            modifier = Modifier.width(176.dp).height(58.dp),
+            contentScale = ContentScale.Fit,
         )
         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
         content()
@@ -368,40 +371,48 @@ private fun StepPage(content: @Composable () -> Unit) {
 
 @Composable
 private fun WelcomePage() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+    val colors = MaterialTheme.colorScheme
+    val animationsEnabled = rememberSystemAnimationsEnabled()
+    Box(
+        modifier = Modifier.fillMaxSize().background(
+            Brush.verticalGradient(listOf(colors.surfaceContainerHigh.copy(alpha = .86f), colors.background)),
+            RoundedCornerShape(28.dp),
+        ),
+        contentAlignment = Alignment.Center,
     ) {
-        Image(
-            painter = painterResource(R.drawable.app_logo),
-            contentDescription = "Huni app logo",
-            modifier = Modifier.size(132.dp),
-            contentScale = ContentScale.Fit,
-        )
-        Spacer(Modifier.height(12.dp))
-        Text(
-            "Welcome to Huni",
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontFamily = bbhBartle,
-                fontWeight = FontWeight.Bold,
-            ),
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            "Thanks for installing Huni.\nYour music stays close, simple, and yours.",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(10.dp))
-        Text(
-            "Let’s make it feel like home.",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-            textAlign = TextAlign.Center,
-        )
+        FallingSakura(Modifier.fillMaxSize(), animate = animationsEnabled)
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Image(
+                painter = painterResource(R.drawable.huni_wordmark_bird),
+                contentDescription = "Huni wordmark with bird",
+                modifier = Modifier.width(280.dp).height(112.dp),
+                contentScale = ContentScale.Fit,
+            )
+            Spacer(Modifier.height(34.dp))
+            Text(
+                "Your music,\nin its own light.",
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(12.dp))
+            Text(
+                "A listening space that feels like yours. Your music stays personal, right here on your device.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(18.dp))
+            Text(
+                "Let’s make it feel like home.",
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.primary,
+                textAlign = TextAlign.Center,
+            )
+        }
     }
 }
 

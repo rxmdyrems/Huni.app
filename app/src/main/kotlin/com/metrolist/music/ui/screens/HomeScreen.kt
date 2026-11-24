@@ -1312,6 +1312,11 @@ fun HomeScreen(
                     )
                 }
 
+            FallingSakura(
+                modifier = Modifier.fillMaxSize(),
+                animate = rememberSystemAnimationsEnabled(),
+            )
+
             LazyColumn(
                 state = lazylistState,
                 contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
