@@ -42,7 +42,7 @@ val HuniPalettes = listOf(
     HuniPalette("maroon", "Maroon", Color(0xFFE5707E), Color(0xFF9B1C31), Color(0xFF1C1114), Color(0xFF29181C), Color(0xFF382127), Color(0xFFFDF7F8), Color(0xFFF6E6E9)),
     HuniPalette("ocean", "Ocean", Color(0xFF6CB8FF), Color(0xFF1565C0), Color(0xFF0E1620), Color(0xFF162130), Color(0xFF202E42), Color(0xFFF5F9FE), Color(0xFFE4EEF9)),
     HuniPalette("teal", "Teal", Color(0xFF4FD6C8), Color(0xFF0F766E), Color(0xFF0D1918), Color(0xFF142524), Color(0xFF1E3432), Color(0xFFF4FBFA), Color(0xFFE0F2F0)),
-    HuniPalette("rose", "Rose", Color(0xFFFF8FB8), Color(0xFFC2185B), Color(0xFF1D1119), Color(0xFF2A1823), Color(0xFF3A2231), Color(0xFFFEF6F9), Color(0xFFF8E4EC)),
+    HuniPalette("rose", "Rose", Color(0xFFC43B46), Color(0xFFB32636), Color(0xFF09090A), Color(0xFF111113), Color(0xFF1A1A1C), Color(0xFFFEF6F7), Color(0xFFF8E6E8)),
     HuniPalette("orange", "Orange", Color(0xFFFF9A5C), Color(0xFFC2510A), Color(0xFF1C1410), Color(0xFF2A1D16), Color(0xFF3A2A20), Color(0xFFFEF8F4), Color(0xFFF8EAE0)),
     HuniPalette("indigo", "Indigo", Color(0xFF8C9EFF), Color(0xFF3949AB), Color(0xFF11131F), Color(0xFF1A1D31), Color(0xFF252A45), Color(0xFFF6F7FE), Color(0xFFE7EAFA)),
     HuniPalette("slate", "Slate", Color(0xFFCBD5E1), Color(0xFF334155), Color(0xFF111317), Color(0xFF1B1E24), Color(0xFF262A32), Color(0xFFF7F8FA), Color(0xFFE8EBF0)),
@@ -78,10 +78,10 @@ fun HuniPalette.colorScheme(dark: Boolean): ColorScheme {
     val bg = if (dark) darkBg else lightBg
     val surface = if (dark) darkSurface else Color.White
     val raised = if (dark) darkRaised else lightRaised
-    val text = if (dark) Color(0xFFF4F1F7) else Color(0xFF1B1722)
-    val muted = if (dark) Color(0xFFA9A3B5) else Color(0xFF6B6475)
+    val text = if (dark) Color(0xFFF5F4F2) else Color(0xFF1B1722)
+    val muted = if (dark) Color(0xFFA7A6A4) else Color(0xFF6B6475)
     val outline = if (dark) raised.mix(Color.White, 0.08f) else raised.mix(Color.Black, 0.10f)
-    val onAccent = if (dark) Color(0xFF14110F) else Color.White
+    val onAccent = if (dark && id == "rose") Color.White else if (dark) Color(0xFF14110F) else Color.White
     return if (dark) darkColorScheme(primary = accent, onPrimary = onAccent, primaryContainer = raised, onPrimaryContainer = text,
         secondary = accent, onSecondary = onAccent, secondaryContainer = raised, onSecondaryContainer = text,
         background = bg, onBackground = text, surface = surface, onSurface = text, surfaceVariant = raised, onSurfaceVariant = muted,

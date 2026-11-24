@@ -44,13 +44,13 @@ fun HuniWordmark(greeting: String, name: String) {
         Image(
             painter = painterResource(R.drawable.huni_wordmark_bird),
             contentDescription = "Huni",
-            modifier = Modifier.width(150.dp).height(50.dp),
+            modifier = Modifier.width(132.dp).height(48.dp),
             contentScale = ContentScale.Fit,
         )
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = "$greeting, ",
-                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp),
+                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 softWrap = false,
@@ -58,7 +58,7 @@ fun HuniWordmark(greeting: String, name: String) {
             Text(
                 text = name,
                 modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp),
+                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 softWrap = false,

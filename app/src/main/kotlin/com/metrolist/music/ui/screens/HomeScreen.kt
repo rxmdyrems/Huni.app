@@ -74,7 +74,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
@@ -585,16 +584,7 @@ fun DailyDiscoverCard(
                         Modifier
                             .fillMaxSize()
                             .background(
-                                brush =
-                                    Brush.verticalGradient(
-                                        colors =
-                                            listOf(
-                                                Color.Black.copy(alpha = 0.3f),
-                                                Color.Transparent,
-                                                Color.Black.copy(alpha = 0.6f),
-                                                Color.Black.copy(alpha = 0.9f),
-                                            ),
-                                    ),
+                                color = Color.Black.copy(alpha = 0.48f),
                             ),
                 )
 
@@ -1311,11 +1301,6 @@ fun HomeScreen(
                         },
                     )
                 }
-
-            FallingSakura(
-                modifier = Modifier.fillMaxSize(),
-                animate = rememberSystemAnimationsEnabled(),
-            )
 
             LazyColumn(
                 state = lazylistState,

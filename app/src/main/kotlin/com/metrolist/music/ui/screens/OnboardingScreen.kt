@@ -49,6 +49,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -62,7 +63,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -279,7 +279,7 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                     when (targetPage) {
                         0 -> WelcomePage()
                         1 -> StepPage {
-                            NamePage(name, currentGreeting, onChange = { name = sanitizeProfileName(it) })
+                            NamePage(name, onChange = { name = sanitizeProfileName(it) })
                         }
                         2 -> StepPage {
                             AvatarPage(
@@ -325,7 +325,7 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                     }
                     Spacer(Modifier.height(16.dp))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        OutlinedButton(
+                        TextButton(
                             enabled = !transitioning && !avatarSaving,
                             onClick = { if (page > 0) goToPage(page - 1) else finish(skip = true) },
                         ) {
@@ -355,13 +355,13 @@ private fun StepPage(content: @Composable () -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()
-            .padding(top = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(22.dp),
+            .padding(top = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Image(
             painter = painterResource(R.drawable.huni_wordmark_bird),
             contentDescription = "Huni wordmark with bird",
-            modifier = Modifier.width(176.dp).height(58.dp),
+            modifier = Modifier.width(148.dp).height(60.dp),
             contentScale = ContentScale.Fit,
         )
         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
@@ -371,45 +371,30 @@ private fun StepPage(content: @Composable () -> Unit) {
 
 @Composable
 private fun WelcomePage() {
-    val colors = MaterialTheme.colorScheme
-    val animationsEnabled = rememberSystemAnimationsEnabled()
     Box(
-        modifier = Modifier.fillMaxSize().background(
-            Brush.verticalGradient(listOf(colors.surfaceContainerHigh.copy(alpha = .86f), colors.background)),
-            RoundedCornerShape(28.dp),
-        ),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        FallingSakura(Modifier.fillMaxSize(), animate = animationsEnabled)
         Column(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Image(
                 painter = painterResource(R.drawable.huni_wordmark_bird),
                 contentDescription = "Huni wordmark with bird",
-                modifier = Modifier.width(280.dp).height(112.dp),
+                modifier = Modifier.width(232.dp).height(96.dp),
                 contentScale = ContentScale.Fit,
             )
-            Spacer(Modifier.height(34.dp))
             Text(
-                "Your music,\nin its own light.",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                "Your music. Your space.",
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Medium),
                 textAlign = TextAlign.Center,
             )
-            Spacer(Modifier.height(12.dp))
             Text(
-                "A listening space that feels like yours. Your music stays personal, right here on your device.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = colors.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
-            Spacer(Modifier.height(18.dp))
-            Text(
-                "Let’s make it feel like home.",
-                style = MaterialTheme.typography.titleMedium,
-                color = colors.primary,
+                "A quieter, more personal way to listen.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
         }
@@ -417,10 +402,10 @@ private fun WelcomePage() {
 }
 
 @Composable
-private fun NamePage(name: String, greeting: String, onChange: (String) -> Unit) {
+private fun NamePage(name: String, onChange: (String) -> Unit) {
     Column(
         Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text("What should we call you?", style = MaterialTheme.typography.headlineMedium)
         OutlinedTextField(
@@ -431,14 +416,6 @@ private fun NamePage(name: String, greeting: String, onChange: (String) -> Unit)
             supportingText = { Text("${name.length}/20") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             modifier = Modifier.fillMaxWidth(),
-        )
-        Text(
-            greeting,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            softWrap = false,
         )
     }
 }
@@ -523,7 +500,7 @@ private fun AvatarChoice(
                     Icon(
                         painter = painterResource(R.drawable.check),
                         contentDescription = "$label selected",
-                        tint = MaterialTheme.colorScheme.onPrimary,
+                        tint = androidx.compose.ui.graphics.Color.White,
                         modifier = Modifier.size(14.dp),
                     )
                 }

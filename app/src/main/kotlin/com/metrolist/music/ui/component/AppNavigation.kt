@@ -57,10 +57,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -228,21 +226,8 @@ fun AppNavigationBar(
         ) {
             androidx.compose.foundation.layout.BoxWithConstraints(
                 modifier = Modifier.weight(1f).height(if (slimNav) lerp(56.dp, 48.dp, collapseFraction) else dockHeight)
-                    .shadow(18.dp, RoundedCornerShape(32.dp), clip = false)
                     .clip(RoundedCornerShape(32.dp))
-                    .background(
-                        if (glassStyle) {
-                            Brush.verticalGradient(
-                                listOf(
-                                    scheme.surface.copy(alpha = 0.72f),
-                                    glassBase.copy(alpha = 0.88f),
-                                    containerColor.copy(alpha = 0.96f),
-                                ),
-                            )
-                        } else {
-                            Brush.verticalGradient(listOf(containerColor, containerColor))
-                        },
-                    )
+                    .background(if (glassStyle) glassBase.copy(alpha = 0.78f) else containerColor)
                     .border(1.dp, outline, RoundedCornerShape(32.dp))
                     .pointerInput(navigationItems) {
                         val itemCount = navigationItems.size.coerceAtLeast(1)
@@ -294,14 +279,9 @@ fun AppNavigationBar(
                 Box(
                     modifier = Modifier.offset(x = indicatorOffset + 4.dp).align(androidx.compose.ui.Alignment.CenterStart)
                         .width(itemWidth - 8.dp).height(indicatorHeight).clip(RoundedCornerShape(28.dp))
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(selectedColor.copy(alpha = 0.28f), selectedColor.copy(alpha = 0.12f), Color.Transparent),
-                            ),
-                        )
-                        .border(1.dp, selectedColor.copy(alpha = 0.42f), RoundedCornerShape(28.dp)),
+                        .background(selectedColor.copy(alpha = 0.16f))
+                        .border(1.dp, selectedColor.copy(alpha = 0.30f), RoundedCornerShape(28.dp)),
                 )
-                if (glassStyle) GlassHighlight(Modifier.matchParentSize())
                 Row(Modifier.fillMaxSize()) {
                     navigationItems.forEachIndexed { index, screen ->
                         val tabLabel = stringResource(screen.titleId)
@@ -385,16 +365,8 @@ fun AppNavigationBar(
                 }
             }
             Box(
-                modifier = Modifier.size(lerp(64.dp, 52.dp, collapseFraction)).shadow(18.dp, CircleShape, clip = false).clip(CircleShape)
-                    .background(
-                        if (glassStyle) {
-                            Brush.verticalGradient(
-                                listOf(scheme.surface.copy(alpha = 0.72f), glassBase.copy(alpha = 0.88f), containerColor.copy(alpha = 0.96f)),
-                            )
-                        } else {
-                            Brush.verticalGradient(listOf(containerColor, containerColor))
-                        },
-                    )
+                modifier = Modifier.size(lerp(64.dp, 52.dp, collapseFraction)).clip(CircleShape)
+                    .background(if (glassStyle) glassBase.copy(alpha = 0.78f) else containerColor)
                     .border(1.dp, outline, CircleShape)
                     .clickable {
                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -403,7 +375,6 @@ fun AppNavigationBar(
                     .semantics { contentDescription = "Menu" },
                 contentAlignment = androidx.compose.ui.Alignment.Center,
             ) {
-                if (glassStyle) GlassHighlight(Modifier.matchParentSize())
                 Canvas(Modifier.size(24.dp).graphicsLayer { rotationZ = menuProgress * 90f }) {
                     val lineWidth = 2.2.dp.toPx()
                     val centerX = size.width / 2f
@@ -417,32 +388,5 @@ fun AppNavigationBar(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun GlassHighlight(modifier: Modifier = Modifier) {
-    val highlightColor = MaterialTheme.colorScheme.onSurface
-    val accentColor = MaterialTheme.colorScheme.primary
-    Canvas(modifier) {
-        val leftGlow = Offset(size.width * 0.16f, -size.height * 0.12f)
-        val rightGlow = Offset(size.width * 0.88f, size.height * 0.2f)
-        drawCircle(
-            brush = Brush.radialGradient(listOf(highlightColor.copy(alpha = 0.22f), Color.Transparent), leftGlow, size.width * 0.78f),
-            radius = size.width * 0.78f,
-            center = leftGlow,
-        )
-        drawCircle(
-            brush = Brush.radialGradient(listOf(accentColor.copy(alpha = 0.10f), Color.Transparent), rightGlow, size.width * 0.54f),
-            radius = size.width * 0.54f,
-            center = rightGlow,
-        )
-        drawLine(
-            brush = Brush.horizontalGradient(listOf(Color.Transparent, highlightColor.copy(alpha = 0.34f), Color.Transparent)),
-            start = Offset(size.width * 0.12f, 1.dp.toPx()),
-            end = Offset(size.width * 0.88f, 1.dp.toPx()),
-            strokeWidth = 1.dp.toPx(),
-            cap = StrokeCap.Round,
-        )
     }
 }

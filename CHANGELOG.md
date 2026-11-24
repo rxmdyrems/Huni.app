@@ -3,10 +3,11 @@
 
 ## v0.9.23 (draft)
 ### 🎨 UI
-- 🎨 Redesigned first-run onboarding and setup/loading with the bird-inclusive Huni wordmark, theme-aware rose glow, and subtle falling sakura.
-- 🎨 Replaced the Home top-bar text mark with the supplied bird wordmark and added restrained, motion-accessible sakura over the dark-first Home screen.
+- 🎨 Refined every onboarding step and setup/loading into a compact, flat near-black design with white type and restrained crimson; removed falling sakura, decorative glow, and gradient cards.
+- 🎨 Simplified Home around the bird-inclusive Huni wordmark and a translucent, gradient-free navigation dock while preserving theme controls and existing actions.
+- 🎨 Added a high-contrast crimson checkmark to the selected preset avatar.
 - 🎨 Applied the supplied phoenix/sakura emblem to the in-app logo and adaptive, monochrome, palette-matched, and legacy launcher icons.
-- 🎨 Set dark mode and the rose palette as new-install defaults while preserving existing user theme selections.
+- 🎨 Kept dark mode as the new-install default, updated the default Rose palette to near-black/crimson, and preserved saved theme-mode and palette selections.
 
 ## v0.9.22 (2026-11-20)
 ### 🐛 Fixes
