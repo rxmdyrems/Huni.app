@@ -8,6 +8,7 @@
 - 🎨 Added a high-contrast crimson checkmark to the selected preset avatar.
 - 🎨 Applied the supplied phoenix/sakura emblem to the in-app logo and adaptive, monochrome, palette-matched, and legacy launcher icons.
 - 🎨 Kept dark mode as the new-install default, updated the default Rose palette to near-black/crimson, and preserved saved theme-mode and palette selections.
+- 🎨 Smoothed onboarding and navigation motion, balanced avatar-step spacing, aligned the bird wordmark, and shortened completion copy.
 
 ## v0.9.22 (2026-11-20)
 ### 🐛 Fixes

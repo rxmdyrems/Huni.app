@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -177,7 +179,7 @@ fun OnboardingScreen(onFinished: () -> Unit) {
 
     LaunchedEffect(page, animationsEnabled) {
         if (transitioning) {
-            if (animationsEnabled) delay(260)
+            if (animationsEnabled) delay(290)
             transitioning = false
         }
     }
@@ -267,12 +269,12 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                     targetState = page,
                     transitionSpec = {
                         val direction = transitionDirection
-                        val slideDuration = if (animationsEnabled) 240 else 0
-                        val fadeDuration = if (animationsEnabled) 180 else 0
-                        (slideInHorizontally(tween(slideDuration)) { width -> direction * width } +
-                            fadeIn(tween(fadeDuration))) togetherWith
-                            (slideOutHorizontally(tween(slideDuration)) { width -> -direction * width } +
-                                fadeOut(tween(fadeDuration)))
+                        val slideDuration = if (animationsEnabled) 280 else 0
+                        val fadeDuration = if (animationsEnabled) 220 else 0
+                        (slideInHorizontally(tween(slideDuration, easing = FastOutSlowInEasing)) { width -> direction * width / 16 } +
+                            fadeIn(tween(fadeDuration, easing = FastOutSlowInEasing))) togetherWith
+                            (slideOutHorizontally(tween(slideDuration, easing = FastOutSlowInEasing)) { width -> -direction * width / 16 } +
+                                fadeOut(tween(fadeDuration, easing = FastOutSlowInEasing)))
                     },
                     label = "onboarding-page-transition",
                 ) { targetPage ->
@@ -308,7 +310,7 @@ fun OnboardingScreen(onFinished: () -> Unit) {
             }
 
             if (!settingUp) {
-                Column(Modifier.imePadding()) {
+                Column(Modifier.imePadding().padding(bottom = if (page == 2) 24.dp else 0.dp)) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                         repeat(4) { index ->
                             Box(
@@ -361,7 +363,7 @@ private fun StepPage(content: @Composable () -> Unit) {
         Image(
             painter = painterResource(R.drawable.huni_wordmark_bird),
             contentDescription = "Huni wordmark with bird",
-            modifier = Modifier.width(148.dp).height(60.dp),
+            modifier = Modifier.width(148.dp).height(60.dp).offset(x = (-14).dp),
             contentScale = ContentScale.Fit,
         )
         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
@@ -518,7 +520,7 @@ private fun FinishPage(greeting: String) {
     ) {
         Text(greeting, style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
         Text(
-            "You’re all set. Thanks for choosing Huni — enjoy the app.",
+            "You’re ready to listen.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

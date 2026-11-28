@@ -55,6 +55,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.zIndex
@@ -202,7 +203,10 @@ fun AppNavigationBar(
     var dragPosition by remember { mutableFloatStateOf(-1f) }
     val collapseFraction by animateFloatAsState(
         targetValue = if (collapseOnScroll && !keepExpanded) collapseProgress.coerceIn(0f, 1f) else 0f,
-        animationSpec = spring(dampingRatio = 0.86f, stiffness = 420f),
+        animationSpec = spring(
+            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
+            stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow,
+        ),
         label = "navigationCollapse",
     )
     val dockHeight = lerp(64.dp, 52.dp, collapseFraction)
@@ -210,7 +214,10 @@ fun AppNavigationBar(
     val labelAlpha = 1f - collapseFraction
     val menuProgress by animateFloatAsState(
         targetValue = if (menuExpanded) 1f else 0f,
-        animationSpec = spring(dampingRatio = 0.78f, stiffness = 440f),
+        animationSpec = spring(
+            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
+            stiffness = androidx.compose.animation.core.Spring.StiffnessMedium,
+        ),
         label = "menuIconMorph",
     )
     val selectedIndex = remember(currentRoute, navigationItems) {
@@ -268,16 +275,18 @@ fun AppNavigationBar(
             ) {
                 val itemCount = navigationItems.size.coerceAtLeast(1)
                 val itemWidth = maxWidth / itemCount
-                val indicatorOffset by androidx.compose.animation.core.animateDpAsState(
+                val indicatorOffset = androidx.compose.animation.core.animateDpAsState(
                     targetValue = itemWidth * selectedIndex,
                     animationSpec = androidx.compose.animation.core.spring(
-                        dampingRatio = 0.82f,
-                        stiffness = androidx.compose.animation.core.Spring.StiffnessMedium,
+                        dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
+                        stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow,
                     ),
                     label = "navigationSelectionBubble",
                 )
                 Box(
-                    modifier = Modifier.offset(x = indicatorOffset + 4.dp).align(androidx.compose.ui.Alignment.CenterStart)
+                    modifier = Modifier.offset {
+                        IntOffset(x = (indicatorOffset.value + 4.dp).roundToPx(), y = 0)
+                    }.align(androidx.compose.ui.Alignment.CenterStart)
                         .width(itemWidth - 8.dp).height(indicatorHeight).clip(RoundedCornerShape(28.dp))
                         .background(selectedColor.copy(alpha = 0.16f))
                         .border(1.dp, selectedColor.copy(alpha = 0.30f), RoundedCornerShape(28.dp)),
@@ -292,9 +301,12 @@ fun AppNavigationBar(
                         val distanceFromFinger = if (dragPosition < 0f) 2f else kotlin.math.abs(index - dragPosition)
                         val scale by animateFloatAsState(
                             targetValue = if (fluidInteraction) {
-                                1f + 0.22f * (1f - distanceFromFinger.coerceIn(0f, 1f))
+                                1f + 0.14f * (1f - distanceFromFinger.coerceIn(0f, 1f))
                             } else 1f,
-                            animationSpec = spring(dampingRatio = 0.72f, stiffness = 520f),
+                            animationSpec = spring(
+                                dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
+                                stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow,
+                            ),
                             label = "navTabMagnification$index",
                         )
                         val isSearchItem = screen == Screens.Search && onSearchLongClick != null

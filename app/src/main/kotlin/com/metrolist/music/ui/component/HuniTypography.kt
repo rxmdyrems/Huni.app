@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -44,7 +45,7 @@ fun HuniWordmark(greeting: String, name: String) {
         Image(
             painter = painterResource(R.drawable.huni_wordmark_bird),
             contentDescription = "Huni",
-            modifier = Modifier.width(132.dp).height(48.dp),
+            modifier = Modifier.width(132.dp).height(48.dp).offset(x = (-12).dp),
             contentScale = ContentScale.Fit,
         )
         Row(modifier = Modifier.fillMaxWidth()) {
