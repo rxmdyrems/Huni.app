@@ -12,6 +12,7 @@ import com.metrolist.music.reader.db.ReaderBookEntity
 import com.metrolist.music.reader.db.ReaderDatabase
 import com.metrolist.music.reader.db.ReaderPageEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
+import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import java.io.File
 import java.net.HttpURLConnection
@@ -24,6 +25,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+data class ReaderChapterOption(
+    val url: String,
+    val title: String,
+    val bookId: String?,
+    val currentPage: Int,
+    val downloaded: Boolean,
+)
 
 @HiltViewModel
 class ReaderViewModel @Inject constructor(
@@ -84,53 +93,107 @@ class ReaderViewModel @Inject constructor(
         id
     }
 
-    /** Fetch and import the next chapter in this installed source's chapter ordering. */
-    suspend fun importNextChapter(bookId: String): String? = withContext(Dispatchers.IO) {
+    /** Use extension source ordering when available; cached chapters are a safe offline fallback. */
+    suspend fun chapterOptions(bookId: String): List<ReaderChapterOption> = withContext(Dispatchers.IO) {
+        val current = dao.bookOnce(bookId) ?: return@withContext emptyList()
+        val storyId = current.storyId ?: return@withContext emptyList()
+        val saved = dao.booksForStory(storyId)
+        val savedByUrl = saved.mapNotNull { chapter -> chapter.chapterUrl?.let { it to chapter } }.toMap()
+        val sourceChapters = try {
+            sourceChapters(current)
+        } catch (_: Exception) {
+            emptyList()
+        }
+        if (sourceChapters.isNotEmpty()) {
+            val options = sourceChapters.map { chapter ->
+                val cached = savedByUrl[chapter.url]
+                ReaderChapterOption(chapter.url, chapter.name, cached?.id, cached?.currentPage ?: 0, cached?.downloadedAt != null)
+            }
+            if (options.none { it.url == current.chapterUrl }) {
+                options + ReaderChapterOption(
+                    current.chapterUrl.orEmpty(),
+                    current.chapterName ?: current.title,
+                    current.id,
+                    current.currentPage,
+                    current.downloadedAt != null,
+                )
+            } else {
+                options
+            }
+        } else {
+            saved.sortedBy { it.addedAt }.mapNotNull { chapter ->
+                chapter.chapterUrl?.let { url ->
+                    ReaderChapterOption(url, chapter.chapterName ?: chapter.title, chapter.id, chapter.currentPage, chapter.downloadedAt != null)
+                }
+            }
+        }
+    }
+
+    /** Return a saved chapter or fetch and save a selected chapter from its installed source. */
+    suspend fun openChapter(bookId: String, chapterUrl: String): String? = withContext(Dispatchers.IO) {
         val current = dao.bookOnce(bookId) ?: return@withContext null
         val storyId = current.storyId ?: return@withContext null
+        dao.chapterForStory(storyId, chapterUrl)?.let { return@withContext it.id }
+        val chapter = sourceChapters(current).firstOrNull { it.url == chapterUrl } ?: return@withContext null
+        importSourceChapter(current, chapter)
+    }
+
+    /** Fetch and import the next chapter in this installed source's canonical chapter ordering. */
+    suspend fun importNextChapter(bookId: String): String? = withContext(Dispatchers.IO) {
+        val current = dao.bookOnce(bookId) ?: return@withContext null
         val chapterUrl = current.chapterUrl ?: return@withContext null
-        val mangaUrl = current.mangaUrl ?: return@withContext null
-        val packageName = current.sourcePackage ?: return@withContext null
-        val sourceId = current.sourceId ?: return@withContext null
-        val extension = extensionRepository.getInstalled().firstOrNull { it.pkg == packageName }
+        val chapters = sourceChapters(current)
+        val currentIndex = chapters.indexOfFirst { it.url == chapterUrl }
+        if (currentIndex < 0) return@withContext null
+        val nextChapter = chapters.getOrNull(currentIndex + 1) ?: return@withContext null
+        importSourceChapter(current, nextChapter)
+    }
+
+    private suspend fun sourceChapters(current: ReaderBookEntity): List<SChapter> {
+        val mangaUrl = current.mangaUrl ?: throw IllegalStateException("This story has no source URL.")
+        val packageName = current.sourcePackage ?: throw IllegalStateException("This story has no source extension.")
+        val sourceId = current.sourceId ?: throw IllegalStateException("This story has no source ID.")
+        extensionRepository.getInstalled().firstOrNull { it.pkg == packageName }
             ?: throw IllegalStateException("The source extension is not installed. Reinstall it to continue this story.")
-        val apkFile = extensionRepository.apkFile(packageName)
         val manga = SManga.create().apply {
             url = mangaUrl
             title = current.storyTitle ?: current.title.substringBefore(" — ")
             thumbnail_url = current.coverUrl.orEmpty()
         }
-        val chapters = extensionRuntime.fetchChapters(apkFile, packageName, sourceId, manga)
-        val currentIndex = chapters.indexOfFirst { it.url == chapterUrl }
-        if (currentIndex < 0) return@withContext null
-        val nextChapter = chapters.getOrNull(currentIndex + 1) ?: return@withContext null
-        dao.chapterForStory(storyId, nextChapter.url)?.let { return@withContext it.id }
+        return extensionRuntime.fetchChapters(extensionRepository.apkFile(packageName), packageName, sourceId, manga)
+    }
 
-        val pageUrls = extensionRuntime.fetchPages(apkFile, packageName, sourceId, nextChapter)
+    private suspend fun importSourceChapter(current: ReaderBookEntity, chapter: SChapter): String? {
+        val storyId = current.storyId ?: return null
+        val mangaUrl = current.mangaUrl ?: return null
+        val packageName = current.sourcePackage ?: return null
+        val sourceId = current.sourceId ?: return null
+        dao.chapterForStory(storyId, chapter.url)?.let { return it.id }
+        val pageUrls = extensionRuntime.fetchPages(extensionRepository.apkFile(packageName), packageName, sourceId, chapter)
             .mapNotNull { it.imageUrl?.takeIf { url -> url.startsWith("https://") || url.startsWith("http://") } }
-        require(pageUrls.isNotEmpty()) { "The next chapter contains no readable pages." }
-        val nextId = UUID.randomUUID().toString()
+        require(pageUrls.isNotEmpty()) { "Chapter contains no readable pages." }
+        val newId = UUID.randomUUID().toString()
         val storyTitle = current.storyTitle ?: current.title.substringBefore(" — ")
         database.withTransaction {
             dao.insertBook(
                 ReaderBookEntity(
-                    id = nextId,
-                    title = "$storyTitle — ${nextChapter.name}",
+                    id = newId,
+                    title = "$storyTitle — ${chapter.name}",
                     sourceName = current.sourceName,
                     referer = current.referer,
                     storyId = storyId,
                     storyTitle = storyTitle,
-                    chapterUrl = nextChapter.url,
-                    chapterName = nextChapter.name,
+                    chapterUrl = chapter.url,
+                    chapterName = chapter.name,
                     mangaUrl = mangaUrl,
                     sourcePackage = packageName,
                     sourceId = sourceId,
                     coverUrl = current.coverUrl ?: pageUrls.firstOrNull(),
                 ),
             )
-            dao.insertPages(pageUrls.mapIndexed { index, url -> ReaderPageEntity(nextId, index, url) })
+            dao.insertPages(pageUrls.mapIndexed { index, url -> ReaderPageEntity(newId, index, url) })
         }
-        nextId
+        return newId
     }
 
     /** Download all remote pages atomically per page, preserving partial progress for retry. */

@@ -15,7 +15,6 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -436,20 +435,22 @@ private fun AvatarPage(
         Text("Pick an avatar", style = MaterialTheme.typography.headlineMedium)
         Text("Photos never leave this phone.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
+            columns = GridCells.Adaptive(minSize = 64.dp),
             modifier = Modifier.fillMaxWidth().heightIn(min = 196.dp, max = 292.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(avatarPresets.indices.toList()) { index ->
                 val id = "avatar_${avatarNames[index].substringBefore(' ').lowercase()}"
-                AvatarChoice(
-                    image = { Image(painterResource(avatarPresets[index]), avatarNames[index], contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize()) },
-                    label = avatarNames[index],
-                    selected = selected == id,
-                    enabled = enabled,
-                    onClick = { onSelected(id) },
-                )
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    AvatarChoice(
+                        image = { Image(painterResource(avatarPresets[index]), avatarNames[index], contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize()) },
+                        label = avatarNames[index],
+                        selected = selected == id,
+                        enabled = enabled,
+                        onClick = { onSelected(id) },
+                    )
+                }
             }
         }
         if (AvatarStore.isCustomAvatarId(selected)) {
@@ -481,17 +482,12 @@ private fun AvatarChoice(
 ) {
     Box(
         Modifier
-            .size(76.dp)
+            .size(64.dp)
             .clip(CircleShape)
-            .border(
-                width = if (selected) 3.dp else 1.dp,
-                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
-                shape = CircleShape,
-            )
             .selectable(selected = selected, enabled = enabled, role = Role.RadioButton, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Box(Modifier.fillMaxSize().padding(3.dp).clip(CircleShape)) { image() }
+        Box(Modifier.fillMaxSize().clip(CircleShape)) { image() }
         if (selected) {
             Surface(
                 modifier = Modifier.align(Alignment.BottomEnd).padding(1.dp).size(22.dp),

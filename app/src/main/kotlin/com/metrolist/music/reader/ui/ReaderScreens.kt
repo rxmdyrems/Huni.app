@@ -25,9 +25,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -41,9 +43,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -70,11 +75,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavController
@@ -123,84 +131,95 @@ fun ReaderLibraryScreen(navController: NavController, viewModel: ReaderViewModel
         }.sortedByDescending { it.lastReadAt }
     }
     Scaffold { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
-            Spacer(Modifier.height(12.dp))
-            Text("Your stories", style = MaterialTheme.typography.headlineMedium)
-            Text(
-                "Pick up where you left off, or add a story to your library.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(16.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Button(
-                    modifier = Modifier.weight(1f),
-                    onClick = { launcher.launch(arrayOf("application/zip", "application/x-cbz", "image/*")) },
-                ) {
-                    Icon(painterResource(R.drawable.library_music_outlined), contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Import files", maxLines = 1)
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(if (libraryLayout == ReaderLibraryLayout.BLOCKS) 2 else 1),
+            modifier = Modifier.fillMaxSize().padding(padding),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+        ) {
+            item(key = "reader-home-heading", span = { GridItemSpan(maxLineSpan) }) {
+                Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text("Your stories", style = MaterialTheme.typography.headlineMedium)
+                        Text(
+                            "Pick up where you left off, or add a story to your library.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Button(
+                            modifier = Modifier.weight(1f),
+                            onClick = { launcher.launch(arrayOf("application/zip", "application/x-cbz", "image/*")) },
+                        ) {
+                            Icon(painterResource(R.drawable.library_music_outlined), contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Import files", maxLines = 1)
+                        }
+                        OutlinedButton(modifier = Modifier.weight(1f), onClick = { navController.navigate("reader/extensions") }) {
+                            Icon(painterResource(R.drawable.manage_search), contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Browse sources", maxLines = 1)
+                        }
+                    }
                 }
-                OutlinedButton(modifier = Modifier.weight(1f), onClick = { navController.navigate("reader/extensions") }) {
-                    Text("Browse sources", maxLines = 1)
-                }
-            }
-            Spacer(Modifier.height(14.dp))
-            HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
-            Row(
-                Modifier.fillMaxWidth().padding(vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Text("Library", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                FilterChip(
-                    selected = libraryLayout == ReaderLibraryLayout.BLOCKS,
-                    onClick = { libraryLayout = ReaderLibraryLayout.BLOCKS },
-                    label = { Text("Blocks") },
-                )
-                FilterChip(
-                    selected = libraryLayout == ReaderLibraryLayout.BIG_TYPE,
-                    onClick = { libraryLayout = ReaderLibraryLayout.BIG_TYPE },
-                    label = { Text("Big type") },
-                )
             }
             if (stories.isEmpty()) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Your reader library is empty.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            } else if (libraryLayout == ReaderLibraryLayout.BLOCKS) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 24.dp),
-                ) {
-                    gridItems(stories, key = { it.id }) { story ->
-                        ReaderStoryCard(
-                            story = story,
-                            bigType = false,
-                            onResume = { navController.navigate("reader/${story.resumeBook.id}") },
-                            onOpenChapters = { chapterStory = story },
-                            onDelete = { viewModel.deleteStory(story.chapters) },
-                        )
-                    }
+                item(key = "reader-empty-state", span = { GridItemSpan(maxLineSpan) }) {
+                    ReaderMessage(
+                        "Your reader library is empty.",
+                        Modifier.fillMaxWidth().height(220.dp),
+                    )
                 }
             } else {
-                LazyColumn(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 24.dp),
-                ) {
-                    items(stories, key = { it.id }) { story ->
-                        ReaderStoryCard(
-                            story = story,
-                            bigType = true,
-                            onResume = { navController.navigate("reader/${story.resumeBook.id}") },
-                            onOpenChapters = { chapterStory = story },
-                            onDelete = { viewModel.deleteStory(story.chapters) },
+                val featuredStory = stories.first()
+                item(key = "reader-featured", span = { GridItemSpan(maxLineSpan) }) {
+                    ReaderFeaturedStoryCard(
+                        story = featuredStory,
+                        onResume = { navController.navigate("reader/${featuredStory.resumeBook.id}") },
+                        onOpenChapters = { chapterStory = featuredStory },
+                    )
+                }
+                if (stories.size > 1) {
+                    item(key = "reader-continue-rail", span = { GridItemSpan(maxLineSpan) }) {
+                        ReaderStoryRail(
+                            title = "Continue reading",
+                            stories = stories.drop(1),
+                            onOpenChapters = { chapterStory = it },
                         )
                     }
+                }
+                item(key = "reader-all-stories-heading", span = { GridItemSpan(maxLineSpan) }) {
+                    Column(Modifier.fillMaxWidth()) {
+                        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
+                        Row(
+                            Modifier.fillMaxWidth().padding(top = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Text("All stories", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                            FilterChip(
+                                selected = libraryLayout == ReaderLibraryLayout.BLOCKS,
+                                onClick = { libraryLayout = ReaderLibraryLayout.BLOCKS },
+                                label = { Text("Blocks") },
+                            )
+                            FilterChip(
+                                selected = libraryLayout == ReaderLibraryLayout.BIG_TYPE,
+                                onClick = { libraryLayout = ReaderLibraryLayout.BIG_TYPE },
+                                label = { Text("Big type") },
+                            )
+                        }
+                    }
+                }
+                gridItems(stories, key = { it.id }) { story ->
+                    ReaderStoryCard(
+                        story = story,
+                        bigType = libraryLayout == ReaderLibraryLayout.BIG_TYPE,
+                        onResume = { navController.navigate("reader/${story.resumeBook.id}") },
+                        onOpenChapters = { chapterStory = story },
+                        onDelete = { viewModel.deleteStory(story.chapters) },
+                    )
                 }
             }
         }
@@ -236,6 +255,7 @@ fun ReaderLibraryScreen(navController: NavController, viewModel: ReaderViewModel
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReaderScreen(bookId: String, navController: NavController, viewModel: ReaderViewModel = hiltViewModel()) {
     val book by viewModel.book(bookId).collectAsState(initial = null)
@@ -251,6 +271,9 @@ fun ReaderScreen(bookId: String, navController: NavController, viewModel: Reader
     var currentPage by remember(bookId) { mutableIntStateOf(0) }
     var pageInitialized by remember(bookId) { mutableStateOf(false) }
     var chapterActionRunning by remember(bookId) { mutableStateOf(false) }
+    var chapterOptions by remember(bookId) { mutableStateOf(emptyList<ReaderChapterOption>()) }
+    var chapterOptionsLoading by remember(bookId) { mutableStateOf(false) }
+    var showChapterPicker by remember(bookId) { mutableStateOf(false) }
     var downloadRunning by remember(bookId) { mutableStateOf(false) }
     var autoAdvanceArmed by remember(bookId) { mutableStateOf(false) }
     val snackbarHostState = remember(bookId) { SnackbarHostState() }
@@ -281,6 +304,22 @@ fun ReaderScreen(bookId: String, navController: NavController, viewModel: Reader
         if (!pageInitialized && loadedBook != null && pages.isNotEmpty()) {
             currentPage = loadedBook.currentPage.coerceIn(0, pages.lastIndex)
             pageInitialized = true
+        }
+    }
+
+    LaunchedEffect(book?.id, book?.storyId) {
+        val loadedBook = book
+        if (loadedBook?.storyId == null) {
+            chapterOptions = emptyList()
+            chapterOptionsLoading = false
+        } else {
+            chapterOptionsLoading = true
+            chapterOptions = try {
+                viewModel.chapterOptions(loadedBook.id)
+            } catch (_: Exception) {
+                emptyList()
+            }
+            chapterOptionsLoading = false
         }
     }
 
@@ -339,6 +378,43 @@ fun ReaderScreen(bookId: String, navController: NavController, viewModel: Reader
         }
     }
 
+    fun openChapterOption(option: ReaderChapterOption) {
+        if (chapterActionRunning) return
+        showChapterPicker = false
+        val savedBookId = option.bookId
+        if (savedBookId != null) {
+            if (savedBookId != bookId) {
+                navController.navigate("reader/$savedBookId") { launchSingleTop = true }
+            }
+            return
+        }
+        chapterActionRunning = true
+        coroutineScope.launch {
+            try {
+                val selectedBookId = viewModel.openChapter(bookId, option.url)
+                if (selectedBookId == null) {
+                    snackbarHostState.showSnackbar("That chapter is no longer available from this source.")
+                } else {
+                    navController.navigate("reader/$selectedBookId") { launchSingleTop = true }
+                }
+            } catch (_: Exception) {
+                snackbarHostState.showSnackbar("Couldn't load that chapter. Check the source and connection.")
+            } finally {
+                chapterActionRunning = false
+            }
+        }
+    }
+
+    fun switchChapter(offset: Int) {
+        val index = chapterOptions.indexOfFirst { it.bookId == bookId || it.url == book?.chapterUrl }
+        val target = chapterOptions.getOrNull(index + offset)
+        if (index >= 0 && target != null) {
+            openChapterOption(target)
+        } else if (offset > 0 && book?.storyId != null) {
+            loadNextChapter()
+        }
+    }
+
     fun saveChapterOffline() {
         if (downloadRunning || book?.downloadedAt != null) return
         downloadRunning = true
@@ -356,6 +432,7 @@ fun ReaderScreen(bookId: String, navController: NavController, viewModel: Reader
 
     val pageCount = pages.size
     val displayedPage = if (pageCount == 0) 0 else currentPage.coerceIn(0, pageCount - 1)
+    val chapterIndex = chapterOptions.indexOfFirst { it.bookId == bookId || it.url == book?.chapterUrl }
     LaunchedEffect(pageInitialized, displayedPage, pageCount, autoAdvance, book?.storyId) {
         if (!pageInitialized || pageCount == 0 || book?.storyId == null) return@LaunchedEffect
         if (displayedPage < pageCount - 1) {
@@ -371,15 +448,29 @@ fun ReaderScreen(bookId: String, navController: NavController, viewModel: Reader
             if (showControls) {
                 TopAppBar(
                     title = {
-                        Column {
-                            Text(book?.storyTitle ?: book?.title ?: "Reader", maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            val subtitle = listOfNotNull(
-                                book?.chapterName,
-                                if (pageCount > 0) "${displayedPage + 1} / $pageCount · ${readingMode.title}" else null,
-                                if (book?.downloadedAt != null) "Available offline" else null,
-                            ).joinToString(" · ")
-                            if (subtitle.isNotBlank()) {
-                                Text(subtitle, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        val canSelectChapter = book?.storyId != null
+                        Row(
+                            Modifier.fillMaxWidth()
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (canSelectChapter) 0.72f else 0f))
+                                .clickable(enabled = canSelectChapter, role = Role.Button) { showChapterPicker = true }
+                                .padding(horizontal = 9.dp, vertical = 5.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Column(Modifier.weight(1f)) {
+                                Text(book?.storyTitle ?: book?.title ?: "Reader", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                val subtitle = listOfNotNull(
+                                    book?.chapterName,
+                                    if (pageCount > 0) "${displayedPage + 1} / $pageCount · ${readingMode.title}" else null,
+                                    if (book?.downloadedAt != null) "Available offline" else null,
+                                ).joinToString(" · ")
+                                if (subtitle.isNotBlank()) {
+                                    Text(subtitle, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                }
+                            }
+                            if (canSelectChapter) {
+                                Icon(painterResource(R.drawable.expand_more), contentDescription = "Choose chapter", modifier = Modifier.size(20.dp))
                             }
                         }
                     },
@@ -389,17 +480,22 @@ fun ReaderScreen(bookId: String, navController: NavController, viewModel: Reader
                         }
                     },
                     actions = {
-                        TextButton(
+                        IconButton(
                             enabled = book != null && pages.isNotEmpty() && book?.downloadedAt == null && !downloadRunning,
                             onClick = ::saveChapterOffline,
                         ) {
-                            Text(when {
-                                book?.downloadedAt != null -> "Offline"
-                                downloadRunning -> "Downloading…"
-                                else -> "Download"
-                            }, maxLines = 1)
+                            Icon(
+                                painterResource(if (book?.downloadedAt != null) R.drawable.library_add_check else R.drawable.download),
+                                contentDescription = when {
+                                    book?.downloadedAt != null -> "Chapter available offline"
+                                    downloadRunning -> "Saving chapter offline"
+                                    else -> "Save chapter offline"
+                                },
+                            )
                         }
-                        TextButton(onClick = { showSettings = true }) { Text("Reader settings") }
+                        IconButton(onClick = { showSettings = true }) {
+                            Icon(painterResource(R.drawable.settings), contentDescription = "Reader settings")
+                        }
                     },
                 )
             }
@@ -486,8 +582,85 @@ fun ReaderScreen(bookId: String, navController: NavController, viewModel: Reader
                         onSeek = ::goToPage,
                         canLoadNextChapter = book?.storyId != null,
                         chapterLoading = chapterActionRunning,
-                        onNextChapter = ::loadNextChapter,
+                        chapterIndex = chapterIndex,
+                        chapterCount = chapterOptions.size,
+                        onOpenChapterPicker = { showChapterPicker = true },
+                        onPreviousChapter = { switchChapter(-1) },
+                        onNextChapter = { switchChapter(1) },
                     )
+                }
+            }
+        }
+    }
+
+    if (showChapterPicker) {
+        ModalBottomSheet(onDismissRequest = { showChapterPicker = false }) {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth().heightIn(max = 640.dp),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                item(key = "reader-chapter-picker-heading") {
+                    Column(
+                        Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Text("Chapters", style = MaterialTheme.typography.headlineSmall)
+                        Text(
+                            book?.storyTitle ?: "Available chapters",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        if (chapterOptionsLoading) {
+                            LinearProgressIndicator(Modifier.fillMaxWidth())
+                        } else {
+                            Text(
+                                "Select a saved chapter to resume, or choose another chapter to load it.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    }
+                }
+                if (chapterOptions.isEmpty() && !chapterOptionsLoading) {
+                    item(key = "reader-no-chapters") {
+                        ReaderMessage("No chapters are available for this story.", Modifier.fillMaxWidth().height(120.dp))
+                    }
+                }
+                items(chapterOptions, key = { it.url }) { option ->
+                    val isCurrent = option.bookId == bookId || option.url == book?.chapterUrl
+                    Row(
+                        Modifier.fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(
+                                if (isCurrent) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.32f),
+                            )
+                            .clickable(enabled = !chapterActionRunning, role = Role.Button) { openChapterOption(option) }
+                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                            Text(option.title, style = MaterialTheme.typography.bodyLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                            Text(
+                                when {
+                                    option.bookId == null -> "Tap to load from source"
+                                    option.downloaded -> "Available offline · page ${option.currentPage + 1}"
+                                    else -> "Saved · page ${option.currentPage + 1}"
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        when {
+                            isCurrent -> Icon(painterResource(R.drawable.check), contentDescription = "Current chapter", tint = MaterialTheme.colorScheme.primary)
+                            option.downloaded -> Text("Offline", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
                 }
             }
         }
@@ -587,6 +760,10 @@ private fun ReaderNavigationControls(
     onSeek: (Int) -> Unit,
     canLoadNextChapter: Boolean,
     chapterLoading: Boolean,
+    chapterIndex: Int,
+    chapterCount: Int,
+    onOpenChapterPicker: () -> Unit,
+    onPreviousChapter: () -> Unit,
     onNextChapter: () -> Unit,
 ) {
     Column(
@@ -613,10 +790,29 @@ private fun ReaderNavigationControls(
                 valueRange = 0f..(pageCount - 1).toFloat(),
             )
         }
-        if (currentPage == pageCount - 1 && canLoadNextChapter) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                TextButton(enabled = !chapterLoading, onClick = onNextChapter) {
-                    Text(if (chapterLoading) "Loading chapter…" else "Next chapter")
+        if (canLoadNextChapter) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextButton(enabled = chapterIndex > 0 && !chapterLoading, onClick = onPreviousChapter) {
+                    Icon(painterResource(R.drawable.arrow_back), contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text("Prev")
+                }
+                TextButton(onClick = onOpenChapterPicker) {
+                    Text(if (chapterIndex >= 0 && chapterCount > 0) "Ch. ${chapterIndex + 1} / $chapterCount" else "Chapters")
+                    Icon(painterResource(R.drawable.expand_more), contentDescription = null, modifier = Modifier.size(16.dp))
+                }
+                TextButton(
+                    enabled = !chapterLoading &&
+                        ((chapterIndex < 0 && canLoadNextChapter) || (chapterIndex >= 0 && chapterIndex < chapterCount - 1)),
+                    onClick = onNextChapter,
+                ) {
+                    Text(if (chapterLoading) "Loading…" else "Next")
+                    Spacer(Modifier.width(4.dp))
+                    Icon(painterResource(R.drawable.arrow_forward), contentDescription = null, modifier = Modifier.size(16.dp))
                 }
             }
         }
@@ -727,6 +923,92 @@ private data class ReaderStory(
     val coverUrl: String?,
     val lastReadAt: Long,
 )
+
+@Composable
+private fun ReaderFeaturedStoryCard(
+    story: ReaderStory,
+    onResume: () -> Unit,
+    onOpenChapters: () -> Unit,
+) {
+    val context = LocalContext.current
+    val coverRequest = remember(story.coverUrl, story.resumeBook.referer) {
+        ImageRequest.Builder(context).data(story.coverUrl).apply {
+            val referer = story.resumeBook.referer
+            if (!referer.isNullOrBlank() && story.coverUrl?.startsWith("http") == true) {
+                httpHeaders(NetworkHeaders.Builder().set("Referer", referer).build())
+            }
+        }.build()
+    }
+    Box(Modifier.fillMaxWidth().height(316.dp).clip(RoundedCornerShape(24.dp))) {
+        ReaderStoryCover(coverRequest, Modifier.fillMaxSize(), story.title)
+        Column(
+            Modifier.align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(7.dp),
+        ) {
+            Text("CONTINUE READING", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+            Text(story.title, style = MaterialTheme.typography.titleLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(
+                "${story.resumeBook.chapterName ?: story.resumeBook.sourceName} · Page ${story.resumeBook.currentPage + 1}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = onResume, modifier = Modifier.weight(1f)) { Text("Resume") }
+                OutlinedButton(onClick = onOpenChapters, modifier = Modifier.weight(1f)) { Text("Chapters") }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReaderStoryRail(
+    title: String,
+    stories: List<ReaderStory>,
+    onOpenChapters: (ReaderStory) -> Unit,
+) {
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(title, style = MaterialTheme.typography.titleMedium)
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(end = 16.dp),
+        ) {
+            items(stories, key = { it.id }) { story ->
+                val context = LocalContext.current
+                val coverRequest = remember(story.coverUrl, story.resumeBook.referer) {
+                    ImageRequest.Builder(context).data(story.coverUrl).apply {
+                        val referer = story.resumeBook.referer
+                        if (!referer.isNullOrBlank() && story.coverUrl?.startsWith("http") == true) {
+                            httpHeaders(NetworkHeaders.Builder().set("Referer", referer).build())
+                        }
+                    }.build()
+                }
+                Column(
+                    Modifier.width(116.dp).clickable(onClick = { onOpenChapters(story) }),
+                    verticalArrangement = Arrangement.spacedBy(5.dp),
+                ) {
+                    ReaderStoryCover(
+                        coverRequest,
+                        Modifier.fillMaxWidth().height(160.dp).clip(RoundedCornerShape(12.dp)),
+                        story.title,
+                    )
+                    Text(story.title, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text(
+                        "${story.chapters.size} chapter${if (story.chapters.size == 1) "" else "s"} · page ${story.resumeBook.currentPage + 1}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
+    }
+}
 
 @Composable
 private fun ReaderStoryCard(
